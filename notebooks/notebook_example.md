@@ -12,7 +12,13 @@ In a single cell.
 
 ```python
 import IPython
+2*2
 3*3
+```
+
+some text
+
+```python
 print(4*4)
 ```
 
