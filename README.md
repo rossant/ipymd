@@ -31,7 +31,7 @@ We propose a simple workflow to combine the best of both worlds.
 
 * Git-friendly
 * Write content in the notebook UI *or* in a text editor (Markdown)
-* Only the text and code input version-controlled (not the output)
+* Only the text and code input are version-controlled (not the output)
 
 
 ## Workflow
