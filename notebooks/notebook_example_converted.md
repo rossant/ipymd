@@ -16,7 +16,9 @@ Random code (no syntax highlight):
 
 Random code:
 
-    some random code 2
+```
+some random code 2
+```
 
 Two paragraphs.
 
