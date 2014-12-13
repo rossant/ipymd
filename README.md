@@ -25,7 +25,7 @@ Cons:
 * No UI to execute code interactively
 
 
-## ipymb
+## ipymd
 
 We propose a simple workflow to combine the best of both worlds.
 
