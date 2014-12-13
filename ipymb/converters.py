@@ -45,7 +45,7 @@ def _merge_successive_inputs(cells):
         is_last_input = is_input
     return cells_merged
 
-def nb_to_markdown(filepath):
+def nb_to_markdown(filepath, saveto=None):
     with open(filepath, "r") as f:
         nb = json.load(f)
     # Only work for nbformat 4 for now.
@@ -57,4 +57,8 @@ def nb_to_markdown(filepath):
     # Find the notebook language.
     lang = nb['metadata']['language_info']['name']
     md = '\n'.join([process_cell(_, lang=lang) for _ in cells])
-    return md
+    if saveto is None:
+        return md
+    else:
+        with open(saveto, "w") as f:
+            f.write(md)
