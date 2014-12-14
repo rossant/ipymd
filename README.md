@@ -53,3 +53,16 @@ Four components are needed:
 2. [DONE] An md ==> ipynb converter
 3. [DONE] An IPython notebook plugin that automatically exports an ipynb to md upon saving
 4. A git post-merge hook that automatically converts md documents to ipynb
+
+
+## Installation
+
+0. You need IPython 3.0 (or latest master) and mistune.
+1. Put this repo in your PYTHONPATH.
+2. Add this in your `ipython_notebook_config.py` file:
+
+    ```python
+    from ipymd.hooks import save_to_markdown
+    c.FileContentsManager.pre_save_hook = save_to_markdown
+    ```
+
