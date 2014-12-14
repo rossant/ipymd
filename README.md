@@ -51,5 +51,5 @@ Four components are needed:
 
 1. [DONE] An ipynb ==> md converter
 2. [DONE] An md ==> ipynb converter
-3. An IPython notebook plugin that automatically exports an ipynb to md upon saving
+3. [DONE] An IPython notebook plugin that automatically exports an ipynb to md upon saving
 4. A git post-merge hook that automatically converts md documents to ipynb
