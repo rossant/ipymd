@@ -2,6 +2,7 @@ import json
 from functools import partial
 import IPython.nbformat as nbf
 import mistune
+from .six import string_types
 
 # nb to markdown
 # -----------------------------------------------------------------------------
@@ -40,9 +41,16 @@ def _merge_successive_inputs(cells):
         is_last_input = is_input
     return cells_merged
 
-def nb_to_markdown(filepath, saveto=None):
-    with open(filepath, "r") as f:
-        nb = json.load(f)
+def _load_nb_contents(contents_or_path):
+    """Load a notebook contents from a dict or a path to a .ipynb file."""
+    if isinstance(contents_or_path, string_types):
+        with open(contents_or_path, "r") as f:
+            return json.load(f)
+    else:
+        return contents_or_path
+
+def nb_to_markdown(nb):
+    """Convert a notebook contents to a Markdown document."""
     # Only work for nbformat 4 for now.
     assert nb['nbformat'] >= 4
     # cells = n-b['worksheets'][0]['cells']  # nbformat 3
@@ -52,11 +60,7 @@ def nb_to_markdown(filepath, saveto=None):
     # Find the notebook language.
     lang = nb['metadata'].get('language_info', {}).get('name', 'python')
     md = '\n'.join([process_cell(_, lang=lang) for _ in cells])
-    if saveto is None:
-        return md
-    else:
-        with open(saveto, "w") as f:
-            f.write(md)
+    return md
 
 
 # markdown to nb
@@ -70,6 +74,10 @@ class NotebookWriter(object):
 
     def append_code(self, source):
         self._nb['cells'].append(nbf.v4.new_code_cell(source))
+
+    @property
+    def contents(self):
+        return self._nb
 
     def save(self, filepath):
         with open(filepath, 'w') as f:
@@ -170,10 +178,9 @@ class MyRenderer(object):
         return text
 
 
-def markdown_to_nb(filepath, saveto=None):
-    with open(filepath, 'r') as f:
-        contents = f.read()
+def markdown_to_nb(contents):
+    """Convert a Markdown text to a notebook contents."""
     renderer = MyRenderer()
     md = mistune.Markdown(renderer=renderer)
     md.render(contents)
-    renderer._nbwriter.save(saveto)
+    return renderer._nbwriter.contents
