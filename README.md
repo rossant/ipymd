@@ -33,6 +33,7 @@ We propose a simple workflow to combine the best of both worlds.
 * Write content in the notebook UI *or* in a text editor (Markdown)
 * Only the text and code input are version-controlled (not the output)
 
+**WARNING**: the following is outdated (update coming soon)
 
 ## Workflow
 
