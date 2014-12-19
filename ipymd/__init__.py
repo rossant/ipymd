@@ -1,0 +1,1 @@
+from .nbplugins import MarkdownManager
