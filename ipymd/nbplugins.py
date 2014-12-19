@@ -47,7 +47,9 @@ class MarkdownManager(FileContentsManager):
             model = self._dir_model(path, content=content)
         ####### this has changed
         # elif type == 'notebook' or (type is None and path.endswith('.md')):
-        elif type == 'notebook' or (type is None and path.endswith('.ipynb')):
+        elif type == 'notebook' or (type is None and (path.endswith('.ipynb')
+                                                      or path.endswith('.md'))
+                                    ):
             model = self._notebook_model(path, content=content)
         else:
             if type == 'directory':
