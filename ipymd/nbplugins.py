@@ -15,6 +15,10 @@ from IPython.utils.io import atomic_writing
 from .converters import nb_to_markdown, markdown_to_nb
 
 class MarkdownManager(FileContentsManager):
+    def __init__(self, *args, **kwargs):
+        super(MarkdownManager, self).__init__(*args, **kwargs)
+        self.code_wrap = 'markdown'
+
     def _notebook_model(self, path, content=True):
         model = self._base_model(path)
         model['type'] = 'notebook'
@@ -57,28 +61,6 @@ class MarkdownManager(FileContentsManager):
                                 u'%s is not a directory', reason='bad type')
             model = self._file_model(path, content=content, format=format)
         return model
-
-    # def get(self, path, content=True, type=None, format=None):
-    #     path = path.strip('/')
-
-    #     if not self.exists(path):
-    #         raise web.HTTPError(404, u'No such file or directory: %s' % path)
-
-    #     os_path = self._get_os_path(path)
-
-    #     if os.path.isdir(os_path):
-    #         if type not in (None, 'directory'):
-    #             raise web.HTTPError(400,
-    #                             u'%s is a directory, not a %s' % (path, type), reason='bad type')
-    #         model = self._dir_model(path, content=content)
-    #     elif type == 'notebook' or (type is None and path.endswith('.md')):
-    #         model = self._notebook_model(path, content=content)
-    #     else:
-    #         if type == 'directory':
-    #             raise web.HTTPError(400,
-    #                             u'%s is not a directory', reason='bad type')
-    #         model = self._file_model(path, content=content, format=format)
-    #     return model
 
     # def new_untitled(self, path='', type='', ext=''):
     #     path = path.strip('/')
@@ -133,11 +115,11 @@ class MarkdownManager(FileContentsManager):
     #     model = self.save(model, path)
     #     return model
 
-    # def _save_notebook(self, os_path, model, path=''):
-    #     """Save a notebook model to a Markdown file."""
-    #     md = nb_to_markdown(model['content'])
-    #     with self.atomic_writing(os_path, encoding='utf-8') as f:
-    #         f.write(md)
+    def _save_notebook(self, os_path, model, path=''):
+        """Save a notebook model to a Markdown file."""
+        md = nb_to_markdown(model['content'], code_wrap=self.code_wrap)
+        with self.atomic_writing(os_path, encoding='utf-8') as f:
+            f.write(md)
 
     # def restore_checkpoint(self, checkpoint_id, path):
     #     """restore a file to a checkpointed state"""

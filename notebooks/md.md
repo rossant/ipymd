@@ -24,6 +24,7 @@ In a single cell.
 
 ```python
 import IPython
+print("Hello world!")
 ```
 
 ```python
