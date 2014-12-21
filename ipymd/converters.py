@@ -6,19 +6,17 @@ from .six import string_types
 from .htmlparser import get_html_contents
 
 CODE_WRAP = {
-    'markdown': '''
-        ```{lang}
-        {code}
-        ```
-        ''',
+    'markdown': '''```{lang}
+{code}
+```
+''',
 
-    'html': '''
-        <pre data-code-language="{lang}" 
-             data-executable="true" 
-             data-type="programlisting">
-        {code}
-        </pre>
-        '''
+    'html': '''<pre data-code-language="{lang}"
+     data-executable="true"
+     data-type="programlisting">
+{code}
+</pre>
+'''
 }
 
 # nb to markdown
@@ -34,7 +32,7 @@ def process_cell_input(cell, lang=None, code_wrap=None):
     input_lines = cell.get('source', [])  # nbformat 4
     code = ''.join(input_lines)
     # code = '```{0:s}\n'.format(lang or '') + code + '\n```\n'
-    code = CODE_WRAP.get('code_wrap', 
+    code = CODE_WRAP.get(code_wrap or
                          'markdown').format(lang=lang, code=code)
     return code
 
