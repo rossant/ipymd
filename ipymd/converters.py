@@ -3,25 +3,47 @@ from functools import partial
 import IPython.nbformat as nbf
 import mistune
 from .six import string_types
+from .htmlparser import get_html_contents
+
+CODE_WRAP = {
+    'markdown': '''
+        ```{lang}
+        {code}
+        ```
+        ''',
+
+    'html': '''
+        <pre data-code-language="{lang}" 
+             data-executable="true" 
+             data-type="programlisting">
+        {code}
+        </pre>
+        '''
+}
 
 # nb to markdown
 # -----------------------------------------------------------------------------
-def process_cell_markdown(cell):
-    return ''.join(cell.get('source', [])) + '\n'
+def process_cell_markdown(cell, code_wrap=None):
+    # if code_wrap == 'math'
+    # Wrap math equations if code wrap is math.
+    source = cell.get('source', [])
+    return ''.join(source) + '\n'
 
-def process_cell_input(cell, lang=None):
+def process_cell_input(cell, lang=None, code_wrap=None):
     # input_lines = cell.get('input', [])  # nbformat 3
     input_lines = cell.get('source', [])  # nbformat 4
     code = ''.join(input_lines)
-    code = '```{0:s}\n'.format(lang or '') + code + '\n```\n'
+    # code = '```{0:s}\n'.format(lang or '') + code + '\n```\n'
+    code = CODE_WRAP.get('code_wrap', 
+                         'markdown').format(lang=lang, code=code)
     return code
 
-def process_cell(cell, lang=None):
+def process_cell(cell, lang=None, code_wrap=None):
     cell_type = cell.get('cell_type', None)
     if cell_type == 'markdown':
         return process_cell_markdown(cell)
     elif cell_type == 'code':
-        return process_cell_input(cell, lang=lang)
+        return process_cell_input(cell, lang=lang, code_wrap=code_wrap)
 
 def _merge_successive_inputs(cells):
     """Return a new list of cells where successive input cells are merged
@@ -49,8 +71,14 @@ def _load_nb_contents(contents_or_path):
     else:
         return contents_or_path
 
-def nb_to_markdown(nb):
-    """Convert a notebook contents to a Markdown document."""
+def nb_to_markdown(nb, code_wrap=None):
+    """Convert a notebook contents to a Markdown document.
+
+    Arguments:
+    * nb : the notebook model
+    * code_wrap: 'markdown' or 'html'
+
+    """
     # Only work for nbformat 4 for now.
     assert nb['nbformat'] >= 4
     # cells = n-b['worksheets'][0]['cells']  # nbformat 3
@@ -59,7 +87,7 @@ def nb_to_markdown(nb):
     # cells = _merge_successive_inputs(cells)
     # Find the notebook language.
     lang = nb['metadata'].get('language_info', {}).get('name', 'python')
-    md = '\n'.join([process_cell(_, lang=lang) for _ in cells])
+    md = '\n'.join([process_cell(_, lang=lang, code_wrap=code_wrap) for _ in cells])
     return md
 
 
@@ -87,6 +115,7 @@ class NotebookWriter(object):
 class MyRenderer(object):
     def __init__(self, **kwargs):
         self.options = kwargs
+        self.code_wrap = kwargs.get('code_wrap', 'markdown')
         self._nbwriter = NotebookWriter()
 
     def placeholder(self):
@@ -108,7 +137,15 @@ class MyRenderer(object):
         return text
 
     def block_html(self, html):
-        self._nbwriter.append_markdown(html)
+        type, contents = get_html_contents(html)
+        # if self.code_wrap == 'html'
+        # Strip special HTML tags for code and math
+        if type == 'code':
+            self._nbwriter.append_code(contents)
+        elif type == 'math':
+            self._nbwriter.append_markdown('$$%s$$' % contents)
+        else:
+            self._nbwriter.append_markdown(html)
         return html
 
     def header(self, text, level, raw=None):
