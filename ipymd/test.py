@@ -14,7 +14,7 @@ with open(path_md, 'r') as f:
 
 nb = markdown_to_nb(md)
 
-md2 = nb_to_markdown(nb)
+md2 = nb_to_markdown(nb, code_wrap='html')
 
 print(md2)
 
