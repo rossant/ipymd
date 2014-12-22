@@ -66,6 +66,79 @@ class IPymdContentsManager(FileContentsManager):
         with self.atomic_writing(os_path, encoding='utf-8') as f:
             f.write(md)
 
+    def new_untitled(self, path='', type='', ext=''):
+        path = path.strip('/')
+        if not self.dir_exists(path):
+            raise HTTPError(404, 'No such directory: %s' % path)
+
+        model = {}
+        if type:
+            model['type'] = type
+
+        if ext == '.md':
+            model.setdefault('type', 'notebook')
+        else:
+            model.setdefault('type', 'file')
+
+        insert = ''
+        if model['type'] == 'directory':
+            untitled = self.untitled_directory
+            insert = ' '
+        elif model['type'] == 'notebook':
+            untitled = self.untitled_notebook
+            ext = '.md'
+        elif model['type'] == 'file':
+            untitled = self.untitled_file
+        else:
+            raise HTTPError(400, "Unexpected model type: %r" % model['type'])
+
+        name = self.increment_filename(untitled + ext, path, insert=insert)
+        path = u'{0}/{1}'.format(path, name)
+        return self.new(model, path)
+
+    def new(self, model=None, path=''):
+        path = path.strip('/')
+        if model is None:
+            model = {}
+
+        if path.endswith('.md'):
+            model.setdefault('type', 'notebook')
+        else:
+            model.setdefault('type', 'file')
+
+        # no content, not a directory, so fill out new-file model
+        if 'content' not in model and model['type'] != 'directory':
+            if model['type'] == 'notebook':
+                model['content'] = new_notebook()
+                model['format'] = 'json'
+            else:
+                model['content'] = ''
+                model['type'] = 'file'
+                model['format'] = 'text'
+
+        model = self.save(model, path)
+        return model
+
+    def restore_checkpoint(self, checkpoint_id, path):
+        """restore a file to a checkpointed state"""
+        path = path.strip('/')
+        self.log.info("restoring %s from checkpoint %s", path, checkpoint_id)
+        nb_path = self._get_os_path(path)
+        cp_path = self.get_checkpoint_path(checkpoint_id, path)
+        if not os.path.isfile(cp_path):
+            self.log.debug("checkpoint file does not exist: %s", cp_path)
+            raise web.HTTPError(404,
+                u'checkpoint does not exist: %s@%s' % (path, checkpoint_id)
+            )
+        # ensure notebook is readable (never restore from an unreadable notebook)
+        if cp_path.endswith('.md'):
+            with self.open(cp_path, 'r', encoding='utf-8') as f:
+                markdown_to_nb(f.read())
+        self.log.debug("copying %s -> %s", cp_path, nb_path)
+        with self.perm_to_403():
+            self._copy(cp_path, nb_path)
+
+
     def check_and_sign(self, nb, path=''):
         self.notary.sign(nb)
 
