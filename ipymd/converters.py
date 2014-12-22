@@ -129,6 +129,7 @@ class MyRenderer(object):
         self.options = kwargs
         self.code_wrap = kwargs.get('code_wrap', 'markdown')
         self._nbwriter = NotebookWriter()
+        self._in_html_block = False
 
     def placeholder(self):
         return ''
@@ -159,9 +160,7 @@ class MyRenderer(object):
         return html
 
     def tag(self, html):
-        type, contents = get_html_contents(html)
-        if type == 'math':
-            return '$'
+        return html
 
     def header(self, text, level, raw=None):
         text = ('#' * level) + ' ' + text
@@ -184,6 +183,9 @@ class MyRenderer(object):
         return text + '\n'
 
     def paragraph(self, text):
+        # Parse inline HTML.
+        text = text.replace('<span class="math-tex" data-type="tex">', '$')
+        text = text.replace('</span>', '$')
         self._nbwriter.append_markdown(text)
         return text
 

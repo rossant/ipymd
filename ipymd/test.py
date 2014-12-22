@@ -14,7 +14,7 @@ with open(path_md, 'r') as f:
     md = f.read()
 
 nb = markdown_to_nb(md)
-# pprint(nb)
+pprint(nb)
 
 md2 = nb_to_markdown(nb, code_wrap='html')
 print(md2)

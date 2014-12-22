@@ -7,7 +7,7 @@ class MyHTMLParser(HTMLParser):
         super(MyHTMLParser, self).__init__(*args, **kwargs)
         self.is_code = False
         self.is_math = False
-        self.is_open = False
+        self.display = ''
         self.data = ''
 
     def handle_starttag(self, tag, attrs):
@@ -15,14 +15,11 @@ class MyHTMLParser(HTMLParser):
             self.is_code = True
         elif tag == 'span' and ('data-type', 'tex') in attrs:
             self.is_math = True
-        self.is_open = True
 
-    def handle_endtag(self, tag):
-        if tag == 'pre':
-            self.is_code = True
-        elif tag == 'span':
-            self.is_math = True
-        self.is_open = False
+        if ('data-display', 'inline') in attrs:
+            self.display = 'inline'
+        elif ('data-display', 'block') in attrs:
+            self.display = 'block'
 
     def handle_data(self, data):
         if self.is_code:
@@ -33,13 +30,12 @@ class MyHTMLParser(HTMLParser):
 def get_html_contents(html):
     parser = MyHTMLParser()
     parser.feed(html)
-    is_open = 'open' if parser.is_open else 'closed'
     if parser.is_code:
-        return ('code', parser.data.strip())
+        return ('code', parser.data.strip(),)# parser.display)
     elif parser.is_math:
-        return ('math', parser.data.strip())
+        return ('math', parser.data.strip(),)# parser.display)
     else:
-        return '', ''
+        return '', ''#, ''
 
 if __name__ == '__main__':
     math = """<span class="math-tex" data-type="tex">x = {-b \pm \sqrt{b^2-4ac} \over 2a}</span>"""
