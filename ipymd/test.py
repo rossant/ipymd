@@ -6,7 +6,7 @@ from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
 
 dir = op.dirname(os.path.realpath(__file__))
 # path_ipynb = op.join(dir, '../notebooks/ipynb.ipynb')
-path_md = op.join(dir, '../notebooks/md.ipynb')
+path_md = op.join(dir, '../notebooks/md.md')
 
 # nb_to_markdown(path_ipynb, path_md)
 

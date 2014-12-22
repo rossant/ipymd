@@ -28,7 +28,7 @@ MATH_WRAP = '''<span class="math-tex" data-type="tex">{equation}</span>'''
 # -----------------------------------------------------------------------------
 def process_latex(text):
     regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
-    return re.sub(regex, MATH_WRAP.format(equation=r'\2'),
+    return re.sub(regex, MATH_WRAP.format(equation=r'\1\2\1'),
                   text)
 
 def process_cell_markdown(cell, code_wrap=None):
@@ -154,7 +154,7 @@ class MyRenderer(object):
         if type == 'code':
             self._nbwriter.append_code(contents)
         elif type == 'math':
-            self._nbwriter.append_markdown('$$%s$$' % contents)
+            self._nbwriter.append_markdown('%s' % contents)
         else:
             self._nbwriter.append_markdown(html)
         return html
@@ -184,8 +184,9 @@ class MyRenderer(object):
 
     def paragraph(self, text):
         # Parse inline HTML.
-        text = text.replace('<span class="math-tex" data-type="tex">', '$')
-        text = text.replace('</span>', '$')
+        # WARNING: this is a hack, need to be fixed in mistune #37
+        text = text.replace('<span class="math-tex" data-type="tex">', '')
+        text = text.replace('</span>', '')
         self._nbwriter.append_markdown(text)
         return text
 

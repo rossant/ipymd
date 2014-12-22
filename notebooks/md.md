@@ -1,10 +1,10 @@
 # Test notebook
 
-This is a text notebook. Here *are* some **rich text**, `code`, <span class="math-tex" data-type="tex">\pi\simeq 3.1415</span> equations.
+This is a text notebook. Here *are* some **rich text**, `code`, <span class="math-tex" data-type="tex">$\pi\simeq 3.1415$</span> equations.
 
 Another equation:
 
-<span class="math-tex" data-type="tex">\sum_{i=1}^n x_i^2</span>
+<span class="math-tex" data-type="tex">$$\sum_{i=1}^n x_i^2$$</span>
 
 Python code:
 
@@ -41,20 +41,6 @@ print("Hello world, ho ho ho!")
      data-executable="true"
      data-type="programlisting">
 2*2
-</pre>
-
-<pre data-code-language="python"
-     data-executable="true"
-     data-type="programlisting">
-3*3
-</pre>
-
-some text
-
-<pre data-code-language="python"
-     data-executable="true"
-     data-type="programlisting">
-print(4*4)
 </pre>
 
 An image:
