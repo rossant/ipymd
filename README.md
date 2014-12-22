@@ -39,6 +39,13 @@ Cons:
 * Collaborators can work on the Markdown document using GitHub (branches, pull requests...), they don't need IPython. They can do everything from the GitHub web interface.
 
 
+## CAVEATS
+
+**WARNING**: this is an experimental module, there is a risk for data loss, so be careful!
+
+* DO NOT RENAME YOUR .MD NOTEBOOKS IN THE NOTEBOOK UI
+
+
 ## Installation
 
 0. You need IPython 3.0 (or latest master) (with PR #7278) and mistune.
@@ -55,8 +62,6 @@ There is also experiment support for O'Reilly Atlas in the `support-atlas` branc
 
 To use the Atlas format, put this instead in your config file:
 
-
 ```python
 c.NotebookApp.contents_manager_class = 'ipymd.AtlasContentsManager'
 ```
-
