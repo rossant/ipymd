@@ -1,7 +1,10 @@
 import json
+import re
 from functools import partial
+
 import IPython.nbformat as nbf
 import mistune
+
 from .six import string_types
 from .htmlparser import get_html_contents
 
@@ -19,13 +22,23 @@ CODE_WRAP = {
 '''
 }
 
+MATH_WRAP = '''<span class="math-tex" data-type="tex">{equation}</span>'''
+
 # nb to markdown
 # -----------------------------------------------------------------------------
+def process_latex(text):
+    regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
+    return re.sub(regex, MATH_WRAP.format(equation=r'\2'),
+                  text)
+
 def process_cell_markdown(cell, code_wrap=None):
-    # if code_wrap == 'math'
     # Wrap math equations if code wrap is math.
     source = cell.get('source', [])
-    return ''.join(source) + '\n'
+    text = ''.join(source) + '\n'
+    if code_wrap == 'html':
+        return process_latex(text)
+    else:
+        return text
 
 def process_cell_input(cell, lang=None, code_wrap=None):
     # input_lines = cell.get('input', [])  # nbformat 3
@@ -39,7 +52,7 @@ def process_cell_input(cell, lang=None, code_wrap=None):
 def process_cell(cell, lang=None, code_wrap=None):
     cell_type = cell.get('cell_type', None)
     if cell_type == 'markdown':
-        return process_cell_markdown(cell)
+        return process_cell_markdown(cell, code_wrap=code_wrap)
     elif cell_type == 'code':
         return process_cell_input(cell, lang=lang, code_wrap=code_wrap)
 
@@ -85,7 +98,8 @@ def nb_to_markdown(nb, code_wrap=None):
     # cells = _merge_successive_inputs(cells)
     # Find the notebook language.
     lang = nb['metadata'].get('language_info', {}).get('name', 'python')
-    md = '\n'.join([process_cell(_, lang=lang, code_wrap=code_wrap) for _ in cells])
+    md = '\n'.join([process_cell(_, lang=lang, code_wrap=code_wrap)
+                    for _ in cells])
     return md
 
 
@@ -136,8 +150,6 @@ class MyRenderer(object):
 
     def block_html(self, html):
         type, contents = get_html_contents(html)
-        # if self.code_wrap == 'html'
-        # Strip special HTML tags for code and math
         if type == 'code':
             self._nbwriter.append_code(contents)
         elif type == 'math':
@@ -145,6 +157,11 @@ class MyRenderer(object):
         else:
             self._nbwriter.append_markdown(html)
         return html
+
+    def tag(self, html):
+        type, contents = get_html_contents(html)
+        if type == 'math':
+            return '$'
 
     def header(self, text, level, raw=None):
         text = ('#' * level) + ' ' + text
@@ -203,8 +220,8 @@ class MyRenderer(object):
     def link(self, link, title, content):
         return '[%s](%s)' % (content or title, link)
 
-    def tag(self, html):
-        return html
+    # def tag(self, html):
+    #     return html
 
     def strikethrough(self, text):
         return '~~%s~~' % text
