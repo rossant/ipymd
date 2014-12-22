@@ -35,6 +35,31 @@ class IPymdContentsManager(FileContentsManager):
             self.validate_notebook_model(model)
         return model
 
+    def get(self, path, content=True, type=None, format=None):
+        path = path.strip('/')
+
+        if not self.exists(path):
+            raise web.HTTPError(404, u'No such file or directory: %s' % path)
+
+        os_path = self._get_os_path(path)
+        if os.path.isdir(os_path):
+            if type not in (None, 'directory'):
+                raise web.HTTPError(400,
+                                u'%s is a directory, not a %s' % (path, type), reason='bad type')
+            model = self._dir_model(path, content=content)
+        ####### this has changed
+        # elif type == 'notebook' or (type is None and path.endswith('.md')):
+        elif type == 'notebook' or (type is None and (path.endswith('.ipynb')
+                                                      or path.endswith('.md'))
+                                    ):
+            model = self._notebook_model(path, content=content)
+        else:
+            if type == 'directory':
+                raise web.HTTPError(400,
+                                u'%s is not a directory', reason='bad type')
+            model = self._file_model(path, content=content, format=format)
+        return model
+
     def _save_notebook(self, os_path, model, path=''):
         """Save a notebook model to a Markdown file."""
         md = nb_to_markdown(model['content'], code_wrap=self.code_wrap)

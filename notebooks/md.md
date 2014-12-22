@@ -1,12 +1,18 @@
 # Test notebook
 
-This is a text notebook. Here *are* some **rich text**, `code`, $\pi\simeq 3.14$ equations.
+This is a text notebook. Here *are* some **rich text**, `code`, <span class="math-tex" data-type="tex">\pi\simeq 3.1415</span> equations.
+
+Another equation:
+
+<span class="math-tex" data-type="tex">\sum_{i=1}^n x_i^2</span>
 
 Python code:
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 # some code in python
-```
+</pre>
 
 Random code (no syntax highlight):
 
@@ -16,30 +22,40 @@ Random code (no syntax highlight):
 
 Random code:
 
-    some random code 2
+```javascript
+console.log("hello" + 3);
+```
 
 Two paragraphs.
 
 In a single cell.
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 import IPython
-print("Hello world!")
-```
+print("Hello world, ho ho ho!")
+</pre>
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 2*2
-```
+</pre>
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 3*3
-```
+</pre>
 
 some text
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 print(4*4)
-```
+</pre>
 
 An image:
 
@@ -57,14 +73,24 @@ and
 1. Un
 2. Deux
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 import numpy as np
 import matplotlib.pyplot as plt
 %matplotlib inline
-```
+</pre>
 
-```python
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
 plt.imshow(np.random.rand(5,5,4), interpolation='none')
-```
+</pre>
 
 That's all folks.
+
+<pre data-code-language="python"
+     data-executable="true"
+     data-type="programlisting">
+print("the end")
+</pre>
