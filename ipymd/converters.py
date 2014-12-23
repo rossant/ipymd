@@ -197,7 +197,9 @@ class MyRenderer(object):
             text = text.replace('\\(', '$$')
             text = text.replace('\\)', '$$')
             return self.block_html(text)
-
+        else:
+            text = text.replace('\\(', '$')
+            text = text.replace('\\)', '$')
         self._nbwriter.append_markdown(text)
         return text
 
