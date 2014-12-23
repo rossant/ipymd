@@ -58,9 +58,16 @@ Cons:
 
 3. Now, you can open `.md` files in the notebook.
 
-There is also experiment support for O'Reilly Atlas in the `support-atlas` branch. Math equations are automatically replaced by special `<span>` tags, and code inputs are replaced by special `<pre>` tags. This is handled transparently in the notebook UI, i.e. you can keep writing math in `$$` and code in code cells or Markdown code blocks.
+### Atlas
 
-To use the Atlas format, put this instead in your config file:
+There is also experimental support for O'Reilly Atlas (thanks to @odewahn, see [this presentation](http://odewahn.github.io/publishing-workflows-for-jupyter/#1)).
+
+* Math equations are automatically replaced by `<span class="math-tex" data-type="tex">{equation}</span>` tags.
+* Code inputs are replaced by `<pre data-code-language="{lang}" data-executable="true" data-type="programlisting">{code}</pre>` tags.
+
+This is handled transparently in the notebook UI, i.e. you can keep writing math in `$$` and code in code cells or Markdown code blocks.
+
+To use the Atlas format, put this in your config file:
 
 ```python
 c.NotebookApp.contents_manager_class = 'ipymd.AtlasContentsManager'
