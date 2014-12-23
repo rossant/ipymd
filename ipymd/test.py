@@ -1,13 +1,32 @@
 import os
 import os.path as op
-from converters import nb_to_markdown, markdown_to_nb
+from pprint import pprint
+from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
+
 
 dir = op.dirname(os.path.realpath(__file__))
-path_ipynb = op.join(dir, '../notebooks/notebook_example.ipynb')
-path_md = op.join(dir, '../notebooks/notebook_example.md')
-path_ipynb2 = op.join(dir, '../notebooks/notebook_example_converted.ipynb')
-path_md2 = op.join(dir, '../notebooks/notebook_example_converted.md')
+# path_ipynb = op.join(dir, '../notebooks/ipynb.ipynb')
+path_md = op.join(dir, '../notebooks/md.md')
 
-nb_to_markdown(path_ipynb, path_md)
-markdown_to_nb(path_md, path_ipynb2)
-nb_to_markdown(path_ipynb2, path_md2)
+# nb_to_markdown(path_ipynb, path_md)
+
+with open(path_md, 'r') as f:
+    md = f.read()
+
+nb = markdown_to_nb(md)
+pprint(nb)
+
+print('----------')
+
+md2 = nb_to_markdown(nb, code_wrap='html')
+print(md2)
+
+print('----------')
+
+nb = markdown_to_nb(md2)
+pprint(nb)
+
+print('----------')
+
+md2 = nb_to_markdown(nb, code_wrap='html')
+print(md2)

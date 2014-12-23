@@ -1,27 +1,66 @@
 import json
+import re
 from functools import partial
+
 import IPython.nbformat as nbf
 import mistune
+
 from .six import string_types
+from .htmlparser import get_html_contents
+
+CODE_WRAP = {
+    'markdown': '''```{lang}
+{code}
+```
+''',
+
+    'html': '''<pre data-code-language="{lang}"
+     data-executable="true"
+     data-type="programlisting">
+{code}
+</pre>
+'''
+}
+
+MATH_WRAP = '''<span class="math-tex" data-type="tex">{equation}</span>'''
 
 # nb to markdown
 # -----------------------------------------------------------------------------
-def process_cell_markdown(cell):
-    return ''.join(cell.get('source', [])) + '\n'
+def process_latex(text):
+    regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
+    return re.sub(regex, MATH_WRAP.format(equation=r'\\\\(\2\\\\)'),
+                  text)
 
-def process_cell_input(cell, lang=None):
+def process_cell_markdown(cell, code_wrap=None):
+    # Wrap math equations if code wrap is math.
+    source = cell.get('source', [])
+    text = ''.join(source) + '\n'
+    if code_wrap == 'html':
+        # Remove any <span> equation tag that would be in a Markdown cell.
+        text = text.replace('<span class="math-tex" data-type="tex">', '')
+        text = text.replace('</span>', '')
+        # Replace '$$eq$$' by '\\(eq\\)'.
+        return process_latex(text)
+    else:
+        return text
+
+def process_cell_input(cell, lang=None, code_wrap=None):
     # input_lines = cell.get('input', [])  # nbformat 3
     input_lines = cell.get('source', [])  # nbformat 4
     code = ''.join(input_lines)
-    code = '```{0:s}\n'.format(lang or '') + code + '\n```\n'
+    # code = '```{0:s}\n'.format(lang or '') + code + '\n```\n'
+    code = CODE_WRAP.get(code_wrap or
+                         'markdown').format(lang=lang, code=code)
     return code
 
-def process_cell(cell, lang=None):
+def process_cell(cell, lang=None, code_wrap=None):
     cell_type = cell.get('cell_type', None)
     if cell_type == 'markdown':
-        return process_cell_markdown(cell)
+        return process_cell_markdown(cell, code_wrap=code_wrap)
     elif cell_type == 'code':
-        return process_cell_input(cell, lang=lang)
+        return process_cell_input(cell, lang=lang, code_wrap=code_wrap)
+    else:
+        return cell.get('source', '')
 
 def _merge_successive_inputs(cells):
     """Return a new list of cells where successive input cells are merged
@@ -49,8 +88,14 @@ def _load_nb_contents(contents_or_path):
     else:
         return contents_or_path
 
-def nb_to_markdown(nb):
-    """Convert a notebook contents to a Markdown document."""
+def nb_to_markdown(nb, code_wrap=None):
+    """Convert a notebook contents to a Markdown document.
+
+    Arguments:
+    * nb : the notebook model
+    * code_wrap: 'markdown' or 'html'
+
+    """
     # Only work for nbformat 4 for now.
     assert nb['nbformat'] >= 4
     # cells = n-b['worksheets'][0]['cells']  # nbformat 3
@@ -59,7 +104,8 @@ def nb_to_markdown(nb):
     # cells = _merge_successive_inputs(cells)
     # Find the notebook language.
     lang = nb['metadata'].get('language_info', {}).get('name', 'python')
-    md = '\n'.join([process_cell(_, lang=lang) for _ in cells])
+    md = '\n'.join([process_cell(_, lang=lang, code_wrap=code_wrap)
+                    for _ in cells])
     return md
 
 
@@ -87,7 +133,9 @@ class NotebookWriter(object):
 class MyRenderer(object):
     def __init__(self, **kwargs):
         self.options = kwargs
+        self.code_wrap = kwargs.get('code_wrap', 'markdown')
         self._nbwriter = NotebookWriter()
+        self._in_html_block = False
 
     def placeholder(self):
         return ''
@@ -108,7 +156,16 @@ class MyRenderer(object):
         return text
 
     def block_html(self, html):
-        self._nbwriter.append_markdown(html)
+        type, contents = get_html_contents(html)
+        if type == 'code':
+            self._nbwriter.append_code(contents)
+        elif type == 'math':
+            self._nbwriter.append_markdown('%s' % contents)
+        else:
+            self._nbwriter.append_markdown(html)
+        return html
+
+    def tag(self, html):
         return html
 
     def header(self, text, level, raw=None):
@@ -132,6 +189,15 @@ class MyRenderer(object):
         return text + '\n'
 
     def paragraph(self, text):
+        # HACK: force treating <span> as a block_html
+        text = text.strip()
+        if (text.startswith('<span class="math-tex"') and
+            text.endswith('</span>')):
+            # Replace '\\(' by '$$' in the notebook.
+            text = text.replace('\\(', '$$')
+            text = text.replace('\\)', '$$')
+            return self.block_html(text)
+
         self._nbwriter.append_markdown(text)
         return text
 
@@ -154,7 +220,7 @@ class MyRenderer(object):
         return '**%s**' % text
 
     def emphasis(self, text):
-        return '*%s*' % text
+        return '_%s_' % text
 
     def image(self, src, title, alt_text):
         return '![%s](%s)' % (title or alt_text, src)
@@ -167,9 +233,6 @@ class MyRenderer(object):
 
     def link(self, link, title, content):
         return '[%s](%s)' % (content or title, link)
-
-    def tag(self, html):
-        return html
 
     def strikethrough(self, text):
         return '~~%s~~' % text
