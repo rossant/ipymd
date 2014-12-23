@@ -16,6 +16,17 @@ with open(path_md, 'r') as f:
 nb = markdown_to_nb(md)
 pprint(nb)
 
+print('----------')
+
 md2 = nb_to_markdown(nb, code_wrap='html')
 print(md2)
 
+print('----------')
+
+nb = markdown_to_nb(md2)
+pprint(nb)
+
+print('----------')
+
+md2 = nb_to_markdown(nb, code_wrap='html')
+print(md2)

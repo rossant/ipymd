@@ -28,7 +28,7 @@ MATH_WRAP = '''<span class="math-tex" data-type="tex">{equation}</span>'''
 # -----------------------------------------------------------------------------
 def process_latex(text):
     regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
-    return re.sub(regex, MATH_WRAP.format(equation=r'\1\2\1'),
+    return re.sub(regex, MATH_WRAP.format(equation=r'\\\\(\2\\\\)'),
                   text)
 
 def process_cell_markdown(cell, code_wrap=None):
@@ -36,6 +36,10 @@ def process_cell_markdown(cell, code_wrap=None):
     source = cell.get('source', [])
     text = ''.join(source) + '\n'
     if code_wrap == 'html':
+        # Remove any <span> equation tag that would be in a Markdown cell.
+        text = text.replace('<span class="math-tex" data-type="tex">', '')
+        text = text.replace('</span>', '')
+        # Replace '$$eq$$' by '\\(eq\\)'.
         return process_latex(text)
     else:
         return text
@@ -55,6 +59,8 @@ def process_cell(cell, lang=None, code_wrap=None):
         return process_cell_markdown(cell, code_wrap=code_wrap)
     elif cell_type == 'code':
         return process_cell_input(cell, lang=lang, code_wrap=code_wrap)
+    else:
+        return cell.get('source', '')
 
 def _merge_successive_inputs(cells):
     """Return a new list of cells where successive input cells are merged
@@ -183,10 +189,15 @@ class MyRenderer(object):
         return text + '\n'
 
     def paragraph(self, text):
-        # Parse inline HTML.
-        # WARNING: this is a hack, need to be fixed in mistune #37
-        text = text.replace('<span class="math-tex" data-type="tex">', '')
-        text = text.replace('</span>', '')
+        # HACK: force treating <span> as a block_html
+        text = text.strip()
+        if (text.startswith('<span class="math-tex"') and
+            text.endswith('</span>')):
+            # Replace '\\(' by '$$' in the notebook.
+            text = text.replace('\\(', '$$')
+            text = text.replace('\\)', '$$')
+            return self.block_html(text)
+
         self._nbwriter.append_markdown(text)
         return text
 
@@ -209,7 +220,7 @@ class MyRenderer(object):
         return '**%s**' % text
 
     def emphasis(self, text):
-        return '*%s*' % text
+        return '_%s_' % text
 
     def image(self, src, title, alt_text):
         return '![%s](%s)' % (title or alt_text, src)
@@ -222,9 +233,6 @@ class MyRenderer(object):
 
     def link(self, link, title, content):
         return '[%s](%s)' % (content or title, link)
-
-    # def tag(self, html):
-    #     return html
 
     def strikethrough(self, text):
         return '~~%s~~' % text
