@@ -16,6 +16,7 @@ from .converters import nb_to_markdown, markdown_to_nb
 
 class IPymdContentsManager(FileContentsManager):
     code_wrap = None
+    add_prompt = None
 
     def _notebook_model(self, path, content=True):
         model = self._base_model(path)
@@ -62,7 +63,8 @@ class IPymdContentsManager(FileContentsManager):
 
     def _save_notebook(self, os_path, model, path=''):
         """Save a notebook model to a Markdown file."""
-        md = nb_to_markdown(model['content'], code_wrap=self.code_wrap)
+        md = nb_to_markdown(model['content'], code_wrap=self.code_wrap,
+                            add_prompt=self.add_prompt)
         with self.atomic_writing(os_path, encoding='utf-8') as f:
             f.write(md)
 
@@ -148,7 +150,14 @@ class IPymdContentsManager(FileContentsManager):
 class MarkdownContentsManager(IPymdContentsManager):
     """Code cells are wrapped by ```."""
     code_wrap = 'markdown'
+    add_prompt = False
+
+class MarkdownOutputContentsManager(IPymdContentsManager):
+    """Code cells are wrapped by ```, and code output + input prompt '>'."""
+    code_wrap = 'markdown'
+    add_prompt = True
 
 class AtlasContentsManager(IPymdContentsManager):
     "Code cells are wrapped by special <pre> tag."""
     code_wrap = 'html'
+    add_prompt = False

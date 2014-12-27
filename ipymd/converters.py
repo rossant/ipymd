@@ -30,25 +30,23 @@ def _has_input_prompt(lines):
     return any(line for line in lines if line.startswith('> '))
 
 def _get_code_input_output(lines):
-    """Return the lines starting with '> ', or the whole source if there is
-    no such line."""
+    """Return the input and output lines with prompt '> ' for input lines."""
     if _has_input_prompt(lines):
         input = [line[2:] for line in lines
                           if line.startswith('> ')]
         output = [line for line in lines
                            if not line.startswith('> ')]
-        return _split_lines(input), _split_lines(output)
+        return '\n'.join(input), '\n'.join(output)
     else:
-        return lines, []
+        return '\n'.join(lines), ''
 
-def _split_lines(lines):
-    """Split lines and keep '\n' at the end if there is more than 1 line."""
-    if not isinstance(lines, list):
-        lines = lines.splitlines()
-    if len(lines) <= 1:
-        return [line.rstrip() for line in lines]
+def _ensure_string(source):
+    # Ensure source is a string.
+    if isinstance(source, list):
+        input = '\n'.join([line.rstrip() for line in source])
     else:
-        return [line.rstrip() + '\n' for line in lines[:-1]] + [lines[-1].rstrip()]
+        input = source
+    return input
 
 def process_latex(text):
     regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
@@ -57,8 +55,9 @@ def process_latex(text):
 
 def process_cell_markdown(cell, code_wrap=None):
     # Wrap math equations if code wrap is math.
-    source = cell.get('source', [])
-    text = ''.join(source) + '\n'
+    # source = cell.get('source', [])
+    # text = ''.join(source) + '\n'
+    text = _ensure_string(cell.get('source', [])) + '\n'
     if code_wrap == 'html':
         # Remove any <span> equation tag that would be in a Markdown cell.
         text = text.replace('<span class="math-tex" data-type="tex">', '')
@@ -70,16 +69,16 @@ def process_cell_markdown(cell, code_wrap=None):
 
 def process_cell_input(cell, lang=None, code_wrap=None, add_prompt=None):
     # input_lines = cell.get('input', [])  # nbformat 3
-    input_lines = cell.get('source', [])  # nbformat 4
+    code = _ensure_string(cell.get('source', []))  # nbformat 4
 
     if add_prompt:
         outputs = cell.get('outputs', [])
-        output = '\n'.join(''.join(output.get('data', {}). \
-                                            get('text/plain', []))
-                           for output in outputs)
-        code = ''.join('> ' + line for line in input_lines) + '\n' + output
-    else:
-        code = ''.join(input_lines)
+        output = '\n'.join(_ensure_string(output.get('data', {}). \
+                                                 get('text/plain', []))
+                            for output in outputs)
+        code = '\n'.join('> ' + line for line in code.splitlines()) + \
+                '\n' + output
+
     return CODE_WRAP.get(code_wrap or
                          'markdown').format(lang=lang, code=code)
 
@@ -151,13 +150,13 @@ class NotebookWriter(object):
         self._nb = nbf.v4.new_notebook()
 
     def append_markdown(self, source):
-        self._nb['cells'].append(nbf.v4.new_markdown_cell(_split_lines(source)))
+        self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
 
     def append_code(self, source):
         """If source does not contain a line starting with '> ', treat the
         whole source as Python code. Otherwise, the lines that do not start
         with '> ' are treated as output."""
-        lines = _split_lines(source)
+        lines = source.splitlines()
         if _has_input_prompt(lines):
             input, output = _get_code_input_output(lines)
             cell = nbf.v4.new_code_cell(input)

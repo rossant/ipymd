@@ -1,1 +1,3 @@
-from .nbplugins import MarkdownContentsManager, AtlasContentsManager
+from .nbplugins import (MarkdownContentsManager,
+                        MarkdownOutputContentsManager,
+                        AtlasContentsManager)

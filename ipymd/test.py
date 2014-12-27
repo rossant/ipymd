@@ -5,11 +5,9 @@ from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
 
 
 dir = op.dirname(os.path.realpath(__file__))
-# path_ipynb = op.join(dir, '../notebooks/ipynb.ipynb')
 path_md = op.join(dir, '../notebooks/md.md')
-code_wrap = 'html'
+code_wrap = 'markdown'
 add_prompt = True
-# nb_to_markdown(path_ipynb, path_md)
 
 with open(path_md, 'r') as f:
     md = f.read()
