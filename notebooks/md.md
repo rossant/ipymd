@@ -1,4 +1,8 @@
 # Test notebook
 
-<span class="math-tex" data-type="tex">\\(p_y p_{y}\\)</span>
+```python
+> print("Hello world")
+Hello world 1
+Hello world 2
+```
 

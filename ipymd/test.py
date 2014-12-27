@@ -7,7 +7,8 @@ from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
 dir = op.dirname(os.path.realpath(__file__))
 # path_ipynb = op.join(dir, '../notebooks/ipynb.ipynb')
 path_md = op.join(dir, '../notebooks/md.md')
-
+code_wrap = 'html'
+add_prompt = True
 # nb_to_markdown(path_ipynb, path_md)
 
 with open(path_md, 'r') as f:
@@ -18,7 +19,7 @@ pprint(nb)
 
 print('----------')
 
-md2 = nb_to_markdown(nb, code_wrap='html')
+md2 = nb_to_markdown(nb, code_wrap=code_wrap, add_prompt=add_prompt)
 print(md2)
 
 print('----------')
@@ -28,5 +29,5 @@ pprint(nb)
 
 print('----------')
 
-md2 = nb_to_markdown(nb, code_wrap='html')
+md2 = nb_to_markdown(nb, code_wrap=code_wrap, add_prompt=add_prompt)
 print(md2)
