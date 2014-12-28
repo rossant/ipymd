@@ -73,11 +73,15 @@ def process_cell_input(cell, lang=None, code_wrap=None, add_prompt=None):
 
     if add_prompt:
         outputs = cell.get('outputs', [])
-        output = '\n'.join(_ensure_string(output.get('data', {}). \
-                                                 get('text/plain', []))
-                            for output in outputs)
+        # Add stdout.
+        output = ('\n'.join(_ensure_string(output.get('text', ''))
+                            for output in outputs)).rstrip()
+        # Add text output.
+        output += ('\n'.join(_ensure_string(output.get('data', {}). \
+                                                  get('text/plain', []))
+                             for output in outputs)).rstrip()
         code = '\n'.join('> ' + line for line in code.splitlines()) + \
-                '\n' + output
+                '\n' + output.rstrip()
 
     return CODE_WRAP.get(code_wrap or
                          'markdown').format(lang=lang, code=code)
