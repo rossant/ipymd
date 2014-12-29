@@ -2,7 +2,7 @@
 
 Combining the best of IPython notebook and Markdown for git-friendly technical book writing.
 
-**tl; dr**: this **experimental** module replaces the JSON-based `.ipynb` format by Markdown `.md` documents (this is exactly Markdown, not a variant). You loose all metadata and code outputs, but you keep Markdown text and code. This is useful when you write technical documents, blog posts, books, etc.
+**tl; dr**: this **experimental** module replaces the JSON-based `.ipynb` format by Markdown `.md` documents (this is exactly Markdown, not a variant). You loose all metadata and non-text outputs (including plots), but you keep Markdown text and code. This is useful when you write technical documents, blog posts, books, etc.
 
 ## Rationale
 
@@ -14,7 +14,7 @@ Pros:
 
 Cons:
 
-* nbformat not really git-friendly (JSON, contains the code output by default)
+* nbformat not really git-friendly (JSON, contains the outputs by default)
 * cannot easily edit in a text editor
 
 
@@ -35,15 +35,30 @@ Cons:
 * Write contents (text and code) in a Markdown `document.md`
     * either in the notebook UI, as usual, with Markdown cells and code cells (useful when working on code)
     * or in a text editor, using Markdown (useful when working on text)
-* Only the Markdown cells and input code cells are saved in the file
+* Only the Markdown cells and code cells (input + text outputs for now) are saved in the file
 * Collaborators can work on the Markdown document using GitHub (branches, pull requests...), they don't need IPython. They can do everything from the GitHub web interface.
 
+### Details
 
-## CAVEATS
+* A notebook code cell = Markdown code block with explicit `python` syntax highlighting (i.e. `\`\`\`python`)
+* If `add_prompt=True` (default), intput and text outputs are converted to:
+
+      > print("Hello world")
+      Hello world
+
+* `md => nb => md` and `nb => md => nb` are not exactly the identity function:
+
+    * `*italics*` is replaced by `_italics_`
+    * extra line breaks are discarded
+    * text output and text stdout ==> combined text output (stdout lines first, output lines last)
+
+
+## Caveats
 
 **WARNING**: this is an experimental module, there is a risk for data loss, so be careful!
 
-* DO NOT RENAME YOUR .MD NOTEBOOKS IN THE NOTEBOOK UI
+* Renaming doesn't work yet (issue #4)
+* New notebook doesn't work yet (issue #5)
 
 
 ## Installation
