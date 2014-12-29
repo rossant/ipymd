@@ -40,7 +40,7 @@ Cons:
 
 ### Details
 
-* A notebook code cell = Markdown code block with explicit `python` syntax highlighting (i.e. ````python`)
+* A notebook code cell = Markdown code block with explicit `python` syntax highlighting (i.e. ```` ```python ````)
 * If `add_prompt=True` (default), intput and text outputs are converted to:
 
   ```
