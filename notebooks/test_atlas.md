@@ -1,10 +1,10 @@
 # Test notebook
 
-This is a text notebook. Here *are* some **rich text**, `code`, <span class="math-tex" data-type="tex">\pi\simeq 3.1415</span> equations.
+This is a text notebook. Here _are_ some **rich text**, `code`, <span class="math-tex" data-type="tex">\\(\pi\simeq 3.1415\\)</span> equations.
 
 Another equation:
 
-<span class="math-tex" data-type="tex">\sum_{i=1}^n x_i</span>
+<span class="math-tex" data-type="tex">\\(\sum_{i=1}^n x_i\\)</span>
 
 Python code:
 
@@ -34,7 +34,7 @@ In a single cell.
      data-executable="true"
      data-type="programlisting">
 import IPython
-print("Hello world, ho ho ho!")
+print("Hello world!")
 </pre>
 
 <pre data-code-language="python"

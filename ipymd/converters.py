@@ -80,8 +80,9 @@ def process_cell_input(cell, lang=None, code_wrap=None, add_prompt=None):
         output += ('\n'.join(_ensure_string(output.get('data', {}). \
                                                   get('text/plain', []))
                              for output in outputs)).rstrip()
-        code = '\n'.join('> ' + line for line in code.splitlines()) + \
-                '\n' + output.rstrip()
+        code = '\n'.join('> ' + line for line in code.splitlines())
+        if output.strip():
+            code += '\n' + output.rstrip()
 
     return CODE_WRAP.get(code_wrap or
                          'markdown').format(lang=lang, code=code)
@@ -164,11 +165,12 @@ class NotebookWriter(object):
         if _has_input_prompt(lines):
             input, output = _get_code_input_output(lines)
             cell = nbf.v4.new_code_cell(input)
-            cell.outputs.append(nbf.v4.new_output('execute_result',
-                                {'text/plain': output},
-                                execution_count=None,
-                                metadata={},
-                                ))
+            if output:
+                cell.outputs.append(nbf.v4.new_output('execute_result',
+                                    {'text/plain': output},
+                                    execution_count=None,
+                                    metadata={},
+                                    ))
             self._nb['cells'].append(cell)
         else:
             self._nb['cells'].append(nbf.v4.new_code_cell(source))
