@@ -1,8 +1,10 @@
 # IPython notebook & Markdown
 
-Combining the best of IPython notebook and Markdown for git-friendly technical book writing.
+**Currently WIP, experimental project, use at your own risks**
 
-**tl; dr**: this **experimental** module replaces the JSON-based `.ipynb` format by Markdown `.md` documents (this is exactly Markdown, not a variant). You loose all metadata and non-text outputs (including plots), but you keep Markdown text and code. This is useful when you write technical documents, blog posts, books, etc.
+Use Markdown `.md` documents instead of `.ipynb` files in the IPython notebook. You keep code input and outputs, but not plots, metadata, or prompt numbers. This is useful when you write technical documents, blog posts, books, etc.
+
+![image](https://cloud.githubusercontent.com/assets/1942359/5570181/f656a484-8f7d-11e4-8ec2-558d022b13d3.png)
 
 ## Rationale
 
