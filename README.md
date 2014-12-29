@@ -6,7 +6,7 @@ Use Markdown `.md` documents instead of `.ipynb` files in the IPython notebook. 
 
 ![image](https://cloud.githubusercontent.com/assets/1942359/5570181/f656a484-8f7d-11e4-8ec2-558d022b13d3.png)
 
-## Rationale
+## Why?
 
 ### IPython notebook
 
