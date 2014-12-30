@@ -159,5 +159,5 @@ class MarkdownOutputContentsManager(IPymdContentsManager):
 
 class AtlasContentsManager(IPymdContentsManager):
     "Code cells are wrapped by special <pre> tag."""
-    code_wrap = 'html'
+    code_wrap = 'atlas'
     add_prompt = False

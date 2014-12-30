@@ -14,7 +14,7 @@ CODE_WRAP = {
 ```
 ''',
 
-    'html': '''<pre data-code-language="{lang}"
+    'atlas': '''<pre data-code-language="{lang}"
      data-executable="true"
      data-type="programlisting">
 {code}
@@ -48,6 +48,12 @@ def _ensure_string(source):
         input = source
     return input
 
+def _remove_math_span(source):
+    # Remove any <span> equation tag that would be in a Markdown cell.
+    source = source.replace('<span class="math-tex" data-type="tex">', '')
+    source = source.replace('</span>', '')
+    return source
+
 def process_latex(text):
     regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
     return re.sub(regex, MATH_WRAP.format(equation=r'\\\\(\2\\\\)'),
@@ -58,10 +64,8 @@ def process_cell_markdown(cell, code_wrap=None):
     # source = cell.get('source', [])
     # text = ''.join(source) + '\n'
     text = _ensure_string(cell.get('source', [])) + '\n'
-    if code_wrap == 'html':
-        # Remove any <span> equation tag that would be in a Markdown cell.
-        text = text.replace('<span class="math-tex" data-type="tex">', '')
-        text = text.replace('</span>', '')
+    if code_wrap == 'atlas':
+        text = _remove_math_span(text)
         # Replace '$$eq$$' by '\\(eq\\)'.
         return process_latex(text)
     else:
@@ -129,7 +133,7 @@ def nb_to_markdown(nb, code_wrap=None, add_prompt=None):
 
     Arguments:
     * nb : the notebook model
-    * code_wrap: 'markdown' or 'html'
+    * code_wrap: 'markdown' or 'atlas'
 
     """
     # Only work for nbformat 4 for now.
@@ -254,8 +258,9 @@ class MyRenderer(object):
         else:
             text = text.replace('\\(', '$')
             text = text.replace('\\)', '$')
-        self._nbwriter.append_markdown(text)
-        return text
+            text = _remove_math_span(text)
+            self._nbwriter.append_markdown(text)
+            return text
 
     def table(self, header, body):
         pass

@@ -5,8 +5,10 @@ from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
 
 
 dir = op.dirname(os.path.realpath(__file__))
-path_md = op.join(dir, '../notebooks/md.md')
-code_wrap = 'markdown'
+
+code_wrap = 'atlas'  # 'atlas' or 'markdown'
+path_md = op.join(dir, '../notebooks/test_%s.md' % code_wrap)
+
 add_prompt = True
 
 with open(path_md, 'r') as f:
