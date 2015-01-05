@@ -36,13 +36,29 @@ def _file_has_extension(file, extensions):
 def _filter_files_by_extension(files, extensions):
     return [file for file in files if _file_has_extension(file, extensions)]
 
+def _converted_filename(file, convert_from):
+    base, ext = op.splitext(file)
+    if convert_from == 'ipynb':
+        convert_ext = '.md'
+    elif convert_from == 'md':
+        convert_ext = '.ipynb'
+    return ''.join((base, convert_ext))
+
 def _read_md(file):
     with open(file, 'r') as f:
         return f.read()
 
+def _write_md(file, contents):
+    with open(file, 'w') as f:
+        f.write(contents)
+
 def _read_nb(file):
     with open(file, 'r') as f:
         return json.load(f)
+
+def _write_nb(file, contents):
+    with open(file, 'w') as f:
+        return json.dump(contents, f)
 
 def main():
     parser = argparse.ArgumentParser(description=
@@ -75,18 +91,25 @@ def main():
     # Filter as a function of --from.
     if convert_from == 'ipynb':
         files = _filter_files_by_extension(files, '.ipynb')
-        conversion_function = nb_to_markdown
-        open_function = _read_nb
+        convert = nb_to_markdown
+        read = _read_nb
+        write = _write_md
     elif convert_from in ('md', 'markdown'):
         files = _filter_files_by_extension(files, '.md')
-        conversion_function = markdown_to_nb
-        open_function = _read_md
+        convert = markdown_to_nb
+        read = _read_md
+        write = _write_nb
 
     for file in files:
         print("Converting {0:s}...".format(file))
-
-        # contents = open_function(file)
-        # conversion_function(contents)
+        contents = read(file)
+        converted = convert(contents)
+        file_to = _converted_filename(file, convert_from)
+        if op.exists(file_to) and not overwrite:
+            print("The file already exists, please use --overwrite.")
+            continue
+        else:
+            write(file_to, converted)
 
 if __name__ == '__main__':
     main()
