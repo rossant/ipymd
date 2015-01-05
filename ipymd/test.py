@@ -1,12 +1,14 @@
+import sys
 import os
 import os.path as op
 from pprint import pprint
 from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
 
-
 dir = op.dirname(os.path.realpath(__file__))
 
-code_wrap = 'atlas'  # 'atlas' or 'markdown'
+# atlas or markdown
+code_wrap = sys.argv[1] if len(sys.argv) >= 2 else 'markdown'
+
 path_md = op.join(dir, '../notebooks/test_%s.md' % code_wrap)
 
 add_prompt = True
