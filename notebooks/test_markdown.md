@@ -10,6 +10,9 @@ Python code:
 
 ```python
 >>> # some code in python
+>>> def f(x):
+...     y = x * x
+...     return y
 ```
 
 Random code (no syntax highlight):

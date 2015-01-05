@@ -45,10 +45,12 @@ def _remove_prompt(line):
         return line
 
 def _add_prompt(line, lineno=0):
-    if lineno == 0:
-        return PROMPT_FIRST + line
-    else:
+    # Only add a "next" prompt when there is indentation and it's not the first
+    # line.
+    if lineno > 0 and line[:2] == '  ':
         return PROMPT_NEXT + line
+    else:
+        return PROMPT_FIRST + line
 
 def _get_code_input_output(lines):
     """Return the input and output lines with prompt for input lines."""
