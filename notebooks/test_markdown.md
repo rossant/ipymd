@@ -9,7 +9,7 @@ $$\sum_{i=1}^n x_i$$
 Python code:
 
 ```python
-> # some code in python
+>>> # some code in python
 ```
 
 Random code (no syntax highlight):
@@ -29,25 +29,25 @@ Two paragraphs.
 In a single cell.
 
 ```python
-> import IPython
-> print("Hello world!")
+>>> import IPython
+... print("Hello world!")
 Hello world!
 ```
 
 ```python
-> 2*2
+>>> 2*2
 4
 ```
 
 ```python
-> 3*3
+>>> 3*3
 9
 ```
 
 some text
 
 ```python
-> print(4*4)
+>>> print(4*4)
 16
 ```
 
@@ -68,19 +68,19 @@ and
 2. Deux
 
 ```python
-> import numpy as np
-> import matplotlib.pyplot as plt
-> %matplotlib inline
+>>> import numpy as np
+... import matplotlib.pyplot as plt
+... %matplotlib inline
 ```
 
 ```python
-> plt.imshow(np.random.rand(5,5,4), interpolation='none');
+>>> plt.imshow(np.random.rand(5,5,4), interpolation='none');
 <matplotlib.figure.Figure at 0x7f11be242748>
 ```
 
 That's all folks.
 
 ```python
-> print("the end")
+>>> print("the end")
 the end
 ```
