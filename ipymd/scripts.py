@@ -58,7 +58,7 @@ def _read_nb(file):
 
 def _write_nb(file, contents):
     with open(file, 'w') as f:
-        return json.dump(contents, f)
+        return json.dump(contents, f, indent=2)
 
 def main():
     parser = argparse.ArgumentParser(description=
@@ -74,7 +74,7 @@ def main():
     parser.add_argument('--type', dest='type',
                         help='either markdown (default) or atlas')
 
-    parser.add_argument('--overwrite', dest='overwrite',
+    parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help=('overwrite target file if it exists '
                               '(false by default)'))
 
