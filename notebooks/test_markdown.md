@@ -10,15 +10,9 @@ Python code:
 
 ```python
 >>> # some code in python
->>> def f(x):
+... def f(x):
 ...     y = x * x
 ...     return y
-```
-
-Random code (no syntax highlight):
-
-```
-# some random code 1
 ```
 
 Random code:
@@ -27,13 +21,11 @@ Random code:
 console.log("hello" + 3);
 ```
 
-Two paragraphs.
-
-In a single cell.
+Python code:
 
 ```python
 >>> import IPython
-... print("Hello world!")
+>>> print("Hello world!")
 Hello world!
 ```
 
@@ -43,6 +35,9 @@ Hello world!
 ```
 
 ```python
+>>> @decorator
+... def f(x):
+...     pass
 >>> 3*3
 9
 ```
@@ -51,6 +46,12 @@ some text
 
 ```python
 >>> print(4*4)
+16
+```
+
+```python
+>>> %%bash
+... print(4*4)
 16
 ```
 
@@ -72,8 +73,8 @@ and
 
 ```python
 >>> import numpy as np
-... import matplotlib.pyplot as plt
-... %matplotlib inline
+>>> import matplotlib.pyplot as plt
+>>> %matplotlib inline
 ```
 
 ```python
@@ -82,8 +83,3 @@ and
 ```
 
 That's all folks.
-
-```python
->>> print("the end")
-the end
-```

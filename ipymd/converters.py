@@ -44,13 +44,30 @@ def _remove_prompt(line):
     else:
         return line
 
-def _add_prompt(line, lineno=0):
-    # Only add a "next" prompt when there is indentation and it's not the first
-    # line.
-    if lineno > 0 and line[:2] == '  ':
-        return PROMPT_NEXT + line
-    else:
-        return PROMPT_FIRST + line
+def _add_prompt(source):
+    """Add input prompts to code."""
+    lines = source.strip().splitlines()
+    lines_prompt = []
+    prompt = PROMPT_FIRST
+    lock = False
+    for line in lines:
+        if line.startswith('%%'):
+            lines_prompt.append(prompt + line)
+            prompt = PROMPT_NEXT
+            lock = True
+        elif line.startswith('#') or line.startswith('@'):
+            lines_prompt.append(prompt + line)
+            prompt = PROMPT_NEXT
+        elif line.startswith('  '):
+            prompt = PROMPT_NEXT
+            lines_prompt.append(prompt + line)
+            if not lock:
+                prompt = PROMPT_FIRST
+        else:
+            lines_prompt.append(prompt + line)
+            if not lock:
+                prompt = PROMPT_FIRST
+    return '\n'.join(lines_prompt)
 
 def _get_code_input_output(lines):
     """Return the input and output lines with prompt for input lines."""
@@ -107,8 +124,7 @@ def process_cell_input(cell, lang=None, code_wrap=None, add_prompt=None):
         output += ('\n'.join(_ensure_string(output.get('data', {}). \
                                                   get('text/plain', []))
                              for output in outputs)).rstrip()
-        code = '\n'.join(_add_prompt(line, lineno=lineno)
-                         for lineno, line in enumerate(code.splitlines()))
+        code = _add_prompt(code)
         if output.strip():
             code += '\n' + output.rstrip()
 
@@ -232,8 +248,7 @@ class MyRenderer(object):
         return code
 
     def block_quote(self, text):
-        text = '\n'.join(_add_prompt(line, lineno=lineno)
-                         for lineno, l in enumerate(text.split('\n')))
+        text = _add_prompt(text)
         self._nbwriter.append_markdown(text)
         return text
 

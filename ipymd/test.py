@@ -1,6 +1,7 @@
 import sys
 import os
 import os.path as op
+import difflib
 from pprint import pprint
 from ipymd.converters import nb_to_markdown, markdown_to_nb, process_latex
 
@@ -33,3 +34,9 @@ print('----------')
 
 md2 = nb_to_markdown(nb, code_wrap=code_wrap, add_prompt=add_prompt)
 print(md2)
+
+print('----------')
+
+diff = difflib.ndiff(md.splitlines(), md2.splitlines())
+delta = ''.join(x[2:] for x in diff if x.startswith('- '))
+print(delta)
