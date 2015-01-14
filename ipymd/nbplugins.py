@@ -63,7 +63,7 @@ class IPymdContentsManager(FileContentsManager):
 
     def _save_notebook(self, os_path, model, path=''):
         """Save a notebook model to a Markdown file."""
-        md = nb_to_markdown(model['content'], code_wrap=self.code_wrap,
+        md = nb_to_markdown(model, code_wrap=self.code_wrap,
                             add_prompt=self.add_prompt)
         with self.atomic_writing(os_path, encoding='utf-8') as f:
             f.write(md)
