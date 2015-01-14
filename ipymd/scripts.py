@@ -69,7 +69,7 @@ def main():
                               'to convert'))
 
     parser.add_argument('--from', dest='convert_from', required=True,
-                        help='either md or ipynb')
+                        help='either \'md\' or \'ipynb\'')
 
     parser.add_argument('--type', dest='type',
                         help='either markdown (default) or atlas')
@@ -99,6 +99,8 @@ def main():
         convert = markdown_to_nb
         read = _read_md
         write = _write_nb
+    else:
+        raise ValueError("'from' should be 'ipynb' or 'md'")
 
     for file in files:
         print("Converting {0:s}...".format(file))
