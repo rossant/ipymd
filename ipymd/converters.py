@@ -248,9 +248,12 @@ class MyRenderer(object):
         return code
 
     def block_quote(self, text):
-        text = _add_prompt(text)
-        self._nbwriter.append_markdown(text)
-        return text
+        # HACK: for block codes, 'paragraph' is called before this function.
+        # So we add a '> ' before the lines in the last cell.
+        lines = self._nbwriter._nb['cells'][-1]['source'].splitlines()
+        self._nbwriter._nb['cells'][-1]['source'] = '\n'.join('> ' + l
+                                                              for l in lines)
+        return ''
 
     def block_html(self, html):
         type, contents = get_html_contents(html)
