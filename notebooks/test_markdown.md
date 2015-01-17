@@ -82,4 +82,7 @@ and
 <matplotlib.figure.Figure at 0x7f11be242748>
 ```
 
-That's all folks.
+> TIP (a block quote): That's all folks.
+> Last line.
+
+Last paragraph.
