@@ -1,11 +1,11 @@
 import json
 import re
 from functools import partial
+from collections import OrderedDict
 
 import IPython.nbformat as nbf
-import mistune
 
-from .six import string_types
+from .six import string_types, iteritems
 from .htmlparser import get_html_contents
 
 CODE_WRAP = {
@@ -228,125 +228,96 @@ class NotebookWriter(object):
             nbf.write(self._nb, f)
 
 
-class MyRenderer(object):
-    def __init__(self, **kwargs):
-        self.options = kwargs
-        self.code_wrap = kwargs.get('code_wrap', 'markdown')
-        self._nbwriter = NotebookWriter()
-        self._in_html_block = False
+# Part of the code below comes from mistune.
+def preprocessing(text, tab=4):
+    text = re.sub(r'\r\n|\r', '\n', text)
+    text = text.replace('\t', ' ' * tab)
+    text = text.replace('\u00a0', ' ')
+    text = text.replace('\u2424', '\n')
+    pattern = re.compile(r'^ +$', re.M)
+    return pattern.sub('', text)
 
-    def placeholder(self):
-        return ''
 
-    def block_code(self, code, lang):
-        # Only explicit Python code becomes a code cell.
-        if lang == 'python':
-            self._nbwriter.append_code(code)
-        else:
-            self._nbwriter.append_markdown('```%s\n%s\n```' % (lang or '',
-                                                               code.strip()))
-        return code
+_tag = (
+    r'(?!(?:'
+    r'a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|'
+    r'var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|'
+    r'span|br|wbr|ins|del|img)\b)\w+(?!:/|[^\w\s@]*@)\b'
+)
 
-    def block_quote(self, text):
-        # HACK: for block codes, 'paragraph' is called before this function.
-        # So we add a '> ' before the lines in the last cell.
-        lines = self._nbwriter._nb['cells'][-1]['source'].splitlines()
-        self._nbwriter._nb['cells'][-1]['source'] = '\n'.join('> ' + l
-                                                              for l in lines)
-        return ''
 
-    def block_html(self, html):
-        type, contents = get_html_contents(html)
-        if type == 'code':
-            self._nbwriter.append_code(contents)
-        elif type == 'math':
-            self._nbwriter.append_markdown('%s' % contents)
-        else:
-            self._nbwriter.append_markdown(html)
-        return html
+rules = OrderedDict([
+    # Code block
+    ('block_code', re.compile(r'^( {4}[^\n]+\n*)+')),
+    ('fences', re.compile(
+        r'^ *(`{3,}|~{3,}) *(\S+)? *\n'  # ```lang
+        r'([\s\S]+?)\s*'
+        r'\1 *(?:\n+|$)'  # ```
+    )),
+    # HTML block
+    ('block_html', re.compile(
+        r'^ *(?:%s|%s|%s) *(?:\n{2,}|\s*$)' % (
+            r'<!--[\s\S]*?-->',
+            r'<(%s)[\s\S]+?<\/\1>' % _tag,
+            r'''<%s(?:"[^"]*"|'[^']*'|[^'">])*?>''' % _tag,
+        )
+    )),
+    # Text until next new line.
+    ('text', re.compile(r'^.+?\n\n|.+?$', re.DOTALL)),
+    ('newline', re.compile(r'^\n+')),
+    # ('text', re.compile(r'^.+')),
+])
 
-    def tag(self, html):
-        return html
 
-    def header(self, text, level, raw=None):
-        text = ('#' * level) + ' ' + text
-        self._nbwriter.append_markdown(text)
-        return text
+class MarkdownParser(object):
+    def __init__(self):
+        self._nb = NotebookWriter()
 
-    def hrule(self):
-        return ''
+    def _manipulate(self, text):
+        for key, rule in iteritems(rules):
+            m = rule.match(text)
+            if not m:
+                continue
+            getattr(self, 'parse_%s' % key)(m)
+            return m
+        return False
 
-    def list(self, body, ordered=True):
-        items = body.strip().split('\n')
-        if ordered:
-            text = '\n'.join('%d. %s' % (i+1,s) for i,s in enumerate(items))
-        else:
-            text = '\n'.join('* %s' % _ for _ in items)
-        self._nbwriter.append_markdown(text)
-        return text
-
-    def list_item(self, text):
-        return text + '\n'
-
-    def paragraph(self, text):
-        # HACK: force treating <span> as a block_html
+    def parse(self, text):
+        text = preprocessing(text)
         text = text.strip()
-        if (text.startswith('<span class="math-tex"') and
-            text.endswith('</span>')):
-            # Replace '\\(' by '$$' in the notebook.
-            text = text.replace('\\(', '$$')
-            text = text.replace('\\)', '$$')
-            return self.block_html(text)
+        while text:
+            m = self._manipulate(text)
+            if m is not False:
+                text = text[len(m.group(0)):]
+                continue
+            if text:
+                raise RuntimeError('Infinite loop at: %s' % text)
+
+    def parse_block_code(self, m):
+        self._nb.append_code(m.group(0))
+
+    def parse_fences(self, m):
+        lang = m.group(2)
+        if lang == 'python':
+            self._nb.append_code(m.group(3))
         else:
-            text = text.replace('\\(', '$')
-            text = text.replace('\\)', '$')
-            text = _remove_math_span(text)
-            self._nbwriter.append_markdown(text)
-            return text
+            self._nb.append_markdown(m.group(0))
 
-    def table(self, header, body):
+    def parse_block_html(self, m):
+        self._nb.append_markdown(m.group(0))
+
+    def parse_text(self, m):
+        self._nb.append_markdown(m.group(0).strip())
+
+    def parse_newline(self, m):
         pass
 
-    def table_row(self, content):
-        pass
-
-    def table_cell(self, content, **flags):
-        pass
-
-    def autolink(self, link, is_email=False):
-        pass
-
-    def codespan(self, text):
-        return '`%s`' % text
-
-    def double_emphasis(self, text):
-        return '**%s**' % text
-
-    def emphasis(self, text):
-        return '_%s_' % text
-
-    def image(self, src, title, alt_text):
-        return '![%s](%s)' % (title or alt_text, src)
-
-    def linebreak(self, ):
-        return '\n'
-
-    def newline(self, ):
-        return '\n'
-
-    def link(self, link, title, content):
-        return '[%s](%s)' % (content or title, link)
-
-    def strikethrough(self, text):
-        return '~~%s~~' % text
-
-    def text(self, text):
-        return text
+    @property
+    def contents(self):
+        return self._nb.contents
 
 
 def markdown_to_nb(contents):
-    """Convert a Markdown text to a notebook contents."""
-    renderer = MyRenderer()
-    md = mistune.Markdown(renderer=renderer)
-    md.render(contents)
-    return renderer._nbwriter.contents
+    parser = MarkdownParser()
+    parser.parse(contents)
+    return parser.contents
