@@ -294,20 +294,34 @@ class MarkdownParser(object):
                 raise RuntimeError('Infinite loop at: %s' % text)
 
     def parse_block_code(self, m):
-        self._nb.append_code(m.group(0))
+        self._nb.append_code(m.group(0).strip())
 
     def parse_fences(self, m):
         lang = m.group(2)
         if lang == 'python':
-            self._nb.append_code(m.group(3))
+            self._nb.append_code(m.group(3).strip())
         else:
-            self._nb.append_markdown(m.group(0))
+            self._nb.append_markdown(m.group(0).strip())
 
     def parse_block_html(self, m):
-        self._nb.append_markdown(m.group(0))
+        text = m.group(0).strip()
+
+        if (text.startswith('<span class="math-tex"') and
+            text.endswith('</span>')):
+            # Replace '\\(' by '$$' in the notebook.
+            text = text.replace(r'\\(', '$$')
+            text = text.replace(r'\\)', '$$')
+
+        self._nb.append_markdown(text.strip())
 
     def parse_text(self, m):
-        self._nb.append_markdown(m.group(0).strip())
+        text = m.group(0).strip()
+
+        text = text.replace(r'\\(', '$')
+        text = text.replace(r'\\)', '$')
+        text = _remove_math_span(text)
+
+        self._nb.append_markdown(text.strip())
 
     def parse_newline(self, m):
         pass
