@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ..utils import _test_file_path, _exec_test_file
-from ..notebook import NotebookReader, _open_ipynb
+from ..notebook import NotebookReader, _open_ipynb, ipynb_to_ipymd_cells
 
 
 #------------------------------------------------------------------------------
@@ -24,8 +24,7 @@ def test_notebook_reader():
     nb_cells = ipynb['cells']
 
     # Convert ipynb to ipymd cells.
-    reader = NotebookReader()
-    cells = [cell for cell in reader.read(nb_cells)]
+    cells = ipynb_to_ipymd_cells(nb_cells)
 
     # Read the expected cells.
     expected_cells = _exec_test_file('markdown_simple.py')

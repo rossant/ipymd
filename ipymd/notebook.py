@@ -97,7 +97,8 @@ class NotebookWriter(object):
 #------------------------------------------------------------------------------
 
 def ipynb_to_ipymd_cells(nb_cells):
-    pass
+    """Convert a list of notebook cells to a list of ipymd cells."""
+    return list(NotebookReader().read(nb_cells))
 
 
 def ipymd_cells_to_ipynb(ipymd_cells):
