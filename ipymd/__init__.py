@@ -1,0 +1,1 @@
+from .contents_manager import MarkdownContentsManager

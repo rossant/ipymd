@@ -21,20 +21,8 @@ from .markdown import markdown_to_ipymd_cells, ipymd_cells_to_markdown
 # Public conversion functions
 #------------------------------------------------------------------------------
 
-def nb_to_markdown(nb, code_wrap=None, add_prompt=None):
-    """Convert a notebook contents to a Markdown document.
-
-    Parameters
-    ----------
-
-    nb : dict
-        the notebook model
-    code_wrap : str
-        Either 'markdown' or 'atlas'
-    add_prompt : bool
-        Whether to add the input prompt in front of input code lines.
-
-    """
+def nb_to_markdown(nb):
+    """Convert a notebook contents to a Markdown document."""
     # Only work for nbformat 4 for now.
     assert nb['nbformat'] >= 4
     nb_cells = nb['cells']
