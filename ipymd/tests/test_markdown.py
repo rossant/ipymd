@@ -7,7 +7,7 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ..utils import _test_file_path
+from ..utils import _test_file_path, _exec_test_file
 from ..markdown import MarkdownReader
 
 
@@ -20,27 +20,7 @@ def test_base_markdown_reader():
     with open(_test_file_path('markdown_simple.md'), 'r') as f:
         contents = f.read()
 
-    expected_cells = [
-
-        {'cell_type': 'markdown',
-         'source': '# Header'},
-
-        {'cell_type': 'markdown',
-         'source': 'A paragraph.'},
-
-        {'cell_type': 'markdown',
-         'source': 'Python code:'},
-
-        {'cell_type': 'code',
-         'input': 'print("Hello world!")',
-         'output': '"Hello world!"'},
-
-        {'cell_type': 'markdown',
-         'source': 'JavaScript code:'},
-
-        {'cell_type': 'markdown',
-         'source': '```javascript\nconsole.log("Hello world!");\n```'}
-    ]
+    expected_cells = _exec_test_file('markdown_simple.py')
 
     # Read the Markdown file.
     reader = MarkdownReader()
