@@ -37,6 +37,13 @@ def _exec_test_file(filename):
     return ns.get('output', None)
 
 
+def _read_test_file(filename):
+    """Read a test file."""
+    path = _test_file_path(filename)
+    with open(path, 'r') as f:
+        return f.read()
+
+
 def _diff_removed_lines(diff):
     return ''.join(x[2:] for x in diff if x.startswith('- '))
 
