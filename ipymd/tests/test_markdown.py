@@ -17,10 +17,21 @@ from ..markdown import MarkdownReader
 
 def test_base_markdown_reader():
     # Open a Markdown test file.
-    with open(_test_file_path('markdown.md'), 'r') as f:
+    with open(_test_file_path('markdown_simple.md'), 'r') as f:
         contents = f.read()
+
+    expected_cells = [
+        {'source': '# Header', 'cell_type': 'markdown'},
+        {'source': 'A paragraph.', 'cell_type': 'markdown'},
+        {'source': 'Python code:', 'cell_type': 'markdown'},
+        {'output': '"Hello world!"', 'cell_type': 'code',
+         'input': 'print("Hello world!")'},
+        {'source': 'JavaScript code:', 'cell_type': 'markdown'},
+        {'source': '```javascript\nconsole.log("Hello world!");\n```',
+         'cell_type': 'markdown'}
+    ]
 
     # Read the Markdown file.
     reader = MarkdownReader()
-    for cell in reader.read(contents):
-        assert cell is not None
+    for cell, expected_cell in zip(reader.read(contents), expected_cells):
+        assert cell == expected_cell
