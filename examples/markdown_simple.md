@@ -9,7 +9,6 @@ Python code:
 Hello world!
 ```
 
-
 JavaScript code:
 
 ```javascript

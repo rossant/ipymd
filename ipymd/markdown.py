@@ -210,7 +210,7 @@ class BaseMarkdownWriter(object):
 
     @property
     def contents(self):
-        return self._output.getvalue().rstrip()
+        return self._output.getvalue().rstrip() + '\n'  # end of file \n
 
     def save(self, filename):
         """Save the string into a text file."""
