@@ -8,7 +8,9 @@
 #------------------------------------------------------------------------------
 
 from ..utils import _test_file_path, _exec_test_file, _diff
-from ..markdown import MarkdownReader, MarkdownWriter, ipymd_cells_to_markdown
+from ..markdown import (MarkdownReader, MarkdownWriter,
+                        markdown_to_ipymd_cells,
+                        ipymd_cells_to_markdown)
 
 
 #------------------------------------------------------------------------------
@@ -22,11 +24,8 @@ def test_base_markdown_reader():
         contents = f.read()
 
     expected_cells = _exec_test_file('markdown_simple.py')
-
-    # Read the Markdown file.
-    reader = MarkdownReader()
-    for cell, expected_cell in zip(reader.read(contents), expected_cells):
-        assert cell == expected_cell
+    cells = markdown_to_ipymd_cells(contents)
+    assert cells == expected_cells
 
 
 def test_base_markdown_writer():

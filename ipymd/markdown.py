@@ -265,6 +265,16 @@ class MarkdownWriter(BaseMarkdownWriter):
         self._output.write(wrapped)
 
 
+#------------------------------------------------------------------------------
+# Helper Markdown functions
+#------------------------------------------------------------------------------
+
+def markdown_to_ipymd_cells(contents):
+    """Read a Markdown document and return a list of ipymd cells."""
+    reader = MarkdownReader()
+    return [cell for cell in reader.read(contents)]
+
+
 def ipymd_cells_to_markdown(cells):
     """Convert a list of ipymd cells to a Markdown document."""
     writer = MarkdownWriter()
