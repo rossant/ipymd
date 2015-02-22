@@ -23,4 +23,4 @@ def test_base_markdown_reader():
     # Read the Markdown file.
     reader = MarkdownReader()
     for cell in reader.read(contents):
-        assert cell is None
+        assert cell is not None

@@ -36,7 +36,7 @@ _tag = (
 
 
 class BaseMarkdownReader(object):
-
+    # TODO: named captured groups in the regexes
     rules = OrderedDict([
         # Code block
         ('block_code', re.compile(r'^( {4}[^\n]+\n*)+')),
@@ -95,7 +95,17 @@ class BaseMarkdownReader(object):
         raise NotImplementedError("This method must be overriden.")
 
     def parse_newline(self, m):
-        raise NotImplementedError("This method must be overriden.")
+        pass
+
+    def _code_cell(self, source):
+        # Can be overriden to separate input/output from source.
+        return {'cell_type': 'code',
+                'input': source,
+                'output': None}
+
+    def _markdown_cell(self, source):
+        return {'cell_type': 'markdown',
+                'source': source}
 
 
 #------------------------------------------------------------------------------
@@ -103,17 +113,66 @@ class BaseMarkdownReader(object):
 #------------------------------------------------------------------------------
 
 class MarkdownReader(BaseMarkdownReader):
-    def parse_block_code(self, m):
-        pass
 
+    prompt_first = '>>> '
+    prompt_next = '... '
+
+    # Handle code prompts
+    # -------------------------------------------------------------------------
+    def _has_input_prompt(self, lines):
+        """Return whether the line or set of lines has an input prompt."""
+        if isinstance(lines, list):
+            return any(line for line in lines
+                       if line.startswith(self.prompt_first))
+        else:
+            return (lines.startswith(self.prompt_first) or
+                    lines.startswith(self.prompt_next))
+
+    def _remove_prompt(self, line):
+        """Remove the prompt in a line."""
+        if line.startswith(self.prompt_first):
+            return line[len(self.prompt_first):]
+        elif line.startswith(self.prompt_next):
+            return line[len(self.prompt_next):]
+        else:
+            return line
+
+    def _get_code_input_output(self, lines):
+        """Return the input and output lines with prompt for input lines."""
+        if self._has_input_prompt(lines):
+            input = [self._remove_prompt(line) for line in lines
+                     if self._has_input_prompt(line)]
+            output = [line for line in lines
+                      if not self._has_input_prompt(line)]
+            return '\n'.join(input), '\n'.join(output)
+        else:
+            return '\n'.join(lines), ''
+
+    def _code_cell(self, source):
+        """Split the source into input and output."""
+        lines = source.splitlines()
+        if self._has_input_prompt(lines):
+            input, output = self._get_code_input_output(lines)
+        else:
+            input, output = source, None
+        return {'cell_type': 'code',
+                'input': input,
+                'output': output}
+
+    # Parser methods
+    # -------------------------------------------------------------------------
     def parse_fences(self, m):
-        pass
+        lang = m.group(2)
+        if lang == 'python':
+            return self._code_cell(m.group(3).rstrip())
+        else:
+            return self._markdown_cell(m.group(0).rstrip())
+
+    def parse_block_code(self, m):
+        return self._markdown_cell(m.group(0).rstrip())
 
     def parse_block_html(self, m):
-        pass
+        return self._markdown_cell(m.group(0).rstrip())
 
     def parse_text(self, m):
-        pass
-
-    def parse_newline(self, m):
-        pass
+        return self._markdown_cell(m.group(0).rstrip())
