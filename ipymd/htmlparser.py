@@ -1,6 +1,6 @@
 """Parse HTML and LaTeX equations from Atlas HTML5."""
-from html.parser import HTMLParser
-from html.entities import name2codepoint
+from .six.moves.html_parser import HTMLParser
+from .six.moves.html_entities import name2codepoint
 
 class MyHTMLParser(HTMLParser):
     def __init__(self, *args, **kwargs):
