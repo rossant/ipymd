@@ -6,7 +6,7 @@ Python code:
 
 ```python
 >>> print("Hello world!")
-"Hello world!"
+Hello world!
 ```
 
 

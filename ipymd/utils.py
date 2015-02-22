@@ -9,6 +9,7 @@
 import os
 import os.path as op
 import difflib
+from pprint import pprint
 
 from .six import exec_, string_types
 
@@ -60,3 +61,10 @@ def _diff(text_0, text_1):
     """Return a diff between two strings."""
     diff = difflib.ndiff(text_0.splitlines(), text_1.splitlines())
     return _diff_removed_lines(diff)
+
+
+def _show_outputs(*outputs):
+    for output in outputs:
+        print()
+        print("-" * 30)
+        pprint(output)

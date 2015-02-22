@@ -11,7 +11,7 @@ output = [
 
     {'cell_type': 'code',
      'input': 'print("Hello world!")',
-     'output': '"Hello world!"'},
+     'output': 'Hello world!'},
 
     {'cell_type': 'markdown',
      'source': 'JavaScript code:'},
