@@ -24,7 +24,7 @@ from .scripts import nb_to_markdown, markdown_to_nb
 # MarkdownContentsManager
 #------------------------------------------------------------------------------
 
-def _file_extension(path):
+def _file_extension(os_path):
     return op.splitext(os_path)[1]
 
 

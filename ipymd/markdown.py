@@ -14,6 +14,7 @@ import re
 from collections import OrderedDict
 
 from .six import StringIO
+from .utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
@@ -201,6 +202,7 @@ class BaseMarkdownWriter(object):
         self._output.write('\n\n')
 
     def append_markdown(self, source):
+        source = _ensure_string(source)
         self._output.write(source.rstrip())
 
     def append_code(self, input, output=None):

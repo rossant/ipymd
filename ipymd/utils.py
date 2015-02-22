@@ -10,7 +10,7 @@ import os
 import os.path as op
 import difflib
 
-from .six import exec_
+from .six import exec_, string_types
 
 
 #------------------------------------------------------------------------------
@@ -42,6 +42,14 @@ def _read_test_file(filename):
     path = _test_file_path(filename)
     with open(path, 'r') as f:
         return f.read()
+
+
+def _ensure_string(source):
+    """Ensure a source is a string."""
+    if isinstance(source, string_types):
+        return source.rstrip()
+    else:
+        return '\n'.join([line.rstrip() for line in source]).rstrip()
 
 
 def _diff_removed_lines(diff):

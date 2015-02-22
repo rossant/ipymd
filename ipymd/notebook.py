@@ -11,6 +11,7 @@ import json
 import IPython.nbformat as nbf
 
 from .six import string_types
+from .utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
@@ -31,15 +32,6 @@ def _create_ipynb(cells):
     nb = nbf.v4.new_notebook()
     nb['cells'] = cells
     return nb
-
-
-def _ensure_string(source):
-    """Ensure a source is a string."""
-    if isinstance(source, list):
-        input = '\n'.join([line.rstrip() for line in source])
-    else:
-        input = source
-    return input.rstrip()
 
 
 def _cell_input(cell):
@@ -88,7 +80,7 @@ class NotebookReader(object):
                 ipymd_cell['input'] = _cell_input(cell)
                 ipymd_cell['output'] = _cell_output(cell)
             elif ctype == 'markdown':
-                ipymd_cell['source'] = cell['source']
+                ipymd_cell['source'] = _ensure_string(cell['source'])
             else:
                 continue
             yield ipymd_cell
