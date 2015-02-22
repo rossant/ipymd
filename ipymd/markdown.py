@@ -159,6 +159,9 @@ class MarkdownReader(BaseMarkdownReader):
                 'input': input,
                 'output': output}
 
+    def _markdown_cell_from_regex(self, m):
+        return self._markdown_cell(m.group(0).rstrip())
+
     # Parser methods
     # -------------------------------------------------------------------------
     def parse_fences(self, m):
@@ -166,13 +169,13 @@ class MarkdownReader(BaseMarkdownReader):
         if lang == 'python':
             return self._code_cell(m.group(3).rstrip())
         else:
-            return self._markdown_cell(m.group(0).rstrip())
+            return self._markdown_cell_from_regex(m)
 
     def parse_block_code(self, m):
-        return self._markdown_cell(m.group(0).rstrip())
+        return self._markdown_cell_from_regex(m)
 
     def parse_block_html(self, m):
-        return self._markdown_cell(m.group(0).rstrip())
+        return self._markdown_cell_from_regex(m)
 
     def parse_text(self, m):
-        return self._markdown_cell(m.group(0).rstrip())
+        return self._markdown_cell_from_regex(m)
