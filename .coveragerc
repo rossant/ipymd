@@ -3,3 +3,4 @@ branch = True
 source = ipymd
 omit =
     */ipymd/six.py
+    ipymd/scripts.py
