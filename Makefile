@@ -19,7 +19,7 @@ clean-pyc:
 	find . -name '__pycache__' -exec rm -fr {} +
 
 lint:
-	flake8 ipymd --exclude=ipymd/six.py,ipymd/_old --ignore=E226,E265,F401,F811
+	flake8 ipymd --exclude=ipymd/six.py,ipymd/_old,ipymd/contents_manager.py --ignore=E226,E265,F401,F811
 
 test: lint
 	py.test --ignore ipymd/_old --cov-report term-missing --cov ipymd
