@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ..utils import _test_file_path, _exec_test_file
-from ..notebook import (NotebookReader, _open_ipynb,
+from ..notebook import (NotebookReader, _open_ipynb, _compare_notebooks,
                         ipynb_to_ipymd_cells,
                         ipymd_cells_to_ipynb)
 
@@ -49,4 +49,4 @@ def test_notebook_writer():
     expected_nb_cells = _load_test_notebook()
 
     # Compare.
-    assert nb_cells == expected_nb_cells
+    assert _compare_notebooks(nb_cells, expected_nb_cells)

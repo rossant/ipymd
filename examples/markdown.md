@@ -35,6 +35,11 @@ Hello world!
 ```
 
 ```python
+>>> def decorator(f):
+...     return f
+```
+
+```python
 >>> @decorator
 ... def f(x):
 ...     pass
@@ -51,8 +56,8 @@ some text
 
 ```python
 >>> %%bash
-... print(4*4)
-16
+... echo 'hello'
+hello
 ```
 
 An image:
@@ -82,7 +87,6 @@ and
 
 ```python
 >>> plt.imshow(np.random.rand(5,5,4), interpolation='none');
-<matplotlib.figure.Figure at 0x7f11be242748>
 ```
 
 > TIP (a block quote): That's all folks.

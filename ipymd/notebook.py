@@ -53,6 +53,17 @@ def _cell_output(cell):
     return output
 
 
+def _compare_notebook_cells(cell_0, cell_1):
+    return all((cell_0['cell_type'] == cell_1['cell_type'],
+                _cell_input(cell_0) == _cell_input(cell_1),
+                _cell_output(cell_0) == _cell_output(cell_1)))
+
+
+def _compare_notebooks(nb_0, nb_1):
+    return all(_compare_notebook_cells(cell_0, cell_1)
+               for cell_0, cell_1 in zip(nb_0, nb_1))
+
+
 #------------------------------------------------------------------------------
 # Notebook reader
 #------------------------------------------------------------------------------

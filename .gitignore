@@ -1,3 +1,6 @@
 .coverage
 wiki
 _old
+notebooks
+images
+*checkpoints*
