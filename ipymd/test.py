@@ -12,7 +12,7 @@ code_wrap = sys.argv[1] if len(sys.argv) >= 2 else 'markdown'
 
 path_md = op.join(dir, '../notebooks/test_%s.md' % code_wrap)
 
-add_prompt = True
+add_prompt = code_wrap == 'markdown'
 
 with open(path_md, 'r') as f:
     md = f.read()
