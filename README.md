@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/rossant/ipymd.svg?branch=travis)](https://travis-ci.org/rossant/ipymd)
+[![Coverage Status](https://coveralls.io/repos/rossant/ipymd/badge.svg)](https://coveralls.io/r/rossant/ipymd)
+
 # IPython notebook & Markdown
 
 **Currently WIP, experimental project, use at your own risks**
