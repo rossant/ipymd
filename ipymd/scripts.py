@@ -11,7 +11,43 @@ import os
 import os.path as op
 import glob
 import json
-# TODO: import ipymd functions
+
+from .notebook import (ipynb_to_ipymd_cells, ipymd_cells_to_ipynb,
+                       _create_ipynb)
+from .markdown import markdown_to_ipymd_cells, ipymd_cells_to_markdown
+
+
+#------------------------------------------------------------------------------
+# Public conversion functions
+#------------------------------------------------------------------------------
+
+def nb_to_markdown(nb, code_wrap=None, add_prompt=None):
+    """Convert a notebook contents to a Markdown document.
+
+    Parameters
+    ----------
+
+    nb : dict
+        the notebook model
+    code_wrap : str
+        Either 'markdown' or 'atlas'
+    add_prompt : bool
+        Whether to add the input prompt in front of input code lines.
+
+    """
+    # Only work for nbformat 4 for now.
+    assert nb['nbformat'] >= 4
+    nb_cells = nb['cells']
+    ipymd_cells = ipynb_to_ipymd_cells(nb_cells)
+    md = ipymd_cells_to_markdown(ipymd_cells)
+    return md
+
+
+def markdown_to_nb(contents):
+    """Convert a Markdown document to an ipynb model."""
+    ipymd_cells = markdown_to_ipymd_cells(contents)
+    nb_cells = ipymd_cells_to_ipynb(ipymd_cells)
+    return _create_ipynb(nb_cells)
 
 
 #------------------------------------------------------------------------------
@@ -113,14 +149,12 @@ def main():
     # Filter as a function of --from.
     if convert_from == 'ipynb':
         files = _filter_files_by_extension(files, '.ipynb')
-        # TODO: uncomment
-        # convert = nb_to_markdown
+        convert = nb_to_markdown
         read = _read_nb
         write = _write_md
     elif convert_from in ('md', 'markdown'):
         files = _filter_files_by_extension(files, '.md')
-        # TODO: uncomment
-        # convert = markdown_to_nb
+        convert = markdown_to_nb
         read = _read_md
         write = _write_nb
     else:
@@ -129,8 +163,7 @@ def main():
     for file in files:
         print("Converting {0:s}...".format(file))
         contents = read(file)
-        # TODO
-        # converted = convert(contents)
+        converted = convert(contents)
         converted = contents
         file_to = _converted_filename(file, convert_from)
         if op.exists(file_to) and not overwrite:
