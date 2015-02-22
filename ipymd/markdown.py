@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Markdown parser and reader
+"""Markdown readers and writers
 
 Much of the code comes from the mistune library.
 
@@ -15,7 +15,7 @@ from collections import OrderedDict
 
 
 #------------------------------------------------------------------------------
-# Markdown parser
+# Base Markdown reader
 #------------------------------------------------------------------------------
 
 def _preprocess(text, tab=4):
@@ -96,3 +96,24 @@ class BaseMarkdownReader(object):
 
     def parse_newline(self, m):
         raise NotImplementedError("This method must be overriden.")
+
+
+#------------------------------------------------------------------------------
+# Default Markdown reader
+#------------------------------------------------------------------------------
+
+class MarkdownReader(BaseMarkdownReader):
+    def parse_block_code(self, m):
+        pass
+
+    def parse_fences(self, m):
+        pass
+
+    def parse_block_html(self, m):
+        pass
+
+    def parse_text(self, m):
+        pass
+
+    def parse_newline(self, m):
+        pass
