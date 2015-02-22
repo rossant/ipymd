@@ -21,14 +21,25 @@ def test_base_markdown_reader():
         contents = f.read()
 
     expected_cells = [
-        {'source': '# Header', 'cell_type': 'markdown'},
-        {'source': 'A paragraph.', 'cell_type': 'markdown'},
-        {'source': 'Python code:', 'cell_type': 'markdown'},
-        {'output': '"Hello world!"', 'cell_type': 'code',
-         'input': 'print("Hello world!")'},
-        {'source': 'JavaScript code:', 'cell_type': 'markdown'},
-        {'source': '```javascript\nconsole.log("Hello world!");\n```',
-         'cell_type': 'markdown'}
+
+        {'cell_type': 'markdown',
+         'source': '# Header'},
+
+        {'cell_type': 'markdown',
+         'source': 'A paragraph.'},
+
+        {'cell_type': 'markdown',
+         'source': 'Python code:'},
+
+        {'cell_type': 'code',
+         'input': 'print("Hello world!")',
+         'output': '"Hello world!"'},
+
+        {'cell_type': 'markdown',
+         'source': 'JavaScript code:'},
+
+        {'cell_type': 'markdown',
+         'source': '```javascript\nconsole.log("Hello world!");\n```'}
     ]
 
     # Read the Markdown file.
