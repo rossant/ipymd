@@ -29,6 +29,7 @@ install:
   # TODO: IPython 2 env as well
   # IPython 3.0.beta
   - pip install --pre 'ipython'
+  - pip install jsonschema
   # Testing dependencies.
   - conda install pytest flake8 coverage
   - pip install coveralls

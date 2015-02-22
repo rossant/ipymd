@@ -29,6 +29,8 @@ def _load_test_notebook():
 #------------------------------------------------------------------------------
 
 def test_notebook_reader():
+
+    # Load the test notebook.
     nb_cells = _load_test_notebook()
 
     # Convert ipynb to ipymd cells.
@@ -43,9 +45,13 @@ def test_notebook_reader():
 
 def test_notebook_writer():
 
+    # Load the test ipymd cells.
     cells = _exec_test_file('markdown_simple.py')
+
+    # Convert to notebook.
     nb_cells = ipymd_cells_to_ipynb(cells)
 
+    # Read the expected notebook cells.
     expected_nb_cells = _load_test_notebook()
 
     # Compare.
