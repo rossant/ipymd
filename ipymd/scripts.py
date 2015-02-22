@@ -1,16 +1,31 @@
+# -*- coding: utf-8 -*-
+
+"""CLI scripts."""
+
+#------------------------------------------------------------------------------
+# Imports
+#------------------------------------------------------------------------------
+
 import argparse
 import os
 import os.path as op
 import glob
 import json
-from ipymd.converters import nb_to_markdown, markdown_to_nb
+# TODO: import ipymd functions
+
+
+#------------------------------------------------------------------------------
+# Scripts
+#------------------------------------------------------------------------------
 
 def _flatten(l):
     return [item for sublist in l for item in sublist]
 
+
 def _to_skip(dirname):
     return (op.basename(dirname).startswith('.') or
             op.basename(dirname).startswith('_'))
+
 
 def _expand_dirs_to_files(files_or_dirs):
     files = []
@@ -28,13 +43,16 @@ def _expand_dirs_to_files(files_or_dirs):
             files.append(file_or_dir)
     return files
 
+
 def _file_has_extension(file, extensions):
     if not isinstance(extensions, list):
         extensions = [extensions]
     return any(file.endswith(extension) for extension in extensions)
 
+
 def _filter_files_by_extension(files, extensions):
     return [file for file in files if _file_has_extension(file, extensions)]
+
 
 def _converted_filename(file, convert_from):
     base, ext = op.splitext(file)
@@ -44,25 +62,29 @@ def _converted_filename(file, convert_from):
         convert_ext = '.ipynb'
     return ''.join((base, convert_ext))
 
+
 def _read_md(file):
     with open(file, 'r') as f:
         return f.read()
+
 
 def _write_md(file, contents):
     with open(file, 'w') as f:
         f.write(contents)
 
+
 def _read_nb(file):
     with open(file, 'r') as f:
         return json.load(f)
+
 
 def _write_nb(file, contents):
     with open(file, 'w') as f:
         return json.dump(contents, f, indent=2)
 
+
 def main():
-    parser = argparse.ArgumentParser(description=
-                                     'Convert between ipynb and md.')
+    parser = argparse.ArgumentParser(description='Convert ipynb/md.')
 
     parser.add_argument('files_or_dirs', nargs='+',
                         help=('list of ipynb or md files or directories '
@@ -81,7 +103,7 @@ def main():
     # Parse the CLI arguments.
     args = parser.parse_args()
     files_or_dirs = args.files_or_dirs
-    md_type = args.type or 'markdown'
+    # md_type = args.type or 'markdown'
     overwrite = args.overwrite
     convert_from = args.convert_from
 
@@ -91,12 +113,14 @@ def main():
     # Filter as a function of --from.
     if convert_from == 'ipynb':
         files = _filter_files_by_extension(files, '.ipynb')
-        convert = nb_to_markdown
+        # TODO: uncomment
+        # convert = nb_to_markdown
         read = _read_nb
         write = _write_md
     elif convert_from in ('md', 'markdown'):
         files = _filter_files_by_extension(files, '.md')
-        convert = markdown_to_nb
+        # TODO: uncomment
+        # convert = markdown_to_nb
         read = _read_md
         write = _write_nb
     else:
@@ -105,13 +129,16 @@ def main():
     for file in files:
         print("Converting {0:s}...".format(file))
         contents = read(file)
-        converted = convert(contents)
+        # TODO
+        # converted = convert(contents)
+        converted = contents
         file_to = _converted_filename(file, convert_from)
         if op.exists(file_to) and not overwrite:
             print("The file already exists, please use --overwrite.")
             continue
         else:
             write(file_to, converted)
+
 
 if __name__ == '__main__':
     main()
