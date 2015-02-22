@@ -26,6 +26,13 @@ def _open_ipynb(contents_or_path):
         return contents_or_path
 
 
+def _create_ipynb(cells):
+    """Create a new ipynb model from a list of ipynb cells."""
+    nb = nbf.v4.new_notebook()
+    nb['cells'] = cells
+    return nb
+
+
 def _ensure_string(source):
     """Ensure a source is a string."""
     if isinstance(source, list):
