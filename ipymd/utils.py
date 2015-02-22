@@ -8,6 +8,7 @@
 
 import os
 import os.path as op
+import difflib
 
 from .six import exec_
 
@@ -34,3 +35,13 @@ def _exec_test_file(filename):
     ns = {}
     exec_(contents, ns)
     return ns.get('output', None)
+
+
+def _diff_removed_lines(diff):
+    return ''.join(x[2:] for x in diff if x.startswith('- '))
+
+
+def _diff(text_0, text_1):
+    """Return a diff between two strings."""
+    diff = difflib.ndiff(text_0.splitlines(), text_1.splitlines())
+    return _diff_removed_lines(diff)
