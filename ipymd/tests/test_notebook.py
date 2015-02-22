@@ -6,7 +6,7 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ..utils import _test_file_path, _exec_test_file, _diff
+from ..utils import _test_file_path, _exec_test_file
 # from ..notebook import
 
 
