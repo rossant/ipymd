@@ -127,7 +127,6 @@ def process_cell_input(cell, lang=None, code_wrap=None, add_prompt=None):
         code = _add_prompt(code)
         if output.strip():
             code += '\n' + output.rstrip()
-
     return CODE_WRAP.get(code_wrap or
                          'markdown').format(lang=lang, code=code)
 
@@ -311,8 +310,15 @@ class MarkdownParser(object):
             # Replace '\\(' by '$$' in the notebook.
             text = text.replace(r'\\(', '$$')
             text = text.replace(r'\\)', '$$')
+            text = text.strip()
 
-        self._nb.append_markdown(text.strip())
+        type, contents = get_html_contents(text)
+        if type == 'code':
+            self._nb.append_code(contents)
+        elif type == 'math':
+            self._nb.append_markdown(contents)
+        else:
+            self._nb.append_markdown(text)
 
     def parse_text(self, m):
         text = m.group(0).strip()

@@ -73,6 +73,8 @@ Cons:
 
     ```python
     c.NotebookApp.contents_manager_class = 'ipymd.MarkdownContentsManager'
+    c.MarkdownContentsManager.code_wrap = 'markdown'  # or 'atlas'
+    c.MarkdownContentsManager.add_prompt = True  # should be False with 'atlas'
     ```
 
 3. Now, you can open `.md` files in the notebook.
@@ -89,5 +91,6 @@ This is handled transparently in the notebook UI, i.e. you can keep writing math
 To use the Atlas format, put this in your config file:
 
 ```python
-c.NotebookApp.contents_manager_class = 'ipymd.AtlasContentsManager'
+c.MarkdownContentsManager.code_wrap = 'atlas'
+c.MarkdownContentsManager.add_prompt = False
 ```

@@ -9,14 +9,16 @@ import os
 from tornado import web
 
 from IPython import nbformat
+from IPython.config.configurable import Configurable
+from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 from IPython.utils.io import atomic_writing
 
 from .converters import nb_to_markdown, markdown_to_nb
 
-class IPymdContentsManager(FileContentsManager):
-    code_wrap = None
-    add_prompt = None
+class MarkdownContentsManager(FileContentsManager, Configurable):
+    code_wrap = Unicode('markdown', config=True)
+    add_prompt = Bool(True, config=True)
 
     def _notebook_model(self, path, content=True):
         model = self._base_model(path)
@@ -147,17 +149,17 @@ class IPymdContentsManager(FileContentsManager):
     def mark_trusted_cells(self, nb, path=''):
         self.notary.mark_cells(nb, True)
 
-class MarkdownContentsManager(IPymdContentsManager):
-    """Code cells are wrapped by ```."""
-    code_wrap = 'markdown'
-    add_prompt = False
+# class MarkdownContentsManager(IPymdContentsManager):
+#     """Code cells are wrapped by ```."""
+#     code_wrap = 'markdown'
+#     add_prompt = False
 
-class MarkdownOutputContentsManager(IPymdContentsManager):
-    """Code cells are wrapped by ```, and code output + input prompt '>'."""
-    code_wrap = 'markdown'
-    add_prompt = True
+# class MarkdownOutputContentsManager(IPymdContentsManager):
+#     """Code cells are wrapped by ```, and code output + input prompt '>'."""
+#     code_wrap = 'markdown'
+#     add_prompt = True
 
-class AtlasContentsManager(IPymdContentsManager):
-    "Code cells are wrapped by special <pre> tag."""
-    code_wrap = 'atlas'
-    add_prompt = False
+# class AtlasContentsManager(IPymdContentsManager):
+#     "Code cells are wrapped by special <pre> tag."""
+#     code_wrap = 'atlas'
+#     add_prompt = False
