@@ -8,6 +8,8 @@
 
 import json
 
+import IPython.nbformat as nbf
+
 from .six import string_types
 
 
@@ -79,17 +81,34 @@ class NotebookReader(object):
 #------------------------------------------------------------------------------
 
 class NotebookWriter(object):
+    def __init__(self):
+        self._nb = nbf.v4.new_notebook()
+        self._count = 1
+
     def append_markdown(self, source):
-        pass
+        self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
 
     def append_code(self, input, output=None, image=None):
-        pass
+        cell = nbf.v4.new_code_cell(input)
+        if output:
+            cell.outputs.append(nbf.v4.new_output('execute_result',
+                                {'text/plain': output},
+                                execution_count=self._count,
+                                metadata={},
+                                ))
+        if image:
+            # TODO
+            raise NotImplementedError("Output images not implemented yet.")
+        self._nb['cells'].append(cell)
+        self._count += 1
 
+    @property
     def contents(self):
-        pass
+        return self._nb
 
     def save(self, filename):
-        pass
+        with open(filename, 'w') as f:
+            nbf.write(self._nb, f)
 
 
 #------------------------------------------------------------------------------
@@ -102,4 +121,11 @@ def ipynb_to_ipymd_cells(nb_cells):
 
 
 def ipymd_cells_to_ipynb(ipymd_cells):
-    pass
+    """Convert a list of ipymd cells to a list of notebook cells."""
+    writer = NotebookWriter()
+    for cell in ipymd_cells:
+        if cell['cell_type'] == 'code':
+            writer.append_code(cell['input'], output=cell['output'])
+        elif cell['cell_type'] == 'markdown':
+            writer.append_markdown(cell['source'])
+    return writer.contents['cells']
