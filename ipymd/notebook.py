@@ -32,3 +32,15 @@ class NotebookWriter(object):
 
     def save(self, filename):
         pass
+
+
+#------------------------------------------------------------------------------
+# Helper notebook conversion functions
+#------------------------------------------------------------------------------
+
+def ipynb_to_ipymd_cells(ipynb_cells):
+    pass
+
+
+def ipymd_cells_to_ipynb(ipymd_cells):
+    pass
