@@ -13,6 +13,8 @@ Much of the code comes from the mistune library.
 import re
 from collections import OrderedDict
 
+from .six import StringIO
+
 
 #------------------------------------------------------------------------------
 # Base Markdown reader
@@ -112,13 +114,16 @@ class BaseMarkdownReader(object):
 # Default Markdown reader
 #------------------------------------------------------------------------------
 
+# TODO: Configurable prompts
 class MarkdownReader(BaseMarkdownReader):
+    """Default Markdown reader."""
 
     prompt_first = '>>> '
     prompt_next = '... '
 
     # Handle code prompts
     # -------------------------------------------------------------------------
+
     def _has_input_prompt(self, lines):
         """Return whether the line or set of lines has an input prompt."""
         if isinstance(lines, list):
@@ -164,6 +169,7 @@ class MarkdownReader(BaseMarkdownReader):
 
     # Parser methods
     # -------------------------------------------------------------------------
+
     def parse_fences(self, m):
         lang = m.group(2)
         if lang == 'python':
@@ -179,3 +185,80 @@ class MarkdownReader(BaseMarkdownReader):
 
     def parse_text(self, m):
         return self._markdown_cell_from_regex(m)
+
+
+#------------------------------------------------------------------------------
+# Base Markdown writer
+#------------------------------------------------------------------------------
+
+class BaseMarkdownWriter(object):
+    """Base Markdown writer."""
+
+    def __init__(self):
+        self._output = StringIO.StringIO()
+
+    def _new_paragraph(self):
+        self._output.write('\n\n')
+
+    def append_markdown(self, source):
+        self._output.write(source.rstrip())
+
+    def append_code(self, input, output=None):
+        raise NotImplementedError("This method must be overriden.")
+
+    @property
+    def contents(self):
+        return self._output.getvalue()
+
+    def save(self, filename):
+        """Save the string into a text file."""
+        with open(filename, 'w') as f:
+            f.write(self.contents)
+
+    def close(self):
+        self._output.close()
+
+    def __del__(self):
+        self.close()
+
+
+#------------------------------------------------------------------------------
+# Default Markdown writer
+#------------------------------------------------------------------------------
+
+class MarkdownWriter(BaseMarkdownWriter):
+    """Default Markdown writer."""
+
+    prompt_first = MarkdownReader.prompt_first
+    prompt_next = MarkdownReader.prompt_next
+
+    def _add_prompt(self, source):
+        """Add input prompts to code."""
+        lines = source.strip().splitlines()
+        lines_prompt = []
+        prompt = self.prompt_first
+        lock = False
+        for line in lines:
+            if line.startswith('%%'):
+                lines_prompt.append(prompt + line)
+                prompt = self.prompt_next
+                lock = True
+            elif line.startswith('#') or line.startswith('@'):
+                lines_prompt.append(prompt + line)
+                prompt = self.prompt_next
+            elif line.startswith('  '):
+                prompt = self.prompt_next
+                lines_prompt.append(prompt + line)
+                if not lock:
+                    prompt = self.prompt_first
+            else:
+                lines_prompt.append(prompt + line)
+                if not lock:
+                    prompt = self.prompt_first
+        return '\n'.join(lines_prompt).rstrip()
+
+    def append_code(self, input, output=None):
+        code = self._add_prompt(input)
+        if output is not None:
+            code += '\n' + output.rstrip()
+        self._output.write(code.rstrip())
