@@ -195,7 +195,7 @@ class BaseMarkdownWriter(object):
     """Base Markdown writer."""
 
     def __init__(self):
-        self._output = StringIO.StringIO()
+        self._output = StringIO()
 
     def _new_paragraph(self):
         self._output.write('\n\n')
@@ -208,7 +208,7 @@ class BaseMarkdownWriter(object):
 
     @property
     def contents(self):
-        return self._output.getvalue()
+        return self._output.getvalue().rstrip()
 
     def save(self, filename):
         """Save the string into a text file."""
@@ -260,5 +260,19 @@ class MarkdownWriter(BaseMarkdownWriter):
     def append_code(self, input, output=None):
         code = self._add_prompt(input)
         if output is not None:
-            code += '\n' + output.rstrip()
-        self._output.write(code.rstrip())
+            code += '\n' + output
+        wrapped = '```python\n{code}\n```'.format(code=code.rstrip())
+        self._output.write(wrapped)
+
+
+def ipymd_cells_to_markdown(cells):
+    """Convert a list of ipymd cells to a Markdown document."""
+    writer = MarkdownWriter()
+    for cell in cells:
+        if cell['cell_type'] == 'markdown':
+            writer.append_markdown(cell['source'])
+            writer._new_paragraph()
+        elif cell['cell_type'] == 'code':
+            writer.append_code(cell['input'], cell['output'])
+            writer._new_paragraph()
+    return writer.contents
