@@ -17,27 +17,52 @@ from .notebook import (ipynb_to_ipymd_cells, ipymd_cells_to_ipynb,
                        _create_ipynb, _read_nb, _write_nb)
 from .markdown import (markdown_to_ipymd_cells, ipymd_cells_to_markdown,
                        _read_md, _write_md)
+from .atlas import (AtlasReader, AtlasWriter,
+                    atlas_to_ipymd_cells,
+                    ipymd_cells_to_atlas)
 
 
 #------------------------------------------------------------------------------
 # Public conversion functions
 #------------------------------------------------------------------------------
 
-def nb_to_markdown(nb):
+def nb_to_markdown(nb, writer=None):
     """Convert a notebook contents to a Markdown document."""
     # Only work for nbformat 4 for now.
     assert nb['nbformat'] >= 4
     nb_cells = nb['cells']
     ipymd_cells = ipynb_to_ipymd_cells(nb_cells)
-    md = ipymd_cells_to_markdown(ipymd_cells)
+    md = ipymd_cells_to_markdown(ipymd_cells, writer=writer)
     return md
 
 
-def markdown_to_nb(contents):
+def markdown_to_nb(contents, reader=None):
     """Convert a Markdown document to an ipynb model."""
-    ipymd_cells = markdown_to_ipymd_cells(contents)
+    ipymd_cells = markdown_to_ipymd_cells(contents, reader=reader)
     nb_cells = ipymd_cells_to_ipynb(ipymd_cells)
     return _create_ipynb(nb_cells)
+
+
+def nb_to_atlas(nb):
+    """Convert a notebook contents to an Atlas document."""
+    return nb_to_markdown(writer=AtlasWriter())
+
+
+def atlas_to_nb(nb):
+    """Convert an Atlas document to an ipynb model."""
+    return markdown_to_nb(reader=AtlasReader())
+
+
+def markdown_to_atlas(contents):
+    """Convert a Markdown document to Atlas."""
+    cells = atlas_to_ipymd_cells(contents)
+    return ipymd_cells_to_markdown(cells)
+
+
+def atlas_to_markdown(contents):
+    """Convert an Atlas document to Markdown."""
+    cells = ipymd_cells_to_atlas(contents)
+    return atlas_to_ipymd_cells(cells)
 
 
 #------------------------------------------------------------------------------
@@ -109,9 +134,13 @@ def _cli(files_or_dirs, overwrite=None, convert_from=None):
         convert = nb_to_markdown
         read = _read_nb
         write = _write_md
-    elif convert_from in ('md', 'markdown'):
+        # TODO: other conversions
+    elif convert_from in ('md', 'markdown', 'atlas'):
         files = _filter_files_by_extension(files, '.md')
-        convert = markdown_to_nb
+        if convert_from == 'atlas':
+            convert = atlas_to_nb
+        else:
+            convert = markdown_to_nb
         read = _read_md
         write = _write_nb
     else:
@@ -138,10 +167,7 @@ def main():
                               'to convert'))
 
     parser.add_argument('--from', dest='convert_from', required=True,
-                        help='either \'md\' or \'ipynb\'')
-
-    parser.add_argument('--type', dest='type',
-                        help='either markdown (default) or atlas')
+                        help='one of "md", "atlas", "ipynb"')
 
     parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help=('overwrite target file if it exists '

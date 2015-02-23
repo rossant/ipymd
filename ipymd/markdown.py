@@ -34,7 +34,7 @@ def _write_md(file, contents):
 
 
 #------------------------------------------------------------------------------
-# Base Markdown reader
+# Base Markdown
 #------------------------------------------------------------------------------
 
 def _preprocess(text, tab=4):
@@ -126,9 +126,44 @@ class BaseMarkdownReader(object):
         return {'cell_type': 'markdown',
                 'source': source}
 
+    def _markdown_cell_from_regex(self, m):
+        return self._markdown_cell(m.group(0).rstrip())
+
+
+class BaseMarkdownWriter(object):
+    """Base Markdown writer."""
+
+    def __init__(self):
+        self._output = StringIO()
+
+    def _new_paragraph(self):
+        self._output.write('\n\n')
+
+    def append_markdown(self, source):
+        source = _ensure_string(source)
+        self._output.write(source.rstrip())
+
+    def append_code(self, input, output=None):
+        raise NotImplementedError("This method must be overriden.")
+
+    @property
+    def contents(self):
+        return self._output.getvalue().rstrip() + '\n'  # end of file \n
+
+    def save(self, filename):
+        """Save the string into a text file."""
+        with open(filename, 'w') as f:
+            f.write(self.contents)
+
+    def close(self):
+        self._output.close()
+
+    def __del__(self):
+        self.close()
+
 
 #------------------------------------------------------------------------------
-# Default Markdown reader
+# Default Markdown
 #------------------------------------------------------------------------------
 
 # TODO: Configurable prompts
@@ -170,6 +205,9 @@ class MarkdownReader(BaseMarkdownReader):
         else:
             return '\n'.join(lines), ''
 
+    # Helper functions to generate ipymd cells
+    # -------------------------------------------------------------------------
+
     def _code_cell(self, source):
         """Split the source into input and output."""
         lines = source.splitlines()
@@ -180,9 +218,6 @@ class MarkdownReader(BaseMarkdownReader):
         return {'cell_type': 'code',
                 'input': input,
                 'output': output}
-
-    def _markdown_cell_from_regex(self, m):
-        return self._markdown_cell(m.group(0).rstrip())
 
     # Parser methods
     # -------------------------------------------------------------------------
@@ -203,46 +238,6 @@ class MarkdownReader(BaseMarkdownReader):
     def parse_text(self, m):
         return self._markdown_cell_from_regex(m)
 
-
-#------------------------------------------------------------------------------
-# Base Markdown writer
-#------------------------------------------------------------------------------
-
-class BaseMarkdownWriter(object):
-    """Base Markdown writer."""
-
-    def __init__(self):
-        self._output = StringIO()
-
-    def _new_paragraph(self):
-        self._output.write('\n\n')
-
-    def append_markdown(self, source):
-        source = _ensure_string(source)
-        self._output.write(source.rstrip())
-
-    def append_code(self, input, output=None):
-        raise NotImplementedError("This method must be overriden.")
-
-    @property
-    def contents(self):
-        return self._output.getvalue().rstrip() + '\n'  # end of file \n
-
-    def save(self, filename):
-        """Save the string into a text file."""
-        with open(filename, 'w') as f:
-            f.write(self.contents)
-
-    def close(self):
-        self._output.close()
-
-    def __del__(self):
-        self.close()
-
-
-#------------------------------------------------------------------------------
-# Default Markdown writer
-#------------------------------------------------------------------------------
 
 class MarkdownWriter(BaseMarkdownWriter):
     """Default Markdown writer."""
@@ -287,15 +282,17 @@ class MarkdownWriter(BaseMarkdownWriter):
 # Helper Markdown functions
 #------------------------------------------------------------------------------
 
-def markdown_to_ipymd_cells(contents):
+def markdown_to_ipymd_cells(contents, reader=None):
     """Read a Markdown document and return a list of ipymd cells."""
-    reader = MarkdownReader()
+    if reader is None:
+        reader = MarkdownReader()
     return [cell for cell in reader.read(contents)]
 
 
-def ipymd_cells_to_markdown(cells):
+def ipymd_cells_to_markdown(cells, writer=None):
     """Convert a list of ipymd cells to a Markdown document."""
-    writer = MarkdownWriter()
+    if writer is None:
+        writer = MarkdownWriter()
     for cell in cells:
         if cell['cell_type'] == 'markdown':
             writer.append_markdown(cell['source'])
