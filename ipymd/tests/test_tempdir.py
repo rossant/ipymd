@@ -6,8 +6,6 @@
 # Imports
 #------------------------------------------------------------------------------
 
-import numpy as np
-
 from ..tempdir import TemporaryDirectory
 
 
