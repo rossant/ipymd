@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ..notebook import _compare_notebooks
-from ..scripts import nb_to_markdown, markdown_to_nb
+from ..scripts import nb_to_markdown, markdown_to_nb, _cli
 from ..utils import _test_file_path, _exec_test_file, _read_test_file, _diff
 from .test_notebook import _load_test_notebook
 
@@ -48,3 +48,12 @@ def test_nb_to_markdown():
 
 def test_markdown_to_nb():
     _test_markdown_to_nb('ex1')
+
+
+#------------------------------------------------------------------------------
+# Test CLI conversion tool
+#------------------------------------------------------------------------------
+
+def test_cli():
+    # _cli()
+    pass
