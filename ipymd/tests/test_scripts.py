@@ -48,10 +48,12 @@ def _test_markdown_to_nb(basename):
 
 def test_nb_to_markdown():
     _test_nb_to_markdown('ex1')
+    _test_nb_to_markdown('ex2')
 
 
 def test_markdown_to_nb():
     _test_markdown_to_nb('ex1')
+    _test_markdown_to_nb('ex2')
 
 
 #------------------------------------------------------------------------------

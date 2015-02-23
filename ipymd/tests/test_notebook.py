@@ -67,11 +67,14 @@ def _test_create_ipynb(basename):
 
 def test_notebook_reader():
     _test_notebook_reader('ex1')
+    _test_notebook_reader('ex2')
 
 
 def test_notebook_writer():
     _test_notebook_writer('ex1')
+    _test_notebook_writer('ex2')
 
 
 def test_create_ipynb():
     _test_create_ipynb('ex1')
+    _test_create_ipynb('ex2')

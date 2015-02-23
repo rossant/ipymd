@@ -33,10 +33,6 @@ def _test_markdown_reader(basename):
     assert cells == expected_cells
 
 
-def test_markdown_reader():
-    _test_markdown_reader('ex1')
-
-
 def _test_markdown_writer(basename):
     """Check that md and ipymd cells ==> md are the same."""
     # Read the test ipymd cells.
@@ -52,5 +48,11 @@ def _test_markdown_writer(basename):
     assert _diff(contents, expected_contents) == ''
 
 
+def test_markdown_reader():
+    _test_markdown_reader('ex1')
+    _test_markdown_reader('ex2')
+
+
 def test_markdown_writer():
     _test_markdown_writer('ex1')
+    _test_markdown_writer('ex2')
