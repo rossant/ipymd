@@ -1,0 +1,7 @@
+[run]
+branch = True
+source = ipymd
+omit =
+    ipymd/six.py
+    ipymd/contents_manager.py
+    ipymd/scripts.py

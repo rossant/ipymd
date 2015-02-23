@@ -1,0 +1,22 @@
+output = [
+
+    {'cell_type': 'markdown',
+     'source': '# Header'},
+
+    {'cell_type': 'markdown',
+     'source': 'A paragraph.'},
+
+    {'cell_type': 'markdown',
+     'source': 'Python code:'},
+
+    {'cell_type': 'code',
+     'input': 'print("Hello world!")',
+     'output': None},  # no output in Atlas
+
+    {'cell_type': 'markdown',
+     'source': 'JavaScript code:'},
+
+    {'cell_type': 'markdown',
+     'source': '```javascript\nconsole.log("Hello world!");\n```'}
+
+]
