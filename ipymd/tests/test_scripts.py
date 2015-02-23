@@ -32,16 +32,6 @@ def _test_nb_to_markdown(basename):
     nb_bis = markdown_to_nb(md)
     assert _compare_notebooks(nb['cells'], nb_bis['cells'])
 
-
-def _test_markdown_to_nb(basename):
-    md = _read_test_file(basename + '.md')
-    nb = markdown_to_nb(md)
-
-    # Check the result.
-    nb_expected = _load_test_notebook(basename)
-    assert _compare_notebooks(nb['cells'], nb_expected['cells'])
-
-    # Check involution.
     md_bis = nb_to_markdown(nb)
     assert(_diff(md, md_bis) == '')
 
@@ -49,11 +39,6 @@ def _test_markdown_to_nb(basename):
 def test_nb_to_markdown():
     _test_nb_to_markdown('ex1')
     _test_nb_to_markdown('ex2')
-
-
-def test_markdown_to_nb():
-    _test_markdown_to_nb('ex1')
-    _test_markdown_to_nb('ex2')
 
 
 #------------------------------------------------------------------------------
