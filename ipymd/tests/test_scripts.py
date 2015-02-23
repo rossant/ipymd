@@ -20,7 +20,7 @@ from .test_notebook import _load_test_notebook
 # Test nb/markdown conversion functions
 #------------------------------------------------------------------------------
 
-def _test_nb_to_markdown(basename):
+def _test_nb_markdown(basename):
     nb = _load_test_notebook(basename)
     md = nb_to_markdown(nb)
 
@@ -36,9 +36,9 @@ def _test_nb_to_markdown(basename):
     assert(_diff(md, md_bis) == '')
 
 
-def test_nb_to_markdown():
-    _test_nb_to_markdown('ex1')
-    _test_nb_to_markdown('ex2')
+def test_nb_markdown():
+    _test_nb_markdown('ex1')
+    _test_nb_markdown('ex2')
 
 
 #------------------------------------------------------------------------------
