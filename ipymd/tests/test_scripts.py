@@ -6,9 +6,13 @@
 # Imports
 #------------------------------------------------------------------------------
 
+import os.path as op
+import shutil
+
 from ..notebook import _compare_notebooks
 from ..scripts import nb_to_markdown, markdown_to_nb, _cli
 from ..utils import _test_file_path, _exec_test_file, _read_test_file, _diff
+from ..tempdir import TemporaryDirectory
 from .test_notebook import _load_test_notebook
 
 
@@ -55,5 +59,14 @@ def test_markdown_to_nb():
 #------------------------------------------------------------------------------
 
 def test_cli():
-    # _cli()
-    pass
+    basename = 'ex1'
+    with TemporaryDirectory() as tempdir:
+        # Copy some Markdown file to the temporary directory.
+        md_orig = _test_file_path(basename + '.md')
+        md_temp = op.join(tempdir, basename + '.md')
+        shutil.copy(md_orig, md_temp)
+
+        # Launch the CLI conversion tool.
+        _cli(md_temp, convert_from='md')
+        # TODO: more tests
+        assert op.exists(op.join(tempdir, basename + '.ipynb'))

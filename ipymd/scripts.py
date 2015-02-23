@@ -12,6 +12,7 @@ import os.path as op
 import glob
 import json
 
+from .six import string_types
 from .notebook import (ipynb_to_ipymd_cells, ipymd_cells_to_ipynb,
                        _create_ipynb, _read_nb, _write_nb)
 from .markdown import (markdown_to_ipymd_cells, ipymd_cells_to_markdown,
@@ -47,13 +48,23 @@ def _flatten(l):
     return [item for sublist in l for item in sublist]
 
 
+def _ensure_list(l):
+    if isinstance(l, string_types):
+        return [l]
+    elif isinstance(l, list):
+        return l
+    else:
+        raise RuntimeError("This should be a string or a list: "
+                           "{0:s}.".format(str(l)))
+
+
 def _to_skip(dirname):
-    return (op.basename(dirname).startswith('.') or
-            op.basename(dirname).startswith('_'))
+    return op.basename(dirname).startswith('._/')
 
 
 def _expand_dirs_to_files(files_or_dirs):
     files = []
+    files_or_dirs = _ensure_list(files_or_dirs)
     for file_or_dir in files_or_dirs:
         if op.isdir(file_or_dir):
             # Skip dirnames starting with '.'
