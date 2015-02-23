@@ -46,7 +46,6 @@ Cons:
 ### Details
 
 * A notebook code cell = Markdown code block with explicit `python` syntax highlighting (i.e. ```` ```python ````)
-* If `add_prompt=True` (default in `MarkdownContentsManager`, but not in `AtlasContentsManager`), intput and text outputs are converted to:
 
   ```
   > print("Hello world")
@@ -55,7 +54,6 @@ Cons:
 
 * `md => nb => md` and `nb => md => nb` are not exactly the identity function:
 
-    * `*italics*` is replaced by `_italics_`
     * extra line breaks are discarded
     * text output and text stdout ==> combined text output (stdout lines first, output lines last)
 
@@ -66,11 +64,12 @@ Cons:
 
 * Renaming doesn't work yet (issue #4)
 * New notebook doesn't work yet (issue #5)
+* Only nbformat v4 is supported currently
 
 
 ## Installation
 
-0. You need IPython 3.0 (or latest master) (with PR #7278) and mistune.
+0. You need IPython 3.0 (or latest master).
 1. Put this repo in your PYTHONPATH.
 2. Add this in your `ipython_notebook_config.py` file:
 
@@ -82,7 +81,7 @@ Cons:
 
 ### Atlas
 
-There is also experimental support for O'Reilly Atlas (thanks to @odewahn, see [this presentation](http://odewahn.github.io/publishing-workflows-for-jupyter/#1)).
+[O'Reilly Atlas](http://odewahn.github.io/publishing-workflows-for-jupyter/#1) is also supported.
 
 * Math equations are automatically replaced by `<span class="math-tex" data-type="tex">{equation}</span>` tags.
 * Code inputs are replaced by `<pre data-code-language="{lang}" data-executable="true" data-type="programlisting">{code}</pre>` tags.
@@ -94,3 +93,17 @@ To use the Atlas format, put this in your config file:
 ```python
 c.NotebookApp.contents_manager_class = 'ipymd.AtlasContentsManager'
 ```
+
+## Code architecture
+
+* An internal format is used, close, but not identical to nbformat: list of dicts (**ipymd cells**) with the following fields:
+    * 'cell_type': 'markdown' or 'code'
+    * 'input': a string with the code input
+    * 'output': a string with the text output and stdout
+    * 'source': contents of Markdown cells
+* MarkdownReader parses a Markdown document with code taken from mistune, and generates a list of ipymd cells
+* MarkdownWriter reads a list of ipymd cells and generates a Markdown documet
+* NotebookReader reads an ipynb model and generates a list of ipymd cells
+* NotebookWriter reads a list of ipymd cells and generates an IPython notebook model
+
+The readers and writers can be specialized by deriving them. This is how Atlas support is implemented.
