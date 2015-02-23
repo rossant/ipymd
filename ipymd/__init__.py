@@ -1,1 +1,1 @@
-from .contents_manager import MarkdownContentsManager
+from .contents_manager import MarkdownContentsManager, AtlasContentsManager
