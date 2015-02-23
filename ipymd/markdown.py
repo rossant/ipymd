@@ -18,6 +18,22 @@ from .utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
+# Utility functions
+#------------------------------------------------------------------------------
+
+def _read_md(file):
+    """Read a Markdown file."""
+    with open(file, 'r') as f:
+        return f.read()
+
+
+def _write_md(file, contents):
+    """Write a Markdown file."""
+    with open(file, 'w') as f:
+        f.write(contents)
+
+
+#------------------------------------------------------------------------------
 # Base Markdown reader
 #------------------------------------------------------------------------------
 

@@ -18,13 +18,20 @@ from .utils import _ensure_string
 # Utility functions
 #------------------------------------------------------------------------------
 
-def _open_ipynb(contents_or_path):
+
+def _read_nb(contents_or_path):
     """Load a notebook contents from a dict or a path to a .ipynb file."""
     if isinstance(contents_or_path, string_types):
         with open(contents_or_path, "r") as f:
             return json.load(f)
     else:
         return contents_or_path
+
+
+def _write_nb(file, contents):
+    """Write a notebook to a JSON ipynb file."""
+    with open(file, 'w') as f:
+        return json.dump(contents, f, indent=2)
 
 
 def _create_ipynb(cells):

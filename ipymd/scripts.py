@@ -13,8 +13,9 @@ import glob
 import json
 
 from .notebook import (ipynb_to_ipymd_cells, ipymd_cells_to_ipynb,
-                       _create_ipynb)
-from .markdown import markdown_to_ipymd_cells, ipymd_cells_to_markdown
+                       _create_ipynb, _read_nb, _write_nb)
+from .markdown import (markdown_to_ipymd_cells, ipymd_cells_to_markdown,
+                       _read_md, _write_md)
 
 
 #------------------------------------------------------------------------------
@@ -85,26 +86,6 @@ def _converted_filename(file, convert_from):
     elif convert_from == 'md':
         convert_ext = '.ipynb'
     return ''.join((base, convert_ext))
-
-
-def _read_md(file):
-    with open(file, 'r') as f:
-        return f.read()
-
-
-def _write_md(file, contents):
-    with open(file, 'w') as f:
-        f.write(contents)
-
-
-def _read_nb(file):
-    with open(file, 'r') as f:
-        return json.load(f)
-
-
-def _write_nb(file, contents):
-    with open(file, 'w') as f:
-        return json.dump(contents, f, indent=2)
 
 
 def _cli(files_or_dirs, overwrite=None, convert_from=None):

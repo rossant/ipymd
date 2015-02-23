@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ..utils import _test_file_path, _exec_test_file
-from ..notebook import (NotebookReader, _open_ipynb, _compare_notebooks,
+from ..notebook import (NotebookReader, _read_nb, _compare_notebooks,
                         ipynb_to_ipymd_cells,
                         ipymd_cells_to_ipynb,
                         _create_ipynb)
@@ -19,7 +19,7 @@ from ..notebook import (NotebookReader, _open_ipynb, _compare_notebooks,
 
 def _load_test_notebook(basename):
     """Load a test notebook."""
-    ipynb = _open_ipynb(_test_file_path(basename + '.ipynb'))
+    ipynb = _read_nb(_test_file_path(basename + '.ipynb'))
     if ipynb['nbformat'] != 4:
         raise RuntimeError("Only nbformat v4 is supported for now.")
     return ipynb
