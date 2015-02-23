@@ -13,11 +13,10 @@ import os.path as op
 from tornado import web
 
 from IPython import nbformat
-from IPython.config.configurable import Configurable
-from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 
-from .scripts import nb_to_markdown, markdown_to_nb
+from .scripts import (nb_to_markdown, markdown_to_nb,
+                      nb_to_atlas, atlas_to_nb)
 
 
 #------------------------------------------------------------------------------
@@ -28,9 +27,8 @@ def _file_extension(os_path):
     return op.splitext(os_path)[1]
 
 
-class MarkdownContentsManager(FileContentsManager, Configurable):
-    # code_wrap = Unicode('markdown', config=True)
-    # add_prompt = Bool(True, config=True)
+class MarkdownContentsManager(FileContentsManager):
+    _atlas = False
 
     def get(self, path, content=True, type=None, format=None):
         """ Takes a path for an entity and returns its model
@@ -84,7 +82,10 @@ class MarkdownContentsManager(FileContentsManager, Configurable):
                 if file_ext == '.ipynb':
                     return nbformat.read(f, as_version=as_version)
                 elif file_ext == '.md':
-                    return markdown_to_nb(f.read())
+                    if self._atlas:
+                        return atlas_to_nb(f.read())
+                    else:
+                        return markdown_to_nb(f.read())
 
             except Exception as e:
                 raise HTTPError(
@@ -115,7 +116,12 @@ class MarkdownContentsManager(FileContentsManager, Configurable):
                     self.check_and_sign(nb, path)
                     self._save_notebook(os_path, nb)
                 elif file_ext == '.md':
-                    md = nb_to_markdown(model['content'])
+
+                    if self._atlas:
+                        md = nb_to_markdown(model['content'])
+                    else:
+                        md = nb_to_atlas(model['content'])
+
                     self._save_file(os_path, md, 'text')
 
                 # One checkpoint should always exist for notebooks.
@@ -146,3 +152,7 @@ class MarkdownContentsManager(FileContentsManager, Configurable):
         self.run_post_save_hook(model=model, os_path=os_path)
 
         return model
+
+
+class AtlasContentsManager(MarkdownContentsManager):
+    _atlas = True
