@@ -50,13 +50,18 @@ def _cell_output(cell):
     """Return the output of an ipynb cell."""
     outputs = cell.get('outputs', [])
     # Add stdout.
-    output = ('\n'.join(_ensure_string(output.get('text', ''))
+    stdout = ('\n'.join(_ensure_string(output.get('text', ''))
                         for output in outputs)).rstrip()
     # Add text output.
-    output += ('\n'.join(_ensure_string(output.get('data', {}).
-                                        get('text/plain', []))
-                         for output in outputs)).rstrip()
-    return output
+    text_outputs = []
+    for output in outputs:
+        out = output.get('data', {}).get('text/plain', [])
+        out = _ensure_string(out)
+        # HACK: skip <matplotlib ...> outputs.
+        if out.startswith('<matplotlib'):
+            continue
+        text_outputs.append(out)
+    return stdout + '\n'.join(text_outputs).rstrip()
 
 
 def _compare_notebook_cells(cell_0, cell_1):
