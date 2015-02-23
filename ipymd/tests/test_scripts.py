@@ -16,12 +16,12 @@ from .test_notebook import _load_test_notebook
 # Test nb/markdown conversion functions
 #------------------------------------------------------------------------------
 
-def test_nb_to_markdown():
-    nb = _load_test_notebook()
+def _test_nb_to_markdown(basename):
+    nb = _load_test_notebook(basename)
     md = nb_to_markdown(nb)
 
     # Check the result.
-    md_expected = _read_test_file('ex1.md')
+    md_expected = _read_test_file(basename + '.md')
     assert(_diff(md, md_expected) == '')
 
     # Check involution.
@@ -29,14 +29,22 @@ def test_nb_to_markdown():
     assert _compare_notebooks(nb['cells'], nb_bis['cells'])
 
 
-def test_markdown_to_nb():
-    md = _read_test_file('ex1.md')
+def _test_markdown_to_nb(basename):
+    md = _read_test_file(basename + '.md')
     nb = markdown_to_nb(md)
 
     # Check the result.
-    nb_expected = _load_test_notebook()
+    nb_expected = _load_test_notebook(basename)
     assert _compare_notebooks(nb['cells'], nb_expected['cells'])
 
     # Check involution.
     md_bis = nb_to_markdown(nb)
     assert(_diff(md, md_bis) == '')
+
+
+def test_nb_to_markdown():
+    _test_nb_to_markdown('ex1')
+
+
+def test_markdown_to_nb():
+    _test_markdown_to_nb('ex1')
