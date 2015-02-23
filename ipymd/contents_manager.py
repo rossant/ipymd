@@ -118,9 +118,9 @@ class MarkdownContentsManager(FileContentsManager):
                 elif file_ext == '.md':
 
                     if self._atlas:
-                        md = nb_to_markdown(model['content'])
-                    else:
                         md = nb_to_atlas(model['content'])
+                    else:
+                        md = nb_to_markdown(model['content'])
 
                     self._save_file(os_path, md, 'text')
 
