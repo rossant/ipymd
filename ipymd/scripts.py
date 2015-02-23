@@ -45,24 +45,24 @@ def markdown_to_nb(contents, reader=None):
 
 def nb_to_atlas(nb):
     """Convert a notebook contents to an Atlas document."""
-    return nb_to_markdown(writer=AtlasWriter())
+    return nb_to_markdown(nb, writer=AtlasWriter())
 
 
-def atlas_to_nb(nb):
+def atlas_to_nb(contents):
     """Convert an Atlas document to an ipynb model."""
-    return markdown_to_nb(reader=AtlasReader())
+    return markdown_to_nb(contents, reader=AtlasReader())
 
 
 def markdown_to_atlas(contents):
     """Convert a Markdown document to Atlas."""
-    cells = atlas_to_ipymd_cells(contents)
-    return ipymd_cells_to_markdown(cells)
+    cells = markdown_to_ipymd_cells(contents)
+    return ipymd_cells_to_atlas(cells)
 
 
 def atlas_to_markdown(contents):
     """Convert an Atlas document to Markdown."""
-    cells = ipymd_cells_to_atlas(contents)
-    return atlas_to_ipymd_cells(cells)
+    cells = atlas_to_ipymd_cells(contents)
+    return ipymd_cells_to_markdown(cells)
 
 
 #------------------------------------------------------------------------------
