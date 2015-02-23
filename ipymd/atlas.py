@@ -94,13 +94,6 @@ class AtlasReader(BaseMarkdownReader):
     def parse_block_html(self, m):
         text = m.group(0).strip()
 
-        if (text.startswith('<span class="math-tex"') and
-           text.endswith('</span>')):
-            # Replace '\\(' by '$$' in the notebook.
-            text = text.replace('\\\\(', '$$')
-            text = text.replace('\\\\)', '$$')
-            text = text.strip()
-
         type, contents = _get_html_contents(text)
         if type == 'code':
             return self._code_cell(contents)
@@ -112,9 +105,16 @@ class AtlasReader(BaseMarkdownReader):
     def parse_text(self, m):
         text = m.group(0).strip()
 
-        # Process math equations.
-        text = text.replace('\\\\(', '$')
-        text = text.replace('\\\\)', '$')
+        if (text.startswith('<span class="math-tex"') and
+           text.endswith('</span>')):
+            # Replace '\\(' by '$$' in the notebook.
+            text = text.replace('\\\\(', '$$')
+            text = text.replace('\\\\)', '$$')
+            text = text.strip()
+        else:
+            # Process math equations.
+            text = text.replace('\\\\(', '$')
+            text = text.replace('\\\\)', '$')
 
         # Remove the math <span>.
         text = self._remove_math_span(text)
