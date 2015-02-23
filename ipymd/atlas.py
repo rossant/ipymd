@@ -22,7 +22,7 @@ from .utils import _ensure_string
 
 class MyHTMLParser(HTMLParser):
     def __init__(self, *args, **kwargs):
-        super(MyHTMLParser, self).__init__(*args, **kwargs)
+        HTMLParser.__init__(self, *args, **kwargs)
         self.is_code = False
         self.is_math = False
         self.display = ''
