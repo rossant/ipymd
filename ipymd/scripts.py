@@ -107,30 +107,7 @@ def _write_nb(file, contents):
         return json.dump(contents, f, indent=2)
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Convert ipynb/md.')
-
-    parser.add_argument('files_or_dirs', nargs='+',
-                        help=('list of ipynb or md files or directories '
-                              'to convert'))
-
-    parser.add_argument('--from', dest='convert_from', required=True,
-                        help='either \'md\' or \'ipynb\'')
-
-    parser.add_argument('--type', dest='type',
-                        help='either markdown (default) or atlas')
-
-    parser.add_argument('--overwrite', dest='overwrite', action='store_true',
-                        help=('overwrite target file if it exists '
-                              '(false by default)'))
-
-    # Parse the CLI arguments.
-    args = parser.parse_args()
-    files_or_dirs = args.files_or_dirs
-    # md_type = args.type or 'markdown'
-    overwrite = args.overwrite
-    convert_from = args.convert_from
-
+def _cli(files_or_dirs, overwrite=None, convert_from=None):
     # Find all files.
     files = _expand_dirs_to_files(files_or_dirs)
 
@@ -159,6 +136,33 @@ def main():
             continue
         else:
             write(file_to, converted)
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Convert ipynb/md.')
+
+    parser.add_argument('files_or_dirs', nargs='+',
+                        help=('list of ipynb or md files or directories '
+                              'to convert'))
+
+    parser.add_argument('--from', dest='convert_from', required=True,
+                        help='either \'md\' or \'ipynb\'')
+
+    parser.add_argument('--type', dest='type',
+                        help='either markdown (default) or atlas')
+
+    parser.add_argument('--overwrite', dest='overwrite', action='store_true',
+                        help=('overwrite target file if it exists '
+                              '(false by default)'))
+
+    # Parse the CLI arguments.
+    args = parser.parse_args()
+    files_or_dirs = args.files_or_dirs
+    # md_type = args.type or 'markdown'
+    overwrite = args.overwrite
+    convert_from = args.convert_from
+
+    _cli(files_or_dirs, overwrite=overwrite, convert_from=convert_from)
 
 
 if __name__ == '__main__':
