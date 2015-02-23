@@ -21,7 +21,7 @@ def test_nb_to_markdown():
     md = nb_to_markdown(nb)
 
     # Check the result.
-    md_expected = _read_test_file('markdown_simple.md')
+    md_expected = _read_test_file('ex1.md')
     assert(_diff(md, md_expected) == '')
 
     # Check involution.
@@ -30,7 +30,7 @@ def test_nb_to_markdown():
 
 
 def test_markdown_to_nb():
-    md = _read_test_file('markdown_simple.md')
+    md = _read_test_file('ex1.md')
     nb = markdown_to_nb(md)
 
     # Check the result.

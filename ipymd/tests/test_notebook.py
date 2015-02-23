@@ -19,7 +19,7 @@ from ..notebook import (NotebookReader, _open_ipynb, _compare_notebooks,
 
 def _load_test_notebook():
     """Load a test notebook."""
-    ipynb = _open_ipynb(_test_file_path('notebook_simple.ipynb'))
+    ipynb = _open_ipynb(_test_file_path('ex1.ipynb'))
     if ipynb['nbformat'] != 4:
         raise RuntimeError("Only nbformat v4 is supported for now.")
     return ipynb
@@ -38,7 +38,7 @@ def test_notebook_reader():
     cells = ipynb_to_ipymd_cells(nb_cells)
 
     # Read the expected cells.
-    expected_cells = _exec_test_file('markdown_simple.py')
+    expected_cells = _exec_test_file('ex1.py')
 
     # Compare.
     assert cells == expected_cells
@@ -47,7 +47,7 @@ def test_notebook_reader():
 def test_notebook_writer():
 
     # Load the test ipymd cells.
-    cells = _exec_test_file('markdown_simple.py')
+    cells = _exec_test_file('ex1.py')
 
     # Convert to notebook.
     nb_cells = ipymd_cells_to_ipynb(cells)
@@ -60,6 +60,6 @@ def test_notebook_writer():
 
 
 def test_create_ipynb():
-    nb_cells = _exec_test_file('markdown_simple.py')
+    nb_cells = _exec_test_file('ex1.py')
     nb = _create_ipynb(nb_cells)
     assert nb['nbformat'] == 4

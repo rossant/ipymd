@@ -15,12 +15,12 @@ from ..utils import _test_file_path, _exec_test_file, _diff
 #------------------------------------------------------------------------------
 
 def test_file_path():
-    filename = 'markdown.md'
+    filename = 'ex1.md'
     assert op.exists(_test_file_path(filename))
 
 
 def test_exec_test_file():
-    filename = 'markdown_simple.py'
+    filename = 'ex1.py'
     assert isinstance(_exec_test_file(filename), list)
 
 
