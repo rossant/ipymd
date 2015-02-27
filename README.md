@@ -175,7 +175,7 @@ You can also implement your own format by following these instructions:
 
 * Now you can convert contents: `ipymd.convert(contents, from_='notebook', to='my_format')` or any other combination.
 * To further integrate your format in ipymd, create a `ipymd/formats/my_format.py` file.
-* Put your reader and writer class in there, as well as a global variable (needs to ends with `FORMAT`):
+* Put your reader and writer class in there, as well as a global variable (needs to end with `FORMAT`):
 
   ```python
     MY_FORMAT = dict(

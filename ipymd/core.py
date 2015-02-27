@@ -26,10 +26,24 @@ class FormatManager(object):
         self._formats = {}
 
     def register(self, name=None, **kwargs):
-        # print("Registering '{0:s}' format.".format(name))
+        """Register a format.
+
+        Arguments
+        ---------
+        reader : class
+            A class that implements read(contents) which yield ipymd cells.
+        writer : class
+            A class that implements write(cell) and contents.
+        file_extension : str
+            The file extension with the leading dot, like '.md'
+        file_type : 'text' or 'json'
+            The type of the file format.
+
+        """
         self._formats[name] = kwargs
 
     def formats(self):
+        """Return the sorted list of registered formats."""
         return sorted(self._formats)
 
     def _check_format(self, name):
@@ -38,16 +52,20 @@ class FormatManager(object):
                              "been registered.")
 
     def file_extension(self, name):
+        """Return the file extension of a registered format."""
         return self._formats[name]['file_extension']
 
     def file_type(self, name):
+        """Return the file type of a registered format."""
         return self._formats[name]['file_type']
 
     def create_reader(self, name, *args, **kwargs):
+        """Create a new reader instance for a given format."""
         self._check_format(name)
         return self._formats[name]['reader'](*args, **kwargs)
 
     def create_writer(self, name, *args, **kwargs):
+        """Create a new writer instance for a given format."""
         self._check_format(name)
         return self._formats[name]['writer'](*args, **kwargs)
 
@@ -80,6 +98,22 @@ def convert(contents,
             from_kwargs=None,
             to_kwargs=None,
             ):
+    """Convert contents between supported formats.
+
+    Arguments
+    ---------
+    contents : str
+        The contents to convert from.
+    from_ : str or None
+        The name of the source format. If None, this is the ipymd_cells format.
+    to : str or None
+        The name of the target format. If None, this is the ipymd_cells format.
+    from_kwargs : dict
+        Optional keyword arguments to pass to the reader instance.
+    to_kwargs : dict
+        Optional keyword arguments to pass to the writer instance.
+
+    """
 
     if from_kwargs is None:
         from_kwargs = {}
