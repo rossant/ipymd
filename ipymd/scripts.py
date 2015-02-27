@@ -124,6 +124,16 @@ def _converted_filename(file, convert_from):
     return ''.join((base, convert_ext))
 
 
+def convert(contents, from_=None, to=None,
+            from_args=None, to_args=None):
+    # TODO: instanciate reader and writer
+    reader = writer = None
+    cells = [cell for cell in reader.read(contents)]
+    for cell in cells:
+        writer.write(cell)
+    return writer.contents
+
+
 def _cli(files_or_dirs, overwrite=None, convert_from=None):
     # Find all files.
     files = _expand_dirs_to_files(files_or_dirs)
