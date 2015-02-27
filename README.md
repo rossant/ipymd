@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/rossant/ipymd.svg?branch=travis)](https://travis-ci.org/rossant/ipymd)
 [![Coverage Status](https://coveralls.io/repos/rossant/ipymd/badge.svg)](https://coveralls.io/r/rossant/ipymd)
 
-# Replace .ipynb JSON files by Markdown files in the IPython notebook
+# Replace .ipynb by .md in the IPython notebook
 
 The goal of ipymd is to replace `.ipynb` notebook files like:
 
@@ -59,9 +59,9 @@ Pros:
 
 Cons:
 
-* Nbformat not really git-friendly (JSON, contains the outputs by default)
+* .ipynb not git-friendly
 * Cannot easily edit in a text editor
-* Cannot easily edit on GitHub
+* Cannot easily edit on GitHub's web interface
 
 
 ### Markdown
@@ -69,8 +69,8 @@ Cons:
 Pros:
 
 * Simple ASCII format to write code and text
-* Can be edited in any text editor
-* Can be edited on GitHub's web interface
+* Can easily edit in a text editor
+* Can easily edit on GitHub's web interface
 * Git-friendly
 
 Cons:
@@ -79,12 +79,11 @@ Cons:
 
 ## How it works
 
-* Write contents (text and code) in a Markdown `document.md`
-    * Either in the notebook UI, as usual, with Markdown cells and code cells (useful when working on code)
-    * Or in a text editor, using Markdown (useful when working on text)
+* Write in Markdown in `document.md`
+    * Either in a text editor (convenient when working on text)
+    * Or in the notebook (convenient when writing code examples)
 * Only the Markdown cells and code cells are saved in the file
-* Collaborators can work on the Markdown document using GitHub (branches, pull requests...), they don't need IPython. They can do everything from the GitHub web interface.
-
+* Collaborators can work on the Markdown document using GitHub's web interface.
 * By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting** (i.e. ```` ```python ````)
 
   ```
@@ -92,9 +91,9 @@ Cons:
   Hello world
   ```
 
-* The back-and-forth conversion is not perfectly stable:
+* The back-and-forth conversion is not strictly the identity:
     * Extra line breaks in Markdown are discarded
-    * Text output and text stdout are combined into a single text output (stdout lines first, output lines last)
+    * Text output and standard output are combined into a single text output (stdout lines first, output lines last)
 
 
 ## Caveats
@@ -136,15 +135,20 @@ You can convert from any supported format to any supported format. This works by
 
 An **ipymd cell** is a Python dictionary with the following fields:
 
-    * `'cell_type': 'markdown' or 'code'
-    * `'input'`: a string with the code input (code cell only)
-    * `'output'`: a string with the text output and stdout (code cell only)
-    * `'source'`: a string containing Markdown markup (markdown cell only)
+    * `cell_type`: `markdown` or `code`
+    * `input`: a string with the code input (code cell only)
+    * `output`: a string with the text output and stdout (code cell only)
+    * `source`: a string containing Markdown markup (markdown cell only)
+
+
+### Customize the Markdown format
+
+You can customize the exact way the notebook is converted from/to Markdown by deriving from `BaseMarkdownReader` or `MarkdownReader` (idem with writers). Look at `ipymd/formats/markdown.py`.
 
 
 ### Implement your own format
 
-You can implement your own format by following these instructions:
+You can also implement your own format by following these instructions:
 
 * Create a `MyFormatReader` class that implements:
     * `self.read(contents)`: yields ipymd cells from a `contents` string
@@ -175,6 +179,7 @@ You can implement your own format by following these instructions:
       file_extension='.md',
       file_type='text',
   )
+  ```
 * Import this file in `ipymd/formats/__init__.py`.
 * Add `c.IPymdContentsManager.format = 'my_format'` to your IPython notebook config file.
 * Add some unit tests in `ipymd/formats/tests`.
