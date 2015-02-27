@@ -1,11 +1,51 @@
 [![Build Status](https://travis-ci.org/rossant/ipymd.svg?branch=travis)](https://travis-ci.org/rossant/ipymd)
 [![Coverage Status](https://coveralls.io/repos/rossant/ipymd/badge.svg)](https://coveralls.io/r/rossant/ipymd)
 
-# IPython notebook & Markdown
+# Replace .ipynb JSON files by Markdown files in the IPython notebook
 
-**Currently WIP, experimental project, use at your own risks**
+The goal of ipymd is to replace `.ipynb` notebook files like:
 
-Use Markdown `.md` documents instead of `.ipynb` files in the IPython notebook. You keep code input and outputs, but not plots, metadata, or prompt numbers. This is useful when you write technical documents, blog posts, books, etc.
+```json
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "source": [
+    "Here is some Python code:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Hello world!\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(\"Hello world!\")"
+   ]
+  },
+  ...
+```
+
+by:
+
+    Here is some Python code:
+
+    ```python
+    >>> print("Hello world!")
+    Hello world!
+    ```
+
+The JSON `.ipymd` are removed out from the equation, and the conversion happens on-the-fly. The IPython notebook becomes an interactive Markdown text editor!
+
+A drawback is that you loose metadata, prompt numbers, and images (for now).
+
+This is useful when you write technical documents, blog posts, books, etc.
 
 ![image](https://cloud.githubusercontent.com/assets/1942359/5570181/f656a484-8f7d-11e4-8ec2-558d022b13d3.png)
 
@@ -19,8 +59,9 @@ Pros:
 
 Cons:
 
-* nbformat not really git-friendly (JSON, contains the outputs by default)
-* cannot easily edit in a text editor
+* Nbformat not really git-friendly (JSON, contains the outputs by default)
+* Cannot easily edit in a text editor
+* Cannot easily edit on GitHub
 
 
 ### Markdown
@@ -29,81 +70,114 @@ Pros:
 
 * Simple ASCII format to write code and text
 * Can be edited in any text editor
+* Can be edited on GitHub's web interface
 * Git-friendly
 
 Cons:
 
 * No UI to execute code interactively
 
-## Workflow
+## How it works
 
 * Write contents (text and code) in a Markdown `document.md`
-    * either in the notebook UI, as usual, with Markdown cells and code cells (useful when working on code)
-    * or in a text editor, using Markdown (useful when working on text)
-* Only the Markdown cells and code cells (input + text outputs for now) are saved in the file
+    * Either in the notebook UI, as usual, with Markdown cells and code cells (useful when working on code)
+    * Or in a text editor, using Markdown (useful when working on text)
+* Only the Markdown cells and code cells are saved in the file
 * Collaborators can work on the Markdown document using GitHub (branches, pull requests...), they don't need IPython. They can do everything from the GitHub web interface.
 
-### Details
-
-* A notebook code cell = Markdown code block with explicit `python` syntax highlighting (i.e. ```` ```python ````)
+* By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting** (i.e. ```` ```python ````)
 
   ```
-  > print("Hello world")
+  >>> print("Hello world")
   Hello world
   ```
 
-* `md => nb => md` and `nb => md => nb` are not exactly the identity function:
-
-    * extra line breaks are discarded
-    * text output and text stdout ==> combined text output (stdout lines first, output lines last)
+* The back-and-forth conversion is not perfectly stable:
+    * Extra line breaks in Markdown are discarded
+    * Text output and text stdout are combined into a single text output (stdout lines first, output lines last)
 
 
 ## Caveats
 
-**WARNING**: this is an experimental module, there is a risk for data loss, so be careful!
+**WARNING**: use this library at your own risks, backup your data, and version-control your notebooks and Markdown files!
 
 * Renaming doesn't work yet (issue #4)
 * New notebook doesn't work yet (issue #5)
-* Only nbformat v4 is supported currently
+* Only nbformat v4 is supported currently (IPython 3.0)
 
 
 ## Installation
 
-0. You need IPython 3.0 (or latest master).
-1. Put this repo in your PYTHONPATH.
-2. Add this in your `ipython_notebook_config.py` file:
+1. You need IPython 3.0.
+2. `git clone https://github.com/rossant/ipymd`
+3. `python setup.py install`
+4. Add this in your `ipython_notebook_config.py` file:
 
     ```python
-    c.NotebookApp.contents_manager_class = 'ipymd.MarkdownContentsManager'
+    c.NotebookApp.contents_manager_class = 'ipymd.IPymdContentsManager'
     ```
 
-3. Now, you can open `.md` files in the notebook.
+5. Now, you can open `.md` files in the notebook.
 
-### Atlas
 
-[O'Reilly Atlas](http://odewahn.github.io/publishing-workflows-for-jupyter/#1) is also supported.
+## Formats
 
-* Math equations are automatically replaced by `<span class="math-tex" data-type="tex">{equation}</span>` tags.
-* Code inputs are replaced by `<pre data-code-language="{lang}" data-executable="true" data-type="programlisting">{code}</pre>` tags.
+ipymd uses a modular architecture that lets you define new formats. The following formats are currently implemented:
 
-This is handled transparently in the notebook UI, i.e. you can keep writing math in `$$` and code in code cells or Markdown code blocks.
+* IPython notebook (`.ipynb`)
+* Markdown (`.md`)
+    * `c.IPymdContentsManager.format = 'markdown'`
+* [O'Reilly Atlas](http://odewahn.github.io/publishing-workflows-for-jupyter/#1)  (`.md` with special HTML tags for code and mathematical equations)
+    * `c.IPymdContentsManager.format = 'atlas'`
 
-To use the Atlas format, put this in your config file:
+You can convert from any supported format to any supported format. This works by converting to an intermediate format that is basically a list of notebook cells.
 
-```python
-c.NotebookApp.contents_manager_class = 'ipymd.AtlasContentsManager'
-```
+### ipymd cells
 
-## Code architecture
+An **ipymd cell** is a Python dictionary with the following fields:
 
-* An internal format is used, close, but not identical to nbformat: list of dicts (**ipymd cells**) with the following fields:
-    * 'cell_type': 'markdown' or 'code'
-    * 'input': a string with the code input
-    * 'output': a string with the text output and stdout
-    * 'source': contents of Markdown cells
-* MarkdownReader parses a Markdown document with code taken from mistune, and generates a list of ipymd cells
-* MarkdownWriter reads a list of ipymd cells and generates a Markdown documet
-* NotebookReader reads an ipynb model and generates a list of ipymd cells
-* NotebookWriter reads a list of ipymd cells and generates an IPython notebook model
+    * `'cell_type': 'markdown' or 'code'
+    * `'input'`: a string with the code input (code cell only)
+    * `'output'`: a string with the text output and stdout (code cell only)
+    * `'source'`: a string containing Markdown markup (markdown cell only)
 
-The readers and writers can be specialized by deriving them. This is how Atlas support is implemented.
+
+### Implement your own format
+
+You can implement your own format by following these instructions:
+
+* Create a `MyFormatReader` class that implements:
+    * `self.read(contents)`: yields ipymd cells from a `contents` string
+* Create a `MyFormatWriter` class that implements:
+    * `self.write(cell)`: append an ipymd cell
+    * `self.contents`: return the contents as a string
+* To activate this format, call this:
+
+  ```python
+  from ipymd import format_manager
+  format_manager().register('my_format',
+                            reader=MyFormatReader,
+                            writer=MyFormatWriter,
+                            file_extension='.md',  # or anything else
+                            file_type='text',  # or JSON
+                            )
+  ```
+
+* Now you can convert contents: `ipymd.convert(contents, from_='notebook', to='my_format')` or any other combination.
+* To further integrate your format in ipymd, create a `ipymd/formats/my_format.py` file.
+* Put your reader and writer class in there, as well as a global variable (needs to ends with `FORMAT`):
+
+  ```python
+    MY_FORMAT = dict(
+      name='markdown',
+      reader=MyFormatReader,
+      writer=MyFormatWriter,
+      file_extension='.md',
+      file_type='text',
+  )
+* Import this file in `ipymd/formats/__init__.py`.
+* Add `c.IPymdContentsManager.format = 'my_format'` to your IPython notebook config file.
+* Add some unit tests in `ipymd/formats/tests`.
+* Propose a PR!
+
+Look at the existing format implementations for more details.

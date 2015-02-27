@@ -17,7 +17,7 @@ from IPython.config.configurable import Configurable
 from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 
-from .core import convert
+from .core import convert, format_manager
 
 
 #------------------------------------------------------------------------------
@@ -53,6 +53,9 @@ class IPymdContentsManager(FileContentsManager, Configurable):
         """
         path = path.strip('/')
 
+        # File extension of the chosen format.
+        file_extension = format_manager().file_extension(self.format)
+
         if not self.exists(path):
             raise web.HTTPError(404, u'No such file or directory: %s' % path)
 
@@ -64,7 +67,7 @@ class IPymdContentsManager(FileContentsManager, Configurable):
             model = self._dir_model(path, content=content)
         elif type == 'notebook' or (type is None and
                                     (path.endswith('.ipynb') or
-                                     path.endswith('.md'))):  # NEW
+                                     path.endswith(file_extension))):  # NEW
             model = self._notebook_model(path, content=content)
         else:
             if type == 'directory':
