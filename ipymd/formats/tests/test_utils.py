@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 import os.path as op
-from ..utils import _test_file_path, _exec_test_file, _diff
+from ._utils import _test_file_path, _exec_test_file, _diff
 
 
 #------------------------------------------------------------------------------
@@ -15,12 +15,12 @@ from ..utils import _test_file_path, _exec_test_file, _diff
 #------------------------------------------------------------------------------
 
 def test_file_path():
-    filename = 'ex1.md'
-    assert op.exists(_test_file_path(filename))
+    filename = 'ex1'
+    assert op.exists(_test_file_path(filename, 'markdown'))
 
 
 def test_exec_test_file():
-    filename = 'ex1.py'
+    filename = 'ex1'
     assert isinstance(_exec_test_file(filename), list)
 
 
