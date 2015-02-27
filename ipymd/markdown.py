@@ -146,6 +146,13 @@ class BaseMarkdownWriter(object):
     def append_code(self, input, output=None):
         raise NotImplementedError("This method must be overriden.")
 
+    def write(self, cell):
+        if cell['cell_type'] == 'markdown':
+            self.append_markdown(cell['source'])
+        elif cell['cell_type'] == 'code':
+            self.append_code(cell['input'], cell['output'])
+        self._new_paragraph()
+
     @property
     def contents(self):
         return self._output.getvalue().rstrip() + '\n'  # end of file \n
@@ -294,10 +301,5 @@ def ipymd_cells_to_markdown(cells, writer=None):
     if writer is None:
         writer = MarkdownWriter()
     for cell in cells:
-        if cell['cell_type'] == 'markdown':
-            writer.append_markdown(cell['source'])
-            writer._new_paragraph()
-        elif cell['cell_type'] == 'code':
-            writer.append_code(cell['input'], cell['output'])
-            writer._new_paragraph()
+        writer.write(cell)
     return writer.contents
