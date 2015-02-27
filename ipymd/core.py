@@ -61,6 +61,9 @@ def format_manager():
     if _FORMAT_MANAGER is None:
         # Discover the formats and register them.
         _FORMAT_MANAGER = FormatManager()
+        # TODO: improve this. Currently, a module in ipymd/formats needs
+        # to have a SOMETHING_FORMAT global dictionary. It would be
+        # better to expose an on_load(format_manager) function.
         for name in dir(formats):
             if re.match(r'^[^\n]+\_FORMAT$', name):
                 _FORMAT_MANAGER.register(**getattr(formats, name))

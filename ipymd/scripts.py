@@ -123,18 +123,18 @@ def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Convert ipynb/md.')
+    desc = 'Convert files across formats supported by ipymd.'
+    parser = argparse.ArgumentParser(description=desc)
 
     parser.add_argument('files_or_dirs', nargs='+',
-                        help=('list of ipynb or md files or directories '
-                              'to convert'))
+                        help=('list of files or directories to convert'))
 
-    # TODO: generate this list of format dynamically
+    formats = ', '.join(format_manager().formats())
     parser.add_argument('--from', dest='from_', required=True,
-                        help='one of "notebook", "markdown", "atlas"')
+                        help='one of {0:s}'.format(formats))
 
     parser.add_argument('--to', dest='to', required=True,
-                        help='one of "notebook", "markdown", "atlas"')
+                        help='one of {0:s}'.format(formats))
 
     parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help=('overwrite target file if it exists '
