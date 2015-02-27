@@ -6,8 +6,10 @@
 # Imports
 #------------------------------------------------------------------------------
 
+from ...core import format_manager, convert
 from ..notebook import _compare_notebooks
-from ._utils import _test_reader, _test_writer, _diff, _show_outputs
+from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
+                     _exec_test_file, _read_test_file)
 
 
 #------------------------------------------------------------------------------
@@ -27,6 +29,16 @@ def _test_notebook_writer(basename):
     assert _compare_notebooks(converted, expected)
 
 
+def _test_notebook_notebook(basename):
+    """Check that the double conversion is the identity."""
+
+    contents = _read_test_file(basename, 'notebook')
+    cells = convert(contents, from_='notebook')
+    converted = convert(cells, to='notebook')
+
+    assert _compare_notebooks(contents, converted)
+
+
 def test_notebook_reader():
     _test_notebook_reader('ex1')
     _test_notebook_reader('ex2')
@@ -35,3 +47,9 @@ def test_notebook_reader():
 def test_notebook_writer():
     _test_notebook_writer('ex1')
     _test_notebook_writer('ex2')
+
+
+
+def test_notebook_notebook():
+    _test_notebook_notebook('ex1')
+    _test_notebook_notebook('ex2')
