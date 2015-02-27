@@ -6,7 +6,9 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ._utils import _test_reader, _test_writer, _diff
+from ...core import format_manager, convert
+from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
+                     _exec_test_file, _read_test_file)
 
 
 #------------------------------------------------------------------------------
@@ -37,6 +39,16 @@ def _test_atlas_writer(basename):
     assert _diff(converted, expected) == ''
 
 
+def _test_atlas_atlas(basename):
+    """Check that the double conversion is the identity."""
+
+    contents = _read_test_file(basename, 'atlas')
+    cells = convert(contents, from_='atlas')
+    converted = convert(cells, to='atlas')
+
+    assert _diff(contents, converted) == ''
+
+
 def test_atlas_reader():
     _test_atlas_reader('ex1')
     _test_atlas_reader('ex2')
@@ -45,3 +57,9 @@ def test_atlas_reader():
 def test_atlas_writer():
     _test_atlas_writer('ex1')
     _test_atlas_writer('ex2')
+
+
+def test_atlas_atlas():
+    _test_atlas_atlas('ex1')
+    _test_atlas_atlas('ex2')
+
