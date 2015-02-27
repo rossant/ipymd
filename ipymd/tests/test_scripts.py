@@ -22,7 +22,7 @@ def test_cli():
     basename = 'ex1'
     with TemporaryDirectory() as tempdir:
         # Copy some Markdown file to the temporary directory.
-        md_orig = _test_file_path(basename + '.md')
+        md_orig = _test_file_path(basename, 'markdown')
         md_temp = op.join(tempdir, basename + '.md')
         shutil.copy(md_orig, md_temp)
 

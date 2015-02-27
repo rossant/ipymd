@@ -80,8 +80,8 @@ def _read_file(file, from_):
                          "not supported (should be 'text' or 'json').")
 
 
-def _write_file(file, to_, contents):
-    file_format = format_manager().file_type(to_)
+def _write_file(file, to, contents):
+    file_format = format_manager().file_type(to)
     if file_format == 'text':
         _write_text(file, contents)
     elif file_format == 'json':
@@ -105,21 +105,21 @@ def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
     # Find all files.
     files = _expand_dirs_to_files(files_or_dirs)
 
+    # Filter by from extension.
     from_extension = format_manager().file_extension(from_)
-    to_extension = format_manager().file_extension(to)
-
     files = _filter_files_by_extension(files, from_extension)
 
+    # Convert all files.
     for file in files:
         print("Converting {0:s}...".format(file))
         contents = _read_file(file, from_)
         converted = convert(contents, from_, to)
-        file_to = _converted_filename(file, from_)
+        file_to = _converted_filename(file, from_, to)
         if op.exists(file_to) and not overwrite:
             print("The file already exists, please use --overwrite.")
             continue
         else:
-            _write_file(file_to, to_, converted)
+            _write_file(file_to, to, converted)
 
 
 def main():
