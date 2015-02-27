@@ -13,10 +13,11 @@ import os.path as op
 from tornado import web
 
 from IPython import nbformat
+from IPython.config.configurable import Configurable
+from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 
-from .scripts import (nb_to_markdown, markdown_to_nb,
-                      nb_to_atlas, atlas_to_nb)
+from .core import convert
 
 
 #------------------------------------------------------------------------------
@@ -27,8 +28,8 @@ def _file_extension(os_path):
     return op.splitext(os_path)[1]
 
 
-class MarkdownContentsManager(FileContentsManager):
-    _atlas = False
+class IPymdContentsManager(FileContentsManager, Configurable):
+    format = Unicode('markdown', config=True)
 
     def get(self, path, content=True, type=None, format=None):
         """ Takes a path for an entity and returns its model
@@ -81,11 +82,8 @@ class MarkdownContentsManager(FileContentsManager):
                 file_ext = _file_extension(os_path)
                 if file_ext == '.ipynb':
                     return nbformat.read(f, as_version=as_version)
-                elif file_ext == '.md':
-                    if self._atlas:
-                        return atlas_to_nb(f.read())
-                    else:
-                        return markdown_to_nb(f.read())
+                else:
+                    return convert(f.read(), from_=self.format, to='notebook')
 
             except Exception as e:
                 raise HTTPError(
@@ -115,15 +113,13 @@ class MarkdownContentsManager(FileContentsManager):
                     nb = nbformat.from_dict(model['content'])
                     self.check_and_sign(nb, path)
                     self._save_notebook(os_path, nb)
-                elif file_ext == '.md':
+                else:
 
-                    if self._atlas:
-                        md = nb_to_atlas(model['content'])
-                    else:
-                        md = nb_to_markdown(model['content'])
+                    contents = convert(model['content'],
+                                       from_='notebook',
+                                       to=self.format)
 
-                    self._save_file(os_path, md, 'text')
-
+                    self._save_file(os_path, contents, 'text')
                 # One checkpoint should always exist for notebooks.
                 if not self.checkpoints.list_checkpoints(path):
                     self.create_checkpoint(path)
@@ -152,7 +148,3 @@ class MarkdownContentsManager(FileContentsManager):
         self.run_post_save_hook(model=model, os_path=os_path)
 
         return model
-
-
-class AtlasContentsManager(MarkdownContentsManager):
-    _atlas = True

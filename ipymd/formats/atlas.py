@@ -8,12 +8,10 @@
 
 import re
 
-from .markdown import (BaseMarkdownReader, BaseMarkdownWriter,
-                       markdown_to_ipymd_cells,
-                       ipymd_cells_to_markdown)
-from .six.moves.html_parser import HTMLParser
-from .six.moves.html_entities import name2codepoint
-from .utils import _ensure_string
+from .markdown import BaseMarkdownReader, BaseMarkdownWriter
+from ..six.moves.html_parser import HTMLParser
+from ..six.moves.html_entities import name2codepoint
+from ..utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
@@ -143,16 +141,10 @@ class AtlasWriter(BaseMarkdownWriter):
         self._output.write(wrapped)
 
 
-#------------------------------------------------------------------------------
-# Helper Atlas functions
-#------------------------------------------------------------------------------
-
-# TODO: delete these
-def atlas_to_ipymd_cells(contents):
-    """Read a Atlas document and return a list of ipymd cells."""
-    return markdown_to_ipymd_cells(contents, reader=AtlasReader())
-
-
-def ipymd_cells_to_atlas(cells):
-    """Convert a list of ipymd cells to a Atlas document."""
-    return ipymd_cells_to_markdown(cells, writer=AtlasWriter())
+ATLAS_FORMAT = dict(
+    name='atlas',
+    reader=AtlasReader,
+    writer=AtlasWriter,
+    file_extension='.md',
+    file_type='text',
+)

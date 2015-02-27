@@ -10,36 +10,13 @@ import json
 
 import IPython.nbformat as nbf
 
-from .six import string_types
-from .utils import _ensure_string
+from ..six import string_types
+from ..utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
 # Utility functions
 #------------------------------------------------------------------------------
-
-
-def _read_nb(contents_or_path):
-    """Load a notebook contents from a dict or a path to a .ipynb file."""
-    if isinstance(contents_or_path, string_types):
-        with open(contents_or_path, "r") as f:
-            return json.load(f)
-    else:
-        return contents_or_path
-
-
-def _write_nb(file, contents):
-    """Write a notebook to a JSON ipynb file."""
-    with open(file, 'w') as f:
-        return json.dump(contents, f, indent=2)
-
-
-def _create_ipynb(cells):
-    """Create a new ipynb model from a list of ipynb cells."""
-    nb = nbf.v4.new_notebook()
-    nb['cells'] = cells
-    return nb
-
 
 def _cell_input(cell):
     """Return the input of an ipynb cell."""
@@ -72,7 +49,7 @@ def _compare_notebook_cells(cell_0, cell_1):
 
 def _compare_notebooks(nb_0, nb_1):
     return all(_compare_notebook_cells(cell_0, cell_1)
-               for cell_0, cell_1 in zip(nb_0, nb_1))
+               for cell_0, cell_1 in zip(nb_0['cells'], nb_1['cells']))
 
 
 #------------------------------------------------------------------------------
@@ -83,8 +60,9 @@ class NotebookReader(object):
     """Reader for notebook cells.
 
     nbformat v4 only."""
-    def read(self, nb_cells):
-        for cell in nb_cells:
+    def read(self, nb):
+        assert nb['nbformat'] >= 4
+        for cell in nb['cells']:
             ipymd_cell = {}
             ctype = cell['cell_type']
             ipymd_cell['cell_type'] = ctype
@@ -134,24 +112,11 @@ class NotebookWriter(object):
     def contents(self):
         return self._nb
 
-    def save(self, filename):
-        with open(filename, 'w') as f:
-            nbf.write(self._nb, f)
 
-
-#------------------------------------------------------------------------------
-# Helper notebook conversion functions
-#------------------------------------------------------------------------------
-
-# TODO: delete those and replace with convert()
-def ipynb_to_ipymd_cells(nb_cells):
-    """Convert a list of notebook cells to a list of ipymd cells."""
-    return list(NotebookReader().read(nb_cells))
-
-
-def ipymd_cells_to_ipynb(ipymd_cells):
-    """Convert a list of ipymd cells to a list of notebook cells."""
-    writer = NotebookWriter()
-    for cell in ipymd_cells:
-        writer.write(cell)
-    return writer.contents['cells']
+NOTEBOOK_FORMAT = dict(
+    name='notebook',
+    reader=NotebookReader,
+    writer=NotebookWriter,
+    file_extension='.ipynb',
+    file_type='json',
+)

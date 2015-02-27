@@ -13,24 +13,8 @@ Much of the code comes from the mistune library.
 import re
 from collections import OrderedDict
 
-from .six import StringIO
-from .utils import _ensure_string
-
-
-#------------------------------------------------------------------------------
-# Utility functions
-#------------------------------------------------------------------------------
-
-def _read_md(file):
-    """Read a Markdown file."""
-    with open(file, 'r') as f:
-        return f.read()
-
-
-def _write_md(file, contents):
-    """Write a Markdown file."""
-    with open(file, 'w') as f:
-        f.write(contents)
+from ..six import StringIO
+from ..utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
@@ -157,11 +141,6 @@ class BaseMarkdownWriter(object):
     def contents(self):
         return self._output.getvalue().rstrip() + '\n'  # end of file \n
 
-    def save(self, filename):
-        """Save the string into a text file."""
-        with open(filename, 'w') as f:
-            f.write(self.contents)
-
     def close(self):
         self._output.close()
 
@@ -285,22 +264,10 @@ class MarkdownWriter(BaseMarkdownWriter):
         self._output.write(wrapped)
 
 
-#------------------------------------------------------------------------------
-# Helper Markdown functions
-#------------------------------------------------------------------------------
-
-# TODO: delete these
-def markdown_to_ipymd_cells(contents, reader=None):
-    """Read a Markdown document and return a list of ipymd cells."""
-    if reader is None:
-        reader = MarkdownReader()
-    return [cell for cell in reader.read(contents)]
-
-
-def ipymd_cells_to_markdown(cells, writer=None):
-    """Convert a list of ipymd cells to a Markdown document."""
-    if writer is None:
-        writer = MarkdownWriter()
-    for cell in cells:
-        writer.write(cell)
-    return writer.contents
+MARKDOWN_FORMAT = dict(
+    name='markdown',
+    reader=MarkdownReader,
+    writer=MarkdownWriter,
+    file_extension='.md',
+    file_type='text',
+)

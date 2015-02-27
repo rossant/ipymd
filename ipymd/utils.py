@@ -8,8 +8,7 @@
 
 import os
 import os.path as op
-import difflib
-from pprint import pprint
+import json
 
 from .six import exec_, string_types
 
@@ -17,33 +16,6 @@ from .six import exec_, string_types
 #------------------------------------------------------------------------------
 # Utils
 #------------------------------------------------------------------------------
-
-def _script_dir():
-    return op.dirname(op.realpath(__file__))
-
-
-def _test_file_path(filename):
-    """Return the full path to an example filename in the 'examples'
-    directory."""
-    return op.realpath(op.join(_script_dir(), '../examples', filename))
-
-
-def _exec_test_file(filename):
-    """Return the 'output' object defined in a Python file."""
-    path = _test_file_path(filename)
-    with open(path, 'r') as f:
-        contents = f.read()
-    ns = {}
-    exec_(contents, ns)
-    return ns.get('output', None)
-
-
-def _read_test_file(filename):
-    """Read a test file."""
-    path = _test_file_path(filename)
-    with open(path, 'r') as f:
-        return f.read()
-
 
 def _ensure_string(source):
     """Ensure a source is a string."""
@@ -53,18 +25,29 @@ def _ensure_string(source):
         return '\n'.join([line.rstrip() for line in source]).rstrip()
 
 
-def _diff_removed_lines(diff):
-    return ''.join(x[2:] for x in diff if x.startswith('- '))
+#------------------------------------------------------------------------------
+# Reading/writing files from/to disk
+#------------------------------------------------------------------------------
+
+def _read_json(file):
+    """Read a JSON file."""
+    with open(file, 'r') as f:
+        return json.load(f)
 
 
-def _diff(text_0, text_1):
-    """Return a diff between two strings."""
-    diff = difflib.ndiff(text_0.splitlines(), text_1.splitlines())
-    return _diff_removed_lines(diff)
+def _write_json(file, contents):
+    """Write a dict to a JSON file."""
+    with open(file, 'w') as f:
+        return json.dump(contents, f, indent=2)
 
 
-def _show_outputs(*outputs):
-    for output in outputs:
-        print()
-        print("-" * 30)
-        pprint(output)
+def _read_text(file):
+    """Read a Markdown file."""
+    with open(file, 'r') as f:
+        return f.read()
+
+
+def _write_text(file, contents):
+    """Write a Markdown file."""
+    with open(file, 'w') as f:
+        f.write(contents)
