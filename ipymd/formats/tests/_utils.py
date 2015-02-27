@@ -80,29 +80,15 @@ def _show_outputs(*outputs):
 
 def _test_reader(basename, format):
     """Return converted and expected ipymd cells of a given example."""
-
-    # File name structure: ex1.markdown.md or ex2.notebook.ipynb
     contents = _read_test_file(basename, format)
-
-    # Convert to ipymd cells.
     converted = convert(contents, from_=format)
-
-    # Load the expected ipymd cells.
     expected = _exec_test_file(basename)
-
     return converted, expected
 
 
 def _test_writer(basename, format):
     """Return converted and expected ipymd cells of a given example."""
-
-    # Load the source ipymd cells.
     cells = _exec_test_file(basename)
-
-    # Convert to ipymd cells.
     converted = convert(cells, to=format)
-
-    # File name structure: ex1.markdown.md or ex2.notebook.ipynb
     expected = _read_test_file(basename, format)
-
     return converted, expected

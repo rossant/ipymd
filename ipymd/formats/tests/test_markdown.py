@@ -6,7 +6,9 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ._utils import _test_reader, _test_writer, _diff, _show_outputs
+from ...core import format_manager, convert
+from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
+                     _exec_test_file, _read_test_file)
 
 
 #------------------------------------------------------------------------------
@@ -26,6 +28,16 @@ def _test_markdown_writer(basename):
     assert _diff(converted, expected) == ''
 
 
+def _test_markdown_markdown(basename):
+    """Check that the double conversion is the identity."""
+
+    contents = _read_test_file(basename, 'markdown')
+    cells = convert(contents, from_='markdown')
+    converted = convert(cells, to='markdown')
+
+    assert _diff(contents, converted) == ''
+
+
 def test_markdown_reader():
     _test_markdown_reader('ex1')
     _test_markdown_reader('ex2')
@@ -34,3 +46,8 @@ def test_markdown_reader():
 def test_markdown_writer():
     _test_markdown_writer('ex1')
     _test_markdown_writer('ex2')
+
+
+def test_markdown_markdown():
+    _test_markdown_markdown('ex1')
+    _test_markdown_markdown('ex2')
