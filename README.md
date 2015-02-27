@@ -77,6 +77,12 @@ Cons:
 
 * No UI to execute code interactively
 
+
+### ipymd
+
+All pros of IPython notebook and Markdown, no cons!
+
+
 ## How it works
 
 * Write in Markdown in `document.md`
@@ -84,7 +90,7 @@ Cons:
     * Or in the notebook (convenient when writing code examples)
 * Only the Markdown cells and code cells are saved in the file
 * Collaborators can work on the Markdown document using GitHub's web interface.
-* By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting** (i.e. ```` ```python ````)
+* By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting**:
 
   ```
   >>> print("Hello world")
@@ -135,10 +141,10 @@ You can convert from any supported format to any supported format. This works by
 
 An **ipymd cell** is a Python dictionary with the following fields:
 
-    * `cell_type`: `markdown` or `code`
-    * `input`: a string with the code input (code cell only)
-    * `output`: a string with the text output and stdout (code cell only)
-    * `source`: a string containing Markdown markup (markdown cell only)
+* `cell_type`: `markdown` or `code`
+* `input`: a string with the code input (code cell only)
+* `output`: a string with the text output and stdout (code cell only)
+* `source`: a string containing Markdown markup (markdown cell only)
 
 
 ### Customize the Markdown format
