@@ -1,3 +1,4 @@
+# List of ipymd cells expected for this example.
 output = [
 
     {'cell_type': 'markdown',
