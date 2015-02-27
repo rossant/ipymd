@@ -6,7 +6,7 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ._utils import _test_reader, _test_writer, _diff
+from ._utils import _test_reader, _test_writer, _diff, _show_outputs
 
 
 #------------------------------------------------------------------------------
