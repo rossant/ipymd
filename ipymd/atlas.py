@@ -147,6 +147,7 @@ class AtlasWriter(BaseMarkdownWriter):
 # Helper Atlas functions
 #------------------------------------------------------------------------------
 
+# TODO: delete these
 def atlas_to_ipymd_cells(contents):
     """Read a Atlas document and return a list of ipymd cells."""
     return markdown_to_ipymd_cells(contents, reader=AtlasReader())

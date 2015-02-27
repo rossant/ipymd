@@ -289,6 +289,7 @@ class MarkdownWriter(BaseMarkdownWriter):
 # Helper Markdown functions
 #------------------------------------------------------------------------------
 
+# TODO: delete these
 def markdown_to_ipymd_cells(contents, reader=None):
     """Read a Markdown document and return a list of ipymd cells."""
     if reader is None:

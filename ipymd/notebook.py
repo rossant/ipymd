@@ -124,6 +124,12 @@ class NotebookWriter(object):
         self._nb['cells'].append(cell)
         self._count += 1
 
+    def write(self, cell):
+        if cell['cell_type'] == 'markdown':
+            self.append_markdown(cell['source'])
+        elif cell['cell_type'] == 'code':
+            self.append_code(cell['input'], cell['output'])
+
     @property
     def contents(self):
         return self._nb
@@ -137,6 +143,7 @@ class NotebookWriter(object):
 # Helper notebook conversion functions
 #------------------------------------------------------------------------------
 
+# TODO: delete those and replace with convert()
 def ipynb_to_ipymd_cells(nb_cells):
     """Convert a list of notebook cells to a list of ipymd cells."""
     return list(NotebookReader().read(nb_cells))
@@ -146,8 +153,5 @@ def ipymd_cells_to_ipynb(ipymd_cells):
     """Convert a list of ipymd cells to a list of notebook cells."""
     writer = NotebookWriter()
     for cell in ipymd_cells:
-        if cell['cell_type'] == 'code':
-            writer.append_code(cell['input'], output=cell['output'])
-        elif cell['cell_type'] == 'markdown':
-            writer.append_markdown(cell['source'])
+        writer.write(cell)
     return writer.contents['cells']
