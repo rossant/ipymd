@@ -49,7 +49,6 @@ def test_notebook_writer():
     _test_notebook_writer('ex2')
 
 
-
 def test_notebook_notebook():
     _test_notebook_notebook('ex1')
     _test_notebook_notebook('ex2')

@@ -62,4 +62,3 @@ def test_atlas_writer():
 def test_atlas_atlas():
     _test_atlas_atlas('ex1')
     _test_atlas_atlas('ex2')
-
