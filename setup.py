@@ -7,9 +7,7 @@ setup(
     name='ipymd',
     version='0.1.0-dev',
     packages=['ipymd',
-              'ipymd.tests',
               'ipymd.formats',
-              'ipymd.formats.tests',
               ],
     entry_points={
         'console_scripts': [
