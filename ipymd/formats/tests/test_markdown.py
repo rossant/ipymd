@@ -51,3 +51,23 @@ def test_markdown_writer():
 def test_markdown_markdown():
     _test_markdown_markdown('ex1')
     _test_markdown_markdown('ex2')
+
+
+def test_decorator():
+
+    source = "\n".join(("@decorator",
+                        "def f():",
+                        "    # pass",
+                        "    ",
+                        "    return",
+                        ))
+    cells = [{'cell_type': 'code',
+              'input': source,
+              'output': 'blah\nblah'}]
+    markdown = convert(cells, to='markdown')
+    cells_bis = convert(markdown, from_='markdown')
+    markdown_bis = convert(cells_bis, to='markdown')
+
+    print("***")
+    print(markdown_bis)
+    print("***")
