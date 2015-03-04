@@ -74,3 +74,6 @@ def test_decorator():
 
     assert '...' not in cells[0]['input']
     assert cells[0]['output'] == 'blah\nblah'
+
+    markdown_bis = convert(cells, to='markdown')
+    assert _diff(markdown, markdown_bis) == ''
