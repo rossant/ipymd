@@ -166,10 +166,10 @@ class MarkdownReader(BaseMarkdownReader):
         """Return whether the line or set of lines has an input prompt."""
         if isinstance(lines, list):
             return any(line for line in lines
-                       if line.startswith(self.prompt_first))
+                       if line.startswith(self.prompt_first.rstrip()))
         else:
-            return (lines.startswith(self.prompt_first) or
-                    lines.startswith(self.prompt_next))
+            return lines.startswith((self.prompt_first.rstrip(),
+                                     self.prompt_next.rstrip()))
 
     def _remove_prompt(self, line):
         """Remove the prompt in a line."""
