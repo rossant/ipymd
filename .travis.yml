@@ -25,11 +25,8 @@ install:
   - conda create -q -n testenv python=$TRAVIS_PYTHON_VERSION
   - source activate testenv
   # Optional dependencies.
-  - conda install pip tornado
   # TODO: IPython 2 env as well
-  # IPython 3.0.beta
-  - pip install --pre 'ipython'
-  - pip install jsonschema
+  - conda install pip tornado ipython
   # Testing dependencies.
   - conda install pytest flake8 coverage
   - pip install coveralls
