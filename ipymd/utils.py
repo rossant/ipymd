@@ -8,6 +8,7 @@
 
 import os
 import os.path as op
+import re
 import json
 
 from .six import exec_, string_types
@@ -17,12 +18,29 @@ from .six import exec_, string_types
 # Utils
 #------------------------------------------------------------------------------
 
+def _rstrip_lines(source):
+    if not isinstance(source, list):
+        source = source.splitlines()
+    return '\n'.join(line.rstrip() for line in source)
+
+
 def _ensure_string(source):
     """Ensure a source is a string."""
     if isinstance(source, string_types):
         return source.rstrip()
     else:
-        return '\n'.join([line.rstrip() for line in source]).rstrip()
+        return _rstrip_lines(source)
+
+
+def _preprocess(text, tab=4):
+    text = re.sub(r'\r\n|\r', '\n', text)
+    text = text.replace('\t', ' ' * tab)
+    text = text.replace('\u00a0', ' ')
+    text = text.replace('\u2424', '\n')
+    pattern = re.compile(r'^ +$', re.M)
+    text = pattern.sub('', text)
+    text = _rstrip_lines(text)
+    return text
 
 
 #------------------------------------------------------------------------------
