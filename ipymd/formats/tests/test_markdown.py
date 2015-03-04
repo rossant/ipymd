@@ -55,6 +55,7 @@ def test_markdown_markdown():
 
 def test_decorator():
     """Test a bug fix where empty '...' lines were added to the output."""
+
     markdown = '\n'.join(('```python',
                           '>>> @decorator',
                           '... def f():',
@@ -71,4 +72,9 @@ def test_decorator():
                           '```'))
 
     cells = convert(markdown, from_='markdown')
+
+    assert '...' not in cells[0]['input']
     assert cells[0]['output'] == 'blah\nblah'
+
+    markdown_bis = convert(cells, to='markdown')
+    assert _diff(markdown, markdown_bis) == ''
