@@ -55,19 +55,20 @@ def test_markdown_markdown():
 
 def test_decorator():
 
-    source = "\n".join(("@decorator",
-                        "def f():",
-                        "    # pass",
-                        "    ",
-                        "    return",
-                        ))
-    cells = [{'cell_type': 'code',
-              'input': source,
-              'output': 'blah\nblah'}]
-    markdown = convert(cells, to='markdown')
-    cells_bis = convert(markdown, from_='markdown')
-    markdown_bis = convert(cells_bis, to='markdown')
+    markdown = '\n'.join(('```python',
+                          '>>> @decorator',
+                          '... def f():',
+                          '...     """Docstring."""',
+                          '...',
+                          '...     # Comment.',
+                          '...     pass',
+                          '...',
+                          '...     # Comment.',
+                          '...     pass',
+                          '...     pass',
+                          'blah',
+                          'blah',
+                          '```'))
 
-    print("***")
-    print(markdown_bis)
-    print("***")
+    cells = convert(markdown, from_='markdown')
+    assert cells[0]['output'] == 'blah\nblah'
