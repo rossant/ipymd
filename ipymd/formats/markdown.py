@@ -14,21 +14,12 @@ import re
 from collections import OrderedDict
 
 from ..six import StringIO
-from ..utils import _ensure_string
+from ..utils import _ensure_string, _preprocess
 
 
 #------------------------------------------------------------------------------
 # Base Markdown
 #------------------------------------------------------------------------------
-
-def _preprocess(text, tab=4):
-    text = re.sub(r'\r\n|\r', '\n', text)
-    text = text.replace('\t', ' ' * tab)
-    text = text.replace('\u00a0', ' ')
-    text = text.replace('\u2424', '\n')
-    pattern = re.compile(r'^ +$', re.M)
-    return pattern.sub('', text)
-
 
 _tag = (
     r'(?!(?:'
