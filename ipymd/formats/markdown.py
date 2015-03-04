@@ -247,6 +247,9 @@ class MarkdownWriter(BaseMarkdownWriter):
             elif line.startswith('#') or line.startswith('@'):
                 lines_prompt.append(prompt + line)
                 prompt = self.prompt_next
+            # Empty line = second prompt.
+            elif line.rstrip() == '':
+                lines_prompt.append((self.prompt_next + line).rstrip())
             elif line.startswith('  '):
                 prompt = self.prompt_next
                 lines_prompt.append(prompt + line)
