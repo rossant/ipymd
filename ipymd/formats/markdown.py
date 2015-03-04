@@ -164,6 +164,8 @@ class MarkdownReader(BaseMarkdownReader):
 
     def _has_input_prompt(self, lines):
         """Return whether the line or set of lines has an input prompt."""
+        # Note: the rstrip() is necessary for empty lines with the
+        # leading '...' prompt but not the trailing space. See PR #25.
         if isinstance(lines, list):
             return any(line for line in lines
                        if line.startswith(self.prompt_first.rstrip()))

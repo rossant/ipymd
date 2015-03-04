@@ -54,7 +54,7 @@ def test_markdown_markdown():
 
 
 def test_decorator():
-
+    """Test a bug fix where empty '...' lines were added to the output."""
     markdown = '\n'.join(('```python',
                           '>>> @decorator',
                           '... def f():',
