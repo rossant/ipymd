@@ -71,4 +71,6 @@ def test_decorator():
                           '```'))
 
     cells = convert(markdown, from_='markdown')
+
+    assert '...' not in cells[0]['input']
     assert cells[0]['output'] == 'blah\nblah'

@@ -175,9 +175,9 @@ class MarkdownReader(BaseMarkdownReader):
 
     def _remove_prompt(self, line):
         """Remove the prompt in a line."""
-        if line.startswith(self.prompt_first):
+        if line.startswith(self.prompt_first.rstrip()):
             return line[len(self.prompt_first):]
-        elif line.startswith(self.prompt_next):
+        elif line.startswith(self.prompt_next.rstrip()):
             return line[len(self.prompt_next):]
         else:
             return line
