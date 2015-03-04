@@ -7,6 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ...core import format_manager, convert
+from ...utils import _remove_output
 from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
                      _exec_test_file, _read_test_file)
 
@@ -21,15 +22,7 @@ def _test_atlas_reader(basename):
 
     # Assert all cells are identical except the outputs which are lost
     # in translation.
-    for cell_0, cell_1 in zip(converted, expected):
-        assert cell_0['cell_type'] == cell_1['cell_type']
-        ct = cell_0['cell_type']
-        if ct == 'code':
-            assert cell_0['input'] == cell_1['input']
-        elif ct == 'markdown':
-            assert cell_0['source'] == cell_1['source']
-        else:
-            raise RuntimeError()
+    assert _remove_output(converted) == _remove_output(expected)
 
 
 def _test_atlas_writer(basename):
