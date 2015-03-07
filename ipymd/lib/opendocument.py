@@ -132,8 +132,6 @@ def default_styles():
     _add_style('inline-code', family='text', fontsize='12pt',
                fontname='Courier New', color='#333333')
 
-    styles['_numbered_list'] = _numbered_style()
-
     return styles
 
 
@@ -165,6 +163,7 @@ class ODFDocument(object):
         # Add default styles if necessary.
         if styles is None:
             styles = default_styles()
+        styles['_numbered_list'] = _numbered_style()
         self.add_styles(**styles)
 
     # Public methods
@@ -373,6 +372,7 @@ class ODFDocument(object):
         """Add text within the current container."""
         assert self._containers
         container = self._containers[-1]
+        stylename = self._get_style(stylename)
         container.addElement(Span(stylename=stylename, text=text))
 
     def link(self, url):
