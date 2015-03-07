@@ -19,7 +19,7 @@ from ..markdown import BlockLexer, InlineLexer
 
 class BlockRenderer(BaseRenderer):
     def __init__(self):
-        super(BlockRenderer, self).__init__(verbose=False)
+        super(BlockRenderer, self).__init__()
         self.output = []
 
     def paragraph(self, text):
@@ -61,7 +61,7 @@ class BlockRenderer(BaseRenderer):
 
 class InlineRenderer(BaseRenderer):
     def __init__(self, output=None):
-        super(InlineRenderer, self).__init__(verbose=False)
+        super(InlineRenderer, self).__init__()
         if output is None:
             output = []
         self.output = output

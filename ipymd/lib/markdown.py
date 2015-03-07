@@ -19,7 +19,7 @@ The code has been adapted from the mistune library:
 
 import re
 
-from .base_lexer import BaseLexer
+from .base_lexer import BaseLexer, BaseRenderer
 
 
 # -----------------------------------------------------------------------------
