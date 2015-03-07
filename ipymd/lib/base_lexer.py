@@ -78,7 +78,10 @@ class BaseLexer(object):
         tokens = []
         while text:
             m, out = self.manipulate(text, rules)
-            tokens.append(out)
+            if out is None:
+                tokens.append(m)
+            else:
+                tokens.append(out)
             if m is not False:
                 text = text[len(m.group(0)):]
                 continue
