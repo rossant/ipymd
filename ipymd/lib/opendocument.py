@@ -139,8 +139,9 @@ def default_styles():
 
 def load_styles(path):
     """Return a dictionary of all styles contained in an ODF document."""
-    with load(path) as f:
-        return {_style_name(style): style for style in f.styles.childNodes}
+    f = load(path)
+    styles = {_style_name(style): style for style in f.styles.childNodes}
+    return styles
 
 
 # -----------------------------------------------------------------------------
@@ -163,7 +164,8 @@ class ODFDocument(object):
 
         # Add default styles if necessary.
         if styles is None:
-            self.add_styles(**default_styles())
+            styles = default_styles()
+        self.add_styles(**styles)
 
     # Public methods
     # -------------------------------------------------------------------------
