@@ -127,7 +127,7 @@ class BlockGrammar(object):
 
 
 class BaseBlockRenderer(object):
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=False):
         self._verbose = verbose
 
     def block_html(self, text, pre=None):
@@ -465,7 +465,7 @@ class InlineGrammar(object):
 
 
 class BaseInlineRenderer(object):
-    def __init__(self, verbose=True):
+    def __init__(self, verbose=False):
         self._verbose = verbose
 
     def autolink(self, link, is_email=False):

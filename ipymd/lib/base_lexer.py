@@ -22,7 +22,8 @@ class BaseLexer(object):
     default_rules = []
     renderer_cls = None
 
-    def __init__(self, renderer=None, grammar=None, rules=None):
+    def __init__(self, renderer=None, grammar=None, rules=None,
+                 yield_token=False):
         if grammar is None:
             grammar = self.grammar_class()
         if rules is None:
@@ -32,6 +33,7 @@ class BaseLexer(object):
         self.grammar = grammar
         self.rules = rules
         self.renderer = renderer
+        self._yield_token = yield_token
 
     def manipulate(self, text, rules):
         for key in rules:
@@ -39,9 +41,9 @@ class BaseLexer(object):
             m = rule.match(text)
             if not m:
                 continue
-            getattr(self, 'parse_%s' % key)(m)
-            return m
-        return False
+            out = getattr(self, 'parse_%s' % key)(m)
+            return m, out
+        return False, None
 
     def preprocess(self, text):
         return text.rstrip('\n')
@@ -51,7 +53,9 @@ class BaseLexer(object):
             rules = self.rules
         text = self.preprocess(text)
         while text:
-            m = self.manipulate(text, rules)
+            m, out = self.manipulate(text, rules)
+            if self._yield_token:
+                yield out
             if m is not False:
                 text = text[len(m.group(0)):]
                 continue
