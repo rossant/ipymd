@@ -95,6 +95,7 @@ class BlockGrammar(object):
         flags=re.M
     )
     list_bullet = re.compile(r'^ *(?:[*+-]|\d+\.) +')
+    # Paragraph = Text not immediately followed by another non-text block.
     paragraph = re.compile(
         r'^((?:[^\n]+\n?(?!'
         r'%s|%s|%s|%s|%s|%s|%s|%s|%s'
@@ -320,13 +321,11 @@ class BlockLexer(BaseLexer):
 
     def parse_paragraph(self, m):
         text = m.group(1).rstrip('\n')
-        self.renderer.paragraph_start()
-        self.renderer.block_text(text)
-        self.renderer.paragraph_end()
+        self.renderer.paragraph(text)
 
     def parse_text(self, m):
         text = m.group(0)
-        self.renderer.block_text(text)
+        self.renderer.text(text)
 
 
 # -----------------------------------------------------------------------------
@@ -506,8 +505,14 @@ class BaseMarkdownRenderer(object):
     def __init__(self):
         self._inline_lexer = InlineLexer(renderer=self)
 
-    def block_text(self, text):
+    def read_inline(self, text):
         self._inline_lexer.read(text)
+
+    def text(self, text):
+        pass
+
+    def paragraph(self, text):
+        pass
 
     def block_html(self, text, pre=None):
         pass
@@ -530,7 +535,7 @@ class BaseMarkdownRenderer(object):
     def hrule(self):
         pass
 
-    def list_start(self):
+    def list_start(self, ordered=None):
         pass
 
     def list_end(self):
@@ -555,12 +560,6 @@ class BaseMarkdownRenderer(object):
         pass
 
     def block_code(self, text, lang=None):
-        pass
-
-    def paragraph_start(self):
-        pass
-
-    def paragraph_end(self):
         pass
 
     def autolink(self, link, email=False):
@@ -588,7 +587,4 @@ class BaseMarkdownRenderer(object):
         pass
 
     def strikethrough(self):
-        pass
-
-    def text(self, text):
         pass

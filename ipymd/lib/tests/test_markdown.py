@@ -7,6 +7,7 @@
 # -----------------------------------------------------------------------------
 
 import re
+from pprint import pprint
 
 from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer, InlineLexer, BaseMarkdownRenderer
@@ -81,6 +82,99 @@ class InlineRenderer(BaseRenderer):
         self.output.append('<br>')
 
 
+class FullRenderer(BaseMarkdownRenderer):
+    def __init__(self):
+        super(FullRenderer, self).__init__()
+        self.output = []
+
+    # Block rules
+    # -------------------------------------------------------------------------
+
+    def text(self, text):
+        pass
+
+    def paragraph(self, text):
+        pass
+
+    def block_html(self, text, pre=None):
+        pass
+
+    def block_quote_start(self):
+        pass
+
+    def block_quote_end(self):
+        pass
+
+    def footnote_start(self):
+        pass
+
+    def footnote_end(self):
+        pass
+
+    def heading(self, text, level=None):
+        pass
+
+    def hrule(self):
+        pass
+
+    def list_start(self, ordered=None):
+        pass
+
+    def list_end(self):
+        pass
+
+    def list_item_start(self):
+        pass
+
+    def loose_item_start(self):
+        pass
+
+    def list_item_end(self):
+        pass
+
+    def newline(self):
+        pass
+
+    def table(self, item):
+        pass
+
+    def nptable(self, item):
+        pass
+
+    def block_code(self, text, lang=None):
+        pass
+
+    # Inline rules
+    # -------------------------------------------------------------------------
+
+    def autolink(self, link, email=False):
+        pass
+
+    def codespan(self, text):
+        pass
+
+    def double_emphasis(self, text):
+        pass
+
+    def emphasis(self, text):
+        pass
+
+    def image(self, link, title, text):
+        pass
+
+    def linebreak(self):
+        pass
+
+    def link(self, link, title, text):
+        pass
+
+    def tag(self, text):
+        pass
+
+    def strikethrough(self):
+        pass
+
+
 # -----------------------------------------------------------------------------
 # Tests Markdown block lexer
 # -----------------------------------------------------------------------------
@@ -132,3 +226,15 @@ def test_inline_lexer():
                 ' line.'
                 ]
     assert renderer.output == expected
+
+
+# -----------------------------------------------------------------------------
+# Tests full Markdown lexer
+# -----------------------------------------------------------------------------
+
+def test_full_lexer():
+    renderer = FullRenderer()
+    lexer = BlockLexer(renderer=renderer)
+    text = _TEST_TEXT
+    lexer.read(text)
+    pprint(renderer.output)
