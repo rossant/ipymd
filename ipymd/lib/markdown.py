@@ -326,7 +326,7 @@ class BlockLexer(BaseLexer):
 
     def parse_text(self, m):
         text = m.group(0)
-        self.renderer.text(text)
+        self.renderer.block_text(text)
 
 
 # -----------------------------------------------------------------------------
@@ -502,7 +502,7 @@ class InlineLexer(BaseLexer):
         self.renderer.text(text)
 
 
-class MarkdownRenderer(object):
+class BaseMarkdownRenderer(object):
     def __init__(self):
         self._inline_lexer = InlineLexer(renderer=self)
 

@@ -47,8 +47,7 @@ class BaseLexer(object):
     default_rules = []
     renderer_cls = BaseRenderer
 
-    def __init__(self, renderer=None, grammar=None, rules=None,
-                 yield_token=False):
+    def __init__(self, renderer=None, grammar=None, rules=None):
         if grammar is None:
             grammar = self.grammar_class()
         if rules is None:
@@ -58,7 +57,6 @@ class BaseLexer(object):
         self.grammar = grammar
         self.rules = rules
         self.renderer = renderer
-        self._yield_token = yield_token
 
     def manipulate(self, text, rules):
         for key in rules:
@@ -77,12 +75,13 @@ class BaseLexer(object):
         if rules is None:
             rules = self.rules
         text = self.preprocess(text)
+        tokens = []
         while text:
             m, out = self.manipulate(text, rules)
-            if self._yield_token:
-                yield out
+            tokens.append(out)
             if m is not False:
                 text = text[len(m.group(0)):]
                 continue
             if text:
                 raise RuntimeError('Infinite loop at: %s' % text)
+        return tokens

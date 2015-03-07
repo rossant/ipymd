@@ -29,8 +29,7 @@ class BaseMarkdownReader(BlockLexer):
         grammar.text = re.compile(r'^.+?\n\n|.+?$', re.DOTALL)
         rules = ['block_code', 'fences', 'block_html', 'text', 'newline']
         super(BaseMarkdownReader, self).__init__(grammar=grammar,
-                                                 rules=rules,
-                                                 yield_token=True)
+                                                 rules=rules)
 
     def parse_block_code(self, m):
         raise NotImplementedError("This method must be overriden.")
