@@ -7,7 +7,8 @@
 # Imports
 # -----------------------------------------------------------------------------
 
-from ..opendocument import ODFDocument
+from ..markdown import BlockLexer
+from ..opendocument import ODFDocument, ODFRenderer
 
 
 # -----------------------------------------------------------------------------
@@ -61,3 +62,11 @@ def test_odf_document():
     doc.code("print('Hello world!')")
 
     # doc.save('test.odt', overwrite=True)
+
+
+def test_odf_renderer():
+    doc = ODFDocument()
+    renderer = ODFRenderer(doc)
+    block_lexer = BlockLexer(renderer=renderer)
+    text = "Hello world!"
+    block_lexer.read(text)
