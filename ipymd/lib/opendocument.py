@@ -119,18 +119,18 @@ def default_styles():
                family='paragraph', fontsize='14pt', fontweight='bold')
 
     _add_style('code', family='paragraph', fontsize='12pt',
-               fontname='Courier')
+               fontname='Courier New', color='#333333')
     _add_style('quote', family='paragraph', fontsize='12pt',
-               fontstyle='italics')
+               fontstyle='italic')
 
     _add_style('normal', family='text', fontsize='12pt')
-    _add_style('italics', family='text', fontstyle='italics', fontsize='12pt')
+    _add_style('italic', family='text', fontstyle='italic', fontsize='12pt')
     _add_style('bold', family='text', fontweight='bold', fontsize='12pt')
 
     _add_style('url', family='text', fontsize='12pt',
                fontweight='bold', fontname='Courier')
     _add_style('inline-code', family='text', fontsize='12pt',
-               fontname='Courier')
+               fontname='Courier New', color='#333333')
 
     styles['_numbered_list'] = _numbered_style()
 
@@ -382,8 +382,8 @@ class ODFDocument(object):
     def inline_code(self, text):
         self.text(text, stylename='inline-code')
 
-    def italics(self, text):
-        self.text(text, stylename='italics')
+    def italic(self, text):
+        self.text(text, stylename='italic')
 
     def linebreak(self):
         """Add a line break within a paragraph."""
