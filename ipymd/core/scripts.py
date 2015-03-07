@@ -12,8 +12,8 @@ import os.path as op
 import glob
 import json
 
-from .six import string_types
-from .utils import _read_text, _read_json, _write_text, _write_json
+from ..ext.six import string_types
+from ..utils.utils import _read_text, _read_json, _write_text, _write_json
 from .core import convert, format_manager
 
 

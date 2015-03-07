@@ -9,8 +9,8 @@
 import re
 from collections import OrderedDict
 
-from ..six import StringIO
-from ..utils import _ensure_string, _preprocess
+from ..ext.six import StringIO
+from ..utils.utils import _ensure_string, _preprocess
 
 
 #------------------------------------------------------------------------------

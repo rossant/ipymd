@@ -13,8 +13,8 @@ import os.path as op
 import glob
 import json
 
-from .six import string_types
-from . import formats
+from ..ext.six import string_types
+from .. import formats
 
 
 #------------------------------------------------------------------------------

@@ -11,7 +11,7 @@ import os.path as op
 import re
 import json
 
-from .six import exec_, string_types
+from ..ext.six import exec_, string_types
 
 
 #------------------------------------------------------------------------------
