@@ -195,8 +195,8 @@ class ODFDocument(object):
         """Return a style from its default name."""
         actual_name = self.style_mapping.get(default_name, default_name)
         if actual_name not in self._styles:
-            assert RuntimeError("The style {0} ".format(actual_name) +
-                                "doesn't exist.")
+            raise RuntimeError("The style {0} ".format(actual_name) +
+                               "doesn't exist.")
         return self._styles.get(actual_name, None)
 
     @property
@@ -269,7 +269,7 @@ class ODFDocument(object):
     def start_paragraph(self, stylename=None):
         """Start a new paragraph."""
         # Use the next paragraph style if one was set.
-        if stylename is None and self._next_p_style is not None:
+        if self._next_p_style is not None:
             stylename = self._next_p_style
             self._next_p_style = None
         self.start_container(P, stylename=stylename)
