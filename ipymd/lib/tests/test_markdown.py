@@ -79,6 +79,11 @@ class InlineRenderer(BaseRenderer):
         self.text(text)
         self.output.append('</b>')
 
+    def codespan(self, text):
+        self.output.append('<codespan>')
+        self.text(text)
+        self.output.append('</codespan>')
+
     def linebreak(self):
         self.output.append('<br>')
 
