@@ -13,48 +13,7 @@ from ..markdown import BlockLexer, InlineLexer, BaseMarkdownRenderer
 
 
 # -----------------------------------------------------------------------------
-# Tests Markdown inline lexer
-# -----------------------------------------------------------------------------
-
-class InlineRenderer(BaseRenderer):
-    def __init__(self):
-        super(InlineRenderer, self).__init__(verbose=False)
-        self.output = []
-
-    def text(self, text):
-        self.output.append(text)
-
-    def emphasis(self, text):
-        self.output.append('<i>')
-        self.text(text)
-        self.output.append('</i>')
-
-    def double_emphasis(self, text):
-        self.output.append('<b>')
-        self.text(text)
-        self.output.append('</b>')
-
-    def linebreak(self):
-        self.output.append('<br>')
-
-
-def test_inline_lexer():
-    renderer = InlineRenderer()
-    text = ("First *paragraph*.\n**Second** line.")
-    lexer = InlineLexer(renderer=renderer)
-    lexer.read(text)
-    expected = ['First ',
-                '<i>', 'paragraph', '</i>',
-                '.',
-                '<br>',
-                '<b>', 'Second', '</b>',
-                ' line.'
-                ]
-    assert renderer.output == expected
-
-
-# -----------------------------------------------------------------------------
-# Tests Markdown block lexer
+# Test renderers
 # -----------------------------------------------------------------------------
 
 class BlockRenderer(BaseRenderer):
@@ -100,6 +59,32 @@ class BlockRenderer(BaseRenderer):
         self.output.append('</code>')
 
 
+class InlineRenderer(BaseRenderer):
+    def __init__(self):
+        super(InlineRenderer, self).__init__(verbose=False)
+        self.output = []
+
+    def text(self, text):
+        self.output.append(text)
+
+    def emphasis(self, text):
+        self.output.append('<i>')
+        self.text(text)
+        self.output.append('</i>')
+
+    def double_emphasis(self, text):
+        self.output.append('<b>')
+        self.text(text)
+        self.output.append('</b>')
+
+    def linebreak(self):
+        self.output.append('<br>')
+
+
+# -----------------------------------------------------------------------------
+# Tests Markdown block lexer
+# -----------------------------------------------------------------------------
+
 def test_block_lexer():
     renderer = BlockRenderer()
     text = ("First *paragraph*.\n**Second** line.\n\n"
@@ -123,5 +108,24 @@ def test_block_lexer():
                 '</ol>',
 
                 '<p>', 'End.', '</p>',
+                ]
+    assert renderer.output == expected
+
+
+# -----------------------------------------------------------------------------
+# Tests Markdown inline lexer
+# -----------------------------------------------------------------------------
+
+def test_inline_lexer():
+    renderer = InlineRenderer()
+    text = ("First *paragraph*.\n**Second** line.")
+    lexer = InlineLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['First ',
+                '<i>', 'paragraph', '</i>',
+                '.',
+                '<br>',
+                '<b>', 'Second', '</b>',
+                ' line.'
                 ]
     assert renderer.output == expected
