@@ -23,7 +23,7 @@ from .base_lexer import BaseLexer
 
 
 # -----------------------------------------------------------------------------
-# Block renderer
+# Block lexer
 # -----------------------------------------------------------------------------
 
 def _pure_pattern(regex):
@@ -126,88 +126,9 @@ class BlockGrammar(object):
     text = re.compile(r'^[^\n]+')
 
 
-class BaseBlockRenderer(object):
-    def __init__(self, verbose=False):
-        self._verbose = verbose
-
-    def block_html(self, text, pre=None):
-        if self._verbose:
-            print('block_html', text, pre)
-
-    def block_quote_start(self):
-        if self._verbose:
-            print('block_quote_start', )
-
-    def block_quote_end(self):
-        if self._verbose:
-            print('block_quote_end', )
-
-    def footnote_start(self, key):
-        if self._verbose:
-            print('footnote_start', key)
-
-    def footnote_end(self, key):
-        if self._verbose:
-            print('footnote_end', key)
-
-    def heading(self, text, level=None):
-        if self._verbose:
-            print('heading', text, level)
-
-    def hrule(self):
-        if self._verbose:
-            print('hrule', )
-
-    def list_start(self, ordered=False):
-        if self._verbose:
-            print('list_start', ordered)
-
-    def list_end(self):
-        if self._verbose:
-            print('list_end', )
-
-    def list_item_start(self):
-        if self._verbose:
-            print('list_item_start', )
-
-    def loose_item_start(self):
-        if self._verbose:
-            print('loose_item_start', )
-
-    def list_item_end(self):
-        if self._verbose:
-            print('list_item_end', )
-
-    def newline(self):
-        if self._verbose:
-            print('newline', )
-
-    def table(self, item):
-        if self._verbose:
-            print('table', item)
-
-    def nptable(self, item):
-        if self._verbose:
-            print('nptable', item)
-
-    def code(self, code, lang=None):
-        if self._verbose:
-            print('code', code, lang)
-
-    def paragraph(self, text):
-        if self._verbose:
-            print('paragraph', text)
-
-    def text(self, text):
-        if self._verbose:
-            print('text', text)
-
-
 class BlockLexer(BaseLexer):
     """Block level lexer for block grammars."""
     grammar_class = BlockGrammar
-
-    renderer_cls = BaseBlockRenderer
 
     default_rules = [
         'newline', 'hrule', 'block_code', 'fences', 'heading',
@@ -241,10 +162,10 @@ class BlockLexer(BaseLexer):
         code = m.group(0)
         pattern = re.compile(r'^ {4}', re.M)
         code = pattern.sub('', code)
-        self.renderer.code(code, lang=None)
+        self.renderer.block_code(code, lang=None)
 
     def parse_fences(self, m):
-        self.renderer.code(m.group(3), lang=m.group(2))
+        self.renderer.block_code(m.group(3), lang=m.group(2))
 
     def parse_heading(self, m):
         self.renderer.heading(m.group(2), level=len(m.group(1)))
@@ -399,7 +320,9 @@ class BlockLexer(BaseLexer):
 
     def parse_paragraph(self, m):
         text = m.group(1).rstrip('\n')
-        self.renderer.paragraph(text)
+        self.renderer.paragraph_start()
+        self.renderer.block_text(text)
+        self.renderer.paragraph_end()
 
     def parse_text(self, m):
         text = m.group(0)
@@ -407,7 +330,7 @@ class BlockLexer(BaseLexer):
 
 
 # -----------------------------------------------------------------------------
-# Inline renderer
+# Inline lexer
 # -----------------------------------------------------------------------------
 
 class InlineGrammar(object):
@@ -464,56 +387,9 @@ class InlineGrammar(object):
         self.hard_wrap()
 
 
-class BaseInlineRenderer(object):
-    def __init__(self, verbose=False):
-        self._verbose = verbose
-
-    def autolink(self, link, is_email=False):
-        if self._verbose:
-            print("autolink", link, is_email)
-
-    def codespan(self, text):
-        if self._verbose:
-            print("codespan", text)
-
-    def double_emphasis(self, text):
-        if self._verbose:
-            print('double_emphasis', text)
-
-    def emphasis(self, text):
-        if self._verbose:
-            print('emphasis', text)
-
-    def image(self, src, title, alt_text):
-        if self._verbose:
-            print('image', src, title, alt_text)
-
-    def linebreak(self):
-        if self._verbose:
-            print('linebreak')
-
-    def link(self, link, title, content):
-        if self._verbose:
-            print('link', link, title, content)
-
-    def tag(self, html):
-        if self._verbose:
-            print('tag', html)
-
-    def strikethrough(self, text):
-        if self._verbose:
-            print('strikethrough', text)
-
-    def text(self, text):
-        if self._verbose:
-            print('text', text)
-
-
 class InlineLexer(BaseLexer):
     """Inline level lexer for inline grammars."""
     grammar_class = InlineGrammar
-
-    renderer_cls = BaseInlineRenderer
 
     default_rules = [
         'escape', 'autolink', 'url', 'tag',
@@ -533,7 +409,7 @@ class InlineLexer(BaseLexer):
     def read(self, text, rules=None):
         if self._in_footnote and 'footnote' in rules:
             rules.remove('footnote')
-        super(InlineLexer, self).read(text, rules)
+        return super(InlineLexer, self).read(text, rules)
 
     def parse_escape(self, m):
         self.renderer.text(m.group(1))
@@ -624,3 +500,95 @@ class InlineLexer(BaseLexer):
     def parse_text(self, m):
         text = m.group(0)
         self.renderer.text(text)
+
+
+class MarkdownRenderer(object):
+    def __init__(self):
+        self._inline_lexer = InlineLexer(renderer=self)
+
+    def block_text(self, text):
+        self._inline_lexer.read(text)
+
+    def block_html(self, text, pre=None):
+        pass
+
+    def block_quote_start(self):
+        pass
+
+    def block_quote_end(self):
+        pass
+
+    def footnote_start(self):
+        pass
+
+    def footnote_end(self):
+        pass
+
+    def heading(self, text, level=None):
+        pass
+
+    def hrule(self):
+        pass
+
+    def list_start(self):
+        pass
+
+    def list_end(self):
+        pass
+
+    def list_item_start(self):
+        pass
+
+    def loose_item_start(self):
+        pass
+
+    def list_item_end(self):
+        pass
+
+    def newline(self):
+        pass
+
+    def table(self, item):
+        pass
+
+    def nptable(self, item):
+        pass
+
+    def block_code(self, text, lang=None):
+        pass
+
+    def paragraph_start(self):
+        pass
+
+    def paragraph_end(self):
+        pass
+
+    def autolink(self, link, email=False):
+        pass
+
+    def codespan(self, text):
+        pass
+
+    def double_emphasis(self, text):
+        pass
+
+    def emphasis(self, text):
+        pass
+
+    def image(self, link, title, text):
+        pass
+
+    def linebreak(self):
+        pass
+
+    def link(self, link, title, text):
+        pass
+
+    def tag(self, text):
+        pass
+
+    def strikethrough(self):
+        pass
+
+    def text(self, text):
+        pass

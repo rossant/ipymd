@@ -12,15 +12,40 @@ The code has been adapted from the mistune library:
 
 """
 
+# -----------------------------------------------------------------------------
+# Imports
+# -----------------------------------------------------------------------------
+
+from functools import partial
+
 
 # -----------------------------------------------------------------------------
 # Base lexer
 # -----------------------------------------------------------------------------
 
+class BaseGrammar(object):
+    pass
+
+
+class BaseRenderer(object):
+    def __init__(self, verbose=False):
+        self._verbose = verbose
+
+    def _process(self, name, *args, **kwargs):
+        if self._verbose:
+            sargs = ', '.join(args)
+            skwargs = ', '.join('{k}={v}'.format(k=k, v=v)
+                                for k, v in kwargs.items())
+            print(name, sargs, skwargs)
+
+    def __getattr__(self, name):
+        return partial(self._process, name)
+
+
 class BaseLexer(object):
-    grammar_class = None
+    grammar_class = BaseGrammar
     default_rules = []
-    renderer_cls = None
+    renderer_cls = BaseRenderer
 
     def __init__(self, renderer=None, grammar=None, rules=None,
                  yield_token=False):

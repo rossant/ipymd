@@ -15,8 +15,8 @@ from collections import OrderedDict
 
 from ..ext.six import StringIO
 from ..utils.utils import _ensure_string, _preprocess
-from ..lib.markdown import (BlockGrammar, BaseBlockRenderer, BlockLexer,
-                            InlineGrammar, BaseInlineRenderer, InlineLexer)
+from ..lib.markdown import (BlockGrammar, BlockLexer,
+                            InlineGrammar, InlineLexer)
 
 
 #------------------------------------------------------------------------------
