@@ -58,6 +58,12 @@ class BlockRenderer(BaseRenderer):
         self.output.append(text)
         self.output.append('</code>')
 
+    def block_quote_start(self):
+        self.output.append('<quote>')
+
+    def block_quote_end(self):
+        self.output.append('</quote>')
+
 
 class InlineRenderer(BaseRenderer):
     def __init__(self, output=None):
@@ -102,7 +108,7 @@ class FullBlockRenderer(BlockRenderer):
 _TEST_TEXT = ("First *paragraph*.\n**Second** line.\n\n"
               "* Item 1.\n* Item 2.\n\n```\ncode\n```\n\n"
               "1. First.\n2. Second.\n\n"
-              "End.")
+              "> End.\n")
 
 
 def test_block_lexer():
@@ -124,7 +130,7 @@ def test_block_lexer():
                 '<li>', 'Second.', '</li>',
                 '</ol>',
 
-                '<p>', 'End.', '</p>',
+                '<quote>', '<p>', 'End.', '</p>', '</quote>'
                 ]
     assert renderer.output == expected
 
@@ -175,5 +181,6 @@ def test_full_lexer():
                 '<li>', 'Second.', '</li>',
                 '</ol>',
 
-                '<p>', 'End.', '</p>']
+                '<quote>', '<p>', 'End.', '</p>', '</quote>'
+                ]
     assert renderer.output == expected
