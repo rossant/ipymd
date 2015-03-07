@@ -85,12 +85,15 @@ class InlineRenderer(BaseRenderer):
 # Tests Markdown block lexer
 # -----------------------------------------------------------------------------
 
+_TEST_TEXT = ("First *paragraph*.\n**Second** line.\n\n"
+              "* Item 1.\n* Item 2.\n\n```\ncode\n```\n\n"
+              "1. First.\n2. Second.\n\n"
+              "End.")
+
+
 def test_block_lexer():
     renderer = BlockRenderer()
-    text = ("First *paragraph*.\n**Second** line.\n\n"
-            "* Item 1.\n* Item 2.\n\n```\ncode\n```\n\n"
-            "1. First.\n2. Second.\n\n"
-            "End.")
+    text = _TEST_TEXT
     lexer = BlockLexer(renderer=renderer)
     lexer.read(text)
     expected = ['<p>', 'First *paragraph*.\n**Second** line.', '</p>',
