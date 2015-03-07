@@ -501,90 +501,90 @@ class InlineLexer(BaseLexer):
         self.renderer.text(text)
 
 
-class BaseMarkdownRenderer(object):
-    def __init__(self):
-        self._inline_lexer = InlineLexer(renderer=self)
+# class BaseMarkdownRenderer(object):
+#     def __init__(self):
+#         self._inline_lexer = InlineLexer(renderer=self)
 
-    def read_inline(self, text):
-        self._inline_lexer.read(text)
+#     def read_inline(self, text):
+#         self._inline_lexer.read(text)
 
-    def text(self, text):
-        pass
+#     def text(self, text):
+#         pass
 
-    def paragraph(self, text):
-        pass
+#     def paragraph(self, text):
+#         pass
 
-    def block_html(self, text, pre=None):
-        pass
+#     def block_html(self, text, pre=None):
+#         pass
 
-    def block_quote_start(self):
-        pass
+#     def block_quote_start(self):
+#         pass
 
-    def block_quote_end(self):
-        pass
+#     def block_quote_end(self):
+#         pass
 
-    def footnote_start(self):
-        pass
+#     def footnote_start(self):
+#         pass
 
-    def footnote_end(self):
-        pass
+#     def footnote_end(self):
+#         pass
 
-    def heading(self, text, level=None):
-        pass
+#     def heading(self, text, level=None):
+#         pass
 
-    def hrule(self):
-        pass
+#     def hrule(self):
+#         pass
 
-    def list_start(self, ordered=None):
-        pass
+#     def list_start(self, ordered=None):
+#         pass
 
-    def list_end(self):
-        pass
+#     def list_end(self):
+#         pass
 
-    def list_item_start(self):
-        pass
+#     def list_item_start(self):
+#         pass
 
-    def loose_item_start(self):
-        pass
+#     def loose_item_start(self):
+#         pass
 
-    def list_item_end(self):
-        pass
+#     def list_item_end(self):
+#         pass
 
-    def newline(self):
-        pass
+#     def newline(self):
+#         pass
 
-    def table(self, item):
-        pass
+#     def table(self, item):
+#         pass
 
-    def nptable(self, item):
-        pass
+#     def nptable(self, item):
+#         pass
 
-    def block_code(self, text, lang=None):
-        pass
+#     def block_code(self, text, lang=None):
+#         pass
 
-    def autolink(self, link, email=False):
-        pass
+#     def autolink(self, link, email=False):
+#         pass
 
-    def codespan(self, text):
-        pass
+#     def codespan(self, text):
+#         pass
 
-    def double_emphasis(self, text):
-        pass
+#     def double_emphasis(self, text):
+#         pass
 
-    def emphasis(self, text):
-        pass
+#     def emphasis(self, text):
+#         pass
 
-    def image(self, link, title, text):
-        pass
+#     def image(self, link, title, text):
+#         pass
 
-    def linebreak(self):
-        pass
+#     def linebreak(self):
+#         pass
 
-    def link(self, link, title, text):
-        pass
+#     def link(self, link, title, text):
+#         pass
 
-    def tag(self, text):
-        pass
+#     def tag(self, text):
+#         pass
 
-    def strikethrough(self):
-        pass
+#     def strikethrough(self):
+#         pass
