@@ -10,8 +10,8 @@ import os.path as op
 import shutil
 
 from ..scripts import _cli
-from ..formats.tests._utils import _test_file_path
-from ..tempdir import TemporaryDirectory
+from ...formats.tests._utils import _test_file_path
+from ...utils.tempdir import TemporaryDirectory
 
 
 #------------------------------------------------------------------------------

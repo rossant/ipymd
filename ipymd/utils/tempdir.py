@@ -11,7 +11,7 @@ import os as _os
 import sys as _sys
 from tempfile import mkdtemp
 
-from .six import print_
+from ..ext.six import print_
 
 
 #------------------------------------------------------------------------------

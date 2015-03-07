@@ -10,8 +10,8 @@ import json
 
 import IPython.nbformat as nbf
 
-from ..six import string_types
-from ..utils import _ensure_string
+from ..ext.six import string_types
+from ..utils.utils import _ensure_string
 
 
 #------------------------------------------------------------------------------

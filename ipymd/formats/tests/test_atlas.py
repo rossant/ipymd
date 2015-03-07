@@ -6,8 +6,8 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ...core import format_manager, convert
-from ...utils import _remove_output
+from ...core.core import format_manager, convert
+from ...utils.utils import _remove_output
 from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
                      _exec_test_file, _read_test_file)
 

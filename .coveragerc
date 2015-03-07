@@ -2,6 +2,6 @@
 branch = True
 source = ipymd
 omit =
-    ipymd/six.py
-    ipymd/contents_manager.py
-    ipymd/scripts.py
+    ipymd/ext/six.py
+    ipymd/core/contents_manager.py
+    ipymd/utils/tempdir.py

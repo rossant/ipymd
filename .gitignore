@@ -1,4 +1,6 @@
 .coverage
+__pycache__
+experimental
 wiki
 _old
 notebooks

@@ -11,9 +11,9 @@ import os.path as op
 import difflib
 from pprint import pprint
 
-from ...core import format_manager, convert
-from ...scripts import _read_file, _write_file
-from ...six import exec_
+from ...core.core import format_manager, convert
+from ...core.scripts import _read_file, _write_file
+from ...ext.six import exec_
 
 
 #------------------------------------------------------------------------------

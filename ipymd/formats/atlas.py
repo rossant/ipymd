@@ -9,9 +9,9 @@
 import re
 
 from .markdown import BaseMarkdownReader, BaseMarkdownWriter
-from ..six.moves.html_parser import HTMLParser
-from ..six.moves.html_entities import name2codepoint
-from ..utils import _ensure_string
+from ..ext.six.moves.html_parser import HTMLParser
+from ..ext.six.moves.html_entities import name2codepoint
+from ..utils.utils import _ensure_string
 
 
 #------------------------------------------------------------------------------
