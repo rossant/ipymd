@@ -22,10 +22,9 @@ class BlockRenderer(BaseRenderer):
         super(BlockRenderer, self).__init__(verbose=False)
         self.output = []
 
-    def paragraph_start(self):
+    def paragraph(self, text):
         self.output.append('<p>')
-
-    def paragraph_end(self):
+        self.text(text)
         self.output.append('</p>')
 
     def list_start(self, ordered=None):
@@ -51,7 +50,7 @@ class BlockRenderer(BaseRenderer):
     def newline(self):
         self.output.append('\n')
 
-    def block_text(self, text):
+    def text(self, text):
         self.output.append(text)
 
     def block_code(self, text, lang=None):
