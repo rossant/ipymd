@@ -45,7 +45,7 @@ class BaseRenderer(object):
 class BaseLexer(object):
     grammar_class = BaseGrammar
     default_rules = []
-    renderer_cls = BaseRenderer
+    renderer_class = BaseRenderer
 
     def __init__(self, renderer=None, grammar=None, rules=None):
         if grammar is None:
@@ -53,7 +53,7 @@ class BaseLexer(object):
         if rules is None:
             rules = self.default_rules
         if renderer is None:
-            renderer = self.renderer_cls()
+            renderer = self.renderer_class()
         self.grammar = grammar
         self.rules = rules
         self.renderer = renderer
