@@ -13,12 +13,53 @@ from ..markdown import BlockLexer, InlineLexer, BaseMarkdownRenderer
 
 
 # -----------------------------------------------------------------------------
-# Tests
+# Tests Markdown inline lexer
 # -----------------------------------------------------------------------------
 
-class Renderer(BaseRenderer):
+class InlineRenderer(BaseRenderer):
     def __init__(self):
-        super(Renderer, self).__init__(verbose=False)
+        super(InlineRenderer, self).__init__(verbose=False)
+        self.output = []
+
+    def text(self, text):
+        self.output.append(text)
+
+    def emphasis(self, text):
+        self.output.append('<i>')
+        self.text(text)
+        self.output.append('</i>')
+
+    def double_emphasis(self, text):
+        self.output.append('<b>')
+        self.text(text)
+        self.output.append('</b>')
+
+    def linebreak(self):
+        self.output.append('<br>')
+
+
+def test_inline_lexer():
+    renderer = InlineRenderer()
+    text = ("First *paragraph*.\n**Second** line.")
+    lexer = InlineLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['First ',
+                '<i>', 'paragraph', '</i>',
+                '.',
+                '<br>',
+                '<b>', 'Second', '</b>',
+                ' line.'
+                ]
+    assert renderer.output == expected
+
+
+# -----------------------------------------------------------------------------
+# Tests Markdown block lexer
+# -----------------------------------------------------------------------------
+
+class BlockRenderer(BaseRenderer):
+    def __init__(self):
+        super(BlockRenderer, self).__init__(verbose=False)
         self.output = []
 
     def paragraph_start(self):
@@ -60,7 +101,7 @@ class Renderer(BaseRenderer):
 
 
 def test_block_lexer():
-    renderer = Renderer()
+    renderer = BlockRenderer()
     text = ("First *paragraph*.\n**Second** line.\n\n"
             "* Item 1.\n* Item 2.\n\n```\ncode\n```\n\n"
             "1. First.\n2. Second.\n\n"
