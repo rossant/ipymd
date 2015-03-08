@@ -148,10 +148,13 @@ def _style_name(el):
     return el.attributes.get(_STYLE_NAME, '').strip()
 
 
-def load_styles(path):
+def load_styles(path_or_doc):
     """Return a dictionary of all styles contained in an ODF document."""
-    f = load(path)
-    styles = {_style_name(style): style for style in f.styles.childNodes}
+    if isinstance(path_or_doc, string_types):
+        doc = load(path)
+    else:
+        doc = path_or_doc
+    styles = {_style_name(style): style for style in doc.styles.childNodes}
     return styles
 
 
@@ -168,8 +171,11 @@ class ODFDocument(object):
 
         # Add default styles if necessary.
         self._styles = {}  # Dictionary of current styles.
-        if styles is None and doc is None:
-            styles = default_styles()
+        if styles is None:
+            if doc is None:
+                styles = default_styles()
+            else:
+                styles = load_styles(doc)
         styles['_numbered_list'] = _numbered_style()
 
         if doc is None:
@@ -224,6 +230,31 @@ class ODFDocument(object):
     def show_styles(self):
         pprint(self._styles)
 
+    def to_dict(self, el=None):
+        item = {}
+        # Name.
+        if el is None:
+            el = self._doc.text
+            item['name'] = 'root'
+        else:
+            item['name'] = _tag_name(el)
+        # Data.
+        item['data'] = _tag_data(el)
+        # Children.
+        children = [self.to_dict(child) for child in el.childNodes]
+        if (len(children) == 1) and (children[0]['name'] == 'text'):
+            item['text'] = children[0]['data']
+        else:
+            item['children'] = children
+        # Style.
+        item['style'] = self._style_name(el)
+        # Remove empty fields.
+        item = {k: v for k, v in item.items() if v}
+        return item
+
+    def __eq__(self, other):
+        return self.to_dict() == other.to_dict()
+
     # Internal methods
     # -------------------------------------------------------------------------
 
@@ -256,28 +287,6 @@ class ODFDocument(object):
         if not name:
             return None
         return self.inverse_style_mapping.get(name, name)
-
-    def to_dict(self, el=None):
-        item = {}
-        # Name.
-        if el is None:
-            el = self._doc.text
-            item['name'] = 'root'
-        else:
-            item['name'] = _tag_name(el)
-        # Data.
-        item['data'] = _tag_data(el)
-        # Children.
-        children = [self.to_dict(child) for child in el.childNodes]
-        if (len(children) == 1) and (children[0]['name'] == 'text'):
-            item['text'] = children[0]['data']
-        else:
-            item['children'] = children
-        # Style.
-        item['style'] = self._style_name(el)
-        # Remove empty fields.
-        item = {k: v for k, v in item.items() if v}
-        return item
 
     # Block methods
     # -------------------------------------------------------------------------
