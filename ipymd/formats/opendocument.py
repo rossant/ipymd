@@ -9,6 +9,7 @@
 
 from ..lib.markdown import InlineLexer, BlockLexer, BaseRenderer
 from ..lib.opendocument import load, ODFDocument, ODFRenderer
+from ..ext.six import text_type
 
 
 # -----------------------------------------------------------------------------
@@ -50,6 +51,8 @@ class ODFWriter(object):
 
 
 def load_odf(path):
+    # HACK: work around a bug in odfpy: make sure the path string is unicode.
+    path = text_type(path)
     doc = load(path)
     return ODFDocument(doc=doc)
 
