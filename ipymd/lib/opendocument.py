@@ -151,7 +151,7 @@ def _style_name(el):
 def load_styles(path_or_doc):
     """Return a dictionary of all styles contained in an ODF document."""
     if isinstance(path_or_doc, string_types):
-        doc = load(path)
+        doc = load(path_or_doc)
     else:
         doc = path_or_doc
     styles = {_style_name(style): style for style in doc.styles.childNodes}

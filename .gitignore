@@ -6,3 +6,4 @@ _old
 notebooks
 images
 *checkpoints*
+.fuse*
