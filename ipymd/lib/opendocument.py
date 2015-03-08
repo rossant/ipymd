@@ -152,20 +152,23 @@ class ODFDocument(object):
     """Default stylename ==> actual stylename mapping."""
     style_mapping = {}
 
-    def __init__(self, styles=None):
+    def __init__(self, styles=None, doc=None):
 
-        self._doc = OpenDocumentText()
-
+        # Add default styles if necessary.
         self._styles = {}  # Dictionary of current styles.
+        if styles is None and doc is None:
+            styles = default_styles()
+        styles['_numbered_list'] = _numbered_style()
+
+        if doc is None:
+            self._doc = OpenDocumentText()
+            self.add_styles(**styles)
+        else:
+            self._doc = doc
+
         self._containers = []  # Stack of currently-active containers.
         self._next_p_style = None  # Style of the next paragraph to be created.
         self._ordered = False  # Where we're currently in an ordered list.
-
-        # Add default styles if necessary.
-        if styles is None:
-            styles = default_styles()
-        styles['_numbered_list'] = _numbered_style()
-        self.add_styles(**styles)
 
     # Public methods
     # -------------------------------------------------------------------------
