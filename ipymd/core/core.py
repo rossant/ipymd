@@ -129,6 +129,62 @@ class FormatManager(object):
         self._check_format(name)
         return self._formats[name]['writer'](*args, **kwargs)
 
+    def convert(self,
+                contents,
+                from_=None,
+                to=None,
+                from_kwargs=None,
+                to_kwargs=None,
+                ):
+        """Convert contents between supported formats.
+
+        Parameters
+        ----------
+
+        contents : str
+            The contents to convert from.
+        from_ : str or None
+            The name of the source format. If None, this is the
+            ipymd_cells format.
+        to : str or None
+            The name of the target format. If None, this is the
+            ipymd_cells format.
+        from_kwargs : dict
+            Optional keyword arguments to pass to the reader instance.
+        to_kwargs : dict
+            Optional keyword arguments to pass to the writer instance.
+
+        """
+
+        if from_kwargs is None:
+            from_kwargs = {}
+        if to_kwargs is None:
+            to_kwargs = {}
+
+        reader = (self.create_reader(from_, **from_kwargs)
+                  if from_ is not None else None)
+
+        writer = (self.create_writer(to, **to_kwargs)
+                  if to is not None else None)
+
+        if reader is not None:
+            # Convert from the source format to ipymd cells.
+            cells = [cell for cell in reader.read(contents)]
+        else:
+            # If no reader is specified, 'contents' is assumed to already be
+            # a list of ipymd cells.
+            cells = contents
+
+        if writer is not None:
+            # Convert from ipymd cells to the target format.
+            for cell in cells:
+                writer.write(cell)
+            return writer.contents
+        else:
+            # If no writer is specified, the output is supposed to be
+            # a list of ipymd cells.
+            return cells
+
 
 _FORMAT_MANAGER = None
 
@@ -148,59 +204,6 @@ def format_manager():
     return _FORMAT_MANAGER
 
 
-#------------------------------------------------------------------------------
-# Conversion function
-#------------------------------------------------------------------------------
-
-def convert(contents,
-            from_=None,
-            to=None,
-            from_kwargs=None,
-            to_kwargs=None,
-            ):
-    """Convert contents between supported formats.
-
-    Parameters
-    ----------
-
-    contents : str
-        The contents to convert from.
-    from_ : str or None
-        The name of the source format. If None, this is the ipymd_cells format.
-    to : str or None
-        The name of the target format. If None, this is the ipymd_cells format.
-    from_kwargs : dict
-        Optional keyword arguments to pass to the reader instance.
-    to_kwargs : dict
-        Optional keyword arguments to pass to the writer instance.
-
-    """
-
-    if from_kwargs is None:
-        from_kwargs = {}
-    if to_kwargs is None:
-        to_kwargs = {}
-
-    reader = (format_manager().create_reader(from_, **from_kwargs)
-              if from_ is not None else None)
-
-    writer = (format_manager().create_writer(to, **to_kwargs)
-              if to is not None else None)
-
-    if reader is not None:
-        # Convert from the source format to ipymd cells.
-        cells = [cell for cell in reader.read(contents)]
-    else:
-        # If no reader is specified, 'contents' is assumed to already be
-        # a list of ipymd cells.
-        cells = contents
-
-    if writer is not None:
-        # Convert from ipymd cells to the target format.
-        for cell in cells:
-            writer.write(cell)
-        return writer.contents
-    else:
-        # If no writer is specified, the output is supposed to be
-        # a list of ipymd cells.
-        return cells
+def convert(*args, **kwargs):
+    """Alias for format_manager().convert()."""
+    return format_manager().convert(*args, **kwargs)
