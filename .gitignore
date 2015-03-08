@@ -7,3 +7,4 @@ notebooks
 images
 *checkpoints*
 .fuse*
+*.pyc

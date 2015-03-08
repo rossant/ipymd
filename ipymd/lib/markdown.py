@@ -510,15 +510,64 @@ class MarkdownWriter(object):
     """A class for writing Markdown documents."""
     def __init__(self):
         self._output = StringIO()
+        self._list_number = 0
+
+    def _write(self, contents):
+        self._output.write(contents.rstrip())
 
     def newline(self):
         self._output.write('\n\n')
+        self._list_number = 0
 
     def linebreak(self):
         self._output.write('\n')
 
-    def write(self, contents):
-        self._output.write(contents.rstrip())
+    # Block methods
+    # -------------------------------------------------------------------------
+
+    def quote(self, text):
+        self.text('> ' + text)
+
+    def heading(self, text, level=None):
+        assert 1 <= level <= 6
+        self.text(('#' * level) + ' ' + text)
+
+    def numbered_list_item(self, text='', level=0):
+        self._list_number += 1
+        self.list_item(text, level=level, bullet=str(self._list_number),
+                       suffix='. ')
+
+    def list_item(self, text='', level=0, bullet='*', suffix=' '):
+        self.text(('  ' * level) + bullet + suffix + text)
+
+    def code(self, text, lang=None):
+        if lang is None:
+            lang = ''
+        self.text('```{0}\n{1}\n```'.format(lang, text))
+
+    # Inline methods
+    # -------------------------------------------------------------------------
+
+    def link(self, text, url):
+        self.text('[{0}]({1})'.format(text, url))
+
+    def image(self, caption, url):
+        self.text('![{0}]({1})'.format(caption, url))
+
+    def codespan(self, text):
+        self.text('`{0}`'.format(text))
+
+    def emphasis(self, text):
+        self.text('*{0}*'.format(text))
+
+    def double_emphasis(self, text):
+        self.text('**{0}**'.format(text))
+
+    def text(self, text):
+        self._write(text)
+
+    # Misc. methods
+    # -------------------------------------------------------------------------
 
     @property
     def contents(self):
