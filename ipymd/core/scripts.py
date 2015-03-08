@@ -13,7 +13,6 @@ import glob
 import json
 
 from ..ext.six import string_types
-from ..utils.utils import _read_text, _read_json, _write_text, _write_json
 from .core import convert, format_manager
 
 
@@ -67,28 +66,12 @@ def _filter_files_by_extension(files, extensions):
     return [file for file in files if _file_has_extension(file, extensions)]
 
 
-# TODO: refactor these two functions
-# TODO: allow the user to provide their own (de)serialization functions
-def _read_file(file, from_):
-    file_format = format_manager().file_type(from_)
-    if file_format == 'text':
-        return _read_text(file)
-    elif file_format == 'json':
-        return _read_json(file)
-    else:
-        raise ValueError("The file format '{0:s}' is ".format(file_format) +
-                         "not supported (should be 'text' or 'json').")
+def _load_file(file, from_):
+    return format_manager().load(file, from_)
 
 
-def _write_file(file, to, contents):
-    file_format = format_manager().file_type(to)
-    if file_format == 'text':
-        _write_text(file, contents)
-    elif file_format == 'json':
-        _write_json(file, contents)
-    else:
-        raise ValueError("The file format '{0:s}' is ".format(file_format) +
-                         "not supported (should be 'text' or 'json').")
+def _save_file(file, to, contents):
+    format_manager().save(file, to, contents)
 
 
 #------------------------------------------------------------------------------
@@ -112,14 +95,14 @@ def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
     # Convert all files.
     for file in files:
         print("Converting {0:s}...".format(file))
-        contents = _read_file(file, from_)
+        contents = _load_file(file, from_)
         converted = convert(contents, from_, to)
         file_to = _converted_filename(file, from_, to)
         if op.exists(file_to) and not overwrite:
             print("The file already exists, please use --overwrite.")
             continue
         else:
-            _write_file(file_to, to, converted)
+            _save_file(file_to, to, converted)
 
 
 def main():

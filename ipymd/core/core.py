@@ -14,6 +14,7 @@ import glob
 import json
 
 from ..ext.six import string_types
+from ..utils.utils import _read_text, _read_json, _write_text, _write_json
 from .. import formats
 
 
@@ -58,6 +59,32 @@ class FormatManager(object):
     def file_type(self, name):
         """Return the file type of a registered format."""
         return self._formats[name]['file_type']
+
+    def load(self, file, format):
+        file_format = self.file_type(format)
+        if file_format == 'text':
+            return _read_text(file)
+        elif file_format == 'json':
+            return _read_json(file)
+        else:
+            load_function = self._formats[format].get('load', None)
+            if load_function is None:
+                raise IOError("The format must declare a file type or "
+                              "load/save functions.")
+            return load_function(file)
+
+    def save(self, file, format, contents):
+        file_format = self.file_type(format)
+        if file_format == 'text':
+            _write_text(file, contents)
+        elif file_format == 'json':
+            _write_json(file, contents)
+        else:
+            write_function = self._formats[format].get('write', None)
+            if write_function is None:
+                raise IOError("The format must declare a file type or "
+                              "load/save functions.")
+            write_function(file, contents)
 
     def create_reader(self, name, *args, **kwargs):
         """Create a new reader instance for a given format."""

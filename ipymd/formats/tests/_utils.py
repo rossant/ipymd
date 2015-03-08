@@ -12,7 +12,7 @@ import difflib
 from pprint import pprint
 
 from ...core.core import format_manager, convert
-from ...core.scripts import _read_file, _write_file
+from ...core.scripts import _load_file, _save_file
 from ...ext.six import exec_
 
 
@@ -49,7 +49,7 @@ def _exec_test_file(basename):
 def _read_test_file(basename, format):
     """Read a test file."""
     path = _test_file_path(basename, format)
-    return _read_file(path, format)
+    return _load_file(path, format)
 
 
 #------------------------------------------------------------------------------
