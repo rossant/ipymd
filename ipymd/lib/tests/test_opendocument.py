@@ -79,5 +79,14 @@ def test_odf_renderer():
 
 def test_odf_reader():
     doc = _example_document()
-    reader = BaseODFReader(verbose=True)
+    reader = BaseODFReader()
+
+    _items = []
+
+    @reader.handler
+    def f(name, *args, **kwargs):
+        _items.append(name)
+
     reader.read(doc)
+
+    assert len(_items) == 53
