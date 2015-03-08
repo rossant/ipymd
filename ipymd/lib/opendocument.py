@@ -230,7 +230,7 @@ class ODFDocument(object):
     def show_styles(self):
         pprint(self._styles)
 
-    def to_dict(self, el=None):
+    def tree(self, el=None):
         item = {}
         # Name.
         if el is None:
@@ -241,7 +241,7 @@ class ODFDocument(object):
         # Data.
         item['data'] = _tag_data(el)
         # Children.
-        children = [self.to_dict(child) for child in el.childNodes]
+        children = [self.tree(child) for child in el.childNodes]
         if (len(children) == 1) and (children[0]['tag'] == 'text'):
             item['text'] = children[0]['data']
         else:
@@ -253,7 +253,7 @@ class ODFDocument(object):
         return item
 
     def __eq__(self, other):
-        return self.to_dict() == other.to_dict()
+        return self.tree() == other.tree()
 
     # Internal methods
     # -------------------------------------------------------------------------
@@ -567,10 +567,18 @@ class ODFRenderer(BaseRenderer):
 
 class BaseODFReader(object):
     def read(self, doc):
-        # children, name, style, text
+        # tag, style, children, text
         assert isinstance(doc, ODFDocument)
         self._doc = doc
-        self._dict = doc.to_dict()
+        self._dict = doc.tree()
+        assert self._dict['tag'] == 'root'
+        self._read_item(self._dict)
+
+    def _read_item(self, item):
+        pass
+
+    # Overridable methods
+    # -------------------------------------------------------------------------
 
     def block_quote_start(self):
         pass
