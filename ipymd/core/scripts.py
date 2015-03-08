@@ -67,11 +67,11 @@ def _filter_files_by_extension(files, extensions):
 
 
 def _load_file(file, from_):
-    return format_manager().load(file, from_)
+    return format_manager().load(file, name=from_)
 
 
 def _save_file(file, to, contents):
-    format_manager().save(file, to, contents)
+    format_manager().save(file, contents, name=to)
 
 
 #------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ def main():
     parser.add_argument('files_or_dirs', nargs='+',
                         help=('list of files or directories to convert'))
 
-    formats = ', '.join(format_manager().formats())
+    formats = ', '.join(format_manager().formats)
     parser.add_argument('--from', dest='from_', required=True,
                         help='one of {0:s}'.format(formats))
 

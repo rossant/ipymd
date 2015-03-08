@@ -29,8 +29,9 @@ class FormatManager(object):
     def register(self, name=None, **kwargs):
         """Register a format.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
+
         reader : class
             A class that implements read(contents) which yield ipymd cells.
         writer : class
@@ -39,10 +40,20 @@ class FormatManager(object):
             The file extension with the leading dot, like '.md'
         file_type : 'text' or 'json'
             The type of the file format.
+        load : a custom `contents = load(path)` function if no file type
+               is specified.
+        save : a custom `save(path, contents)` function if no file type
+               is specified.
 
         """
+        assert name is not None
         self._formats[name] = kwargs
 
+    def unregister(self, name):
+        """Unregister a format."""
+        del self._formats[name]
+
+    @property
     def formats(self):
         """Return the sorted list of registered formats."""
         return sorted(self._formats)
@@ -56,31 +67,53 @@ class FormatManager(object):
         """Return the file extension of a registered format."""
         return self._formats[name]['file_extension']
 
+    def format_from_extension(self, extension):
+        """Find a format from its extension."""
+        formats = [name
+                   for name, format in self._formats.items()
+                   if format.get('file_extension', None) == extension]
+        if len(formats) == 0:
+            return None
+        elif len(formats) == 2:
+            raise RuntimeError("Several extensions are registered with "
+                               "that extension; please specify the format "
+                               "explicitly.")
+        else:
+            return formats[0]
+
     def file_type(self, name):
         """Return the file type of a registered format."""
-        return self._formats[name]['file_type']
+        return self._formats[name].get('file_type', None)
 
-    def load(self, file, format):
-        file_format = self.file_type(format)
+    def load(self, file, name=None):
+        """Load a file. The format name can be specified explicitly or
+        inferred from the file extension."""
+        if name is None:
+            name = self.format_from_extension(op.splitext(file)[1])
+        file_format = self.file_type(name)
         if file_format == 'text':
             return _read_text(file)
         elif file_format == 'json':
             return _read_json(file)
         else:
-            load_function = self._formats[format].get('load', None)
+            load_function = self._formats[name].get('load', None)
             if load_function is None:
                 raise IOError("The format must declare a file type or "
                               "load/save functions.")
             return load_function(file)
 
-    def save(self, file, format, contents):
-        file_format = self.file_type(format)
+    def save(self, file, contents, name=None):
+        """Save contents into a file. The format name can be specified
+        explicitly or inferred from the file extension."""
+        if name is None:
+            name = self.format_from_extension(op.splitext(file)[1])
+        file_format = self.file_type(name)
         if file_format == 'text':
             _write_text(file, contents)
         elif file_format == 'json':
             _write_json(file, contents)
         else:
-            write_function = self._formats[format].get('write', None)
+            write_function = self._formats[name].get('save', None)
             if write_function is None:
                 raise IOError("The format must declare a file type or "
                               "load/save functions.")
@@ -127,8 +160,9 @@ def convert(contents,
             ):
     """Convert contents between supported formats.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
+
     contents : str
         The contents to convert from.
     from_ : str or None
