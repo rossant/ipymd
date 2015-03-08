@@ -192,4 +192,70 @@ def test_full_lexer():
 
 def test_markdown_writer():
     w = MarkdownWriter()
-    assert w.contents == '\n'
+
+    expected = '\n'.join(("# First chapter",
+                          "",
+                          "**Hello** *world*!",
+                          "How are you? Some `code`.",
+                          "",
+                          "> Good, and you?",
+                          "> End of citation.",
+                          "",
+                          "* Item **1**.",
+                          "* Item 2.",
+                          "",
+                          "1. 1",
+                          "  * 1.1",
+                          "    * 1.1.1",
+                          "2. 2",
+                          "",
+                          "```",
+                          "print(\"Hello world!\")",
+                          "```",
+                          "",
+                          ("Go to [google](http://www.google.com). "
+                           "And here is an image for you:"),
+                          "",
+                          "![Some image](my_image.png)\n"))
+
+    w.heading('First chapter', 1)
+    w.newline()
+
+    w.bold('Hello')
+    w.text(' ')
+    w.italic('world')
+    w.text('!')
+    w.linebreak()
+    w.text('How are you? Some ')
+    w.inline_code('code')
+    w.text('.')
+    w.newline()
+
+    w.quote('Good, and you?')
+    w.linebreak()
+    w.quote('End of citation.')
+    w.newline()
+
+    w.list_item('Item ')
+    w.bold('1')
+    w.text('.')
+    w.list_item('Item 2.')
+    w.newline()
+
+    w.numbered_list_item('1')
+    w.list_item('1.1', level=1)
+    w.list_item('1.1.1', level=2)
+    w.numbered_list_item('2')
+    w.newline()
+
+    w.code('print("Hello world!")')
+    w.newline()
+
+    w.text('Go to ')
+    w.link('google', 'http://www.google.com')
+    w.text('. And here is an image for you:')
+    w.newline()
+
+    w.image('Some image', 'my_image.png')
+
+    assert w.contents == expected

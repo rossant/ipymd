@@ -513,7 +513,7 @@ class MarkdownWriter(object):
         self._list_number = 0
 
     def _write(self, contents):
-        self._output.write(contents.rstrip())
+        self._output.write(contents.rstrip('\n'))
 
     def newline(self):
         self._output.write('\n\n')
@@ -522,25 +522,40 @@ class MarkdownWriter(object):
     def linebreak(self):
         self._output.write('\n')
 
+    def _ensure_newline(self, n):
+        """Make sure there are one or two line breaks at the end."""
+        assert 1 <= n <= 2
+        text = self._output.getvalue()
+        if not text:
+            return
+        k = text[-n:].count('\n')
+        self._output.write('\n' * (n - k))
+        assert self._output.getvalue()[-n:] == '\n' * n
+
     # Block methods
     # -------------------------------------------------------------------------
 
     def quote(self, text):
+        self._ensure_newline(1)
         self.text('> ' + text)
 
     def heading(self, text, level=None):
         assert 1 <= level <= 6
+        self._ensure_newline(2)
         self.text(('#' * level) + ' ' + text)
 
     def numbered_list_item(self, text='', level=0):
-        self._list_number += 1
+        if level == 0:
+            self._list_number += 1
         self.list_item(text, level=level, bullet=str(self._list_number),
                        suffix='. ')
 
     def list_item(self, text='', level=0, bullet='*', suffix=' '):
+        self._ensure_newline(1)
         self.text(('  ' * level) + bullet + suffix + text)
 
     def code(self, text, lang=None):
+        self._ensure_newline(1)
         if lang is None:
             lang = ''
         self.text('```{0}\n{1}\n```'.format(lang, text))
@@ -554,13 +569,13 @@ class MarkdownWriter(object):
     def image(self, caption, url):
         self.text('![{0}]({1})'.format(caption, url))
 
-    def codespan(self, text):
+    def inline_code(self, text):
         self.text('`{0}`'.format(text))
 
-    def emphasis(self, text):
+    def italic(self, text):
         self.text('*{0}*'.format(text))
 
-    def double_emphasis(self, text):
+    def bold(self, text):
         self.text('**{0}**'.format(text))
 
     def text(self, text):
