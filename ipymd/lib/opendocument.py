@@ -235,14 +235,14 @@ class ODFDocument(object):
         # Name.
         if el is None:
             el = self._doc.text
-            item['name'] = 'root'
+            item['tag'] = 'root'
         else:
-            item['name'] = _tag_name(el)
+            item['tag'] = _tag_name(el)
         # Data.
         item['data'] = _tag_data(el)
         # Children.
         children = [self.to_dict(child) for child in el.childNodes]
-        if (len(children) == 1) and (children[0]['name'] == 'text'):
+        if (len(children) == 1) and (children[0]['tag'] == 'text'):
             item['text'] = children[0]['data']
         else:
             item['children'] = children
@@ -559,3 +559,66 @@ class ODFRenderer(BaseRenderer):
 
     def block_code(self, code, lang=None):
         self._doc.code(code)
+
+
+# -----------------------------------------------------------------------------
+# ODF reader
+# -----------------------------------------------------------------------------
+
+class BaseODFReader(object):
+    def read(self, doc):
+        # children, name, style, text
+        assert isinstance(doc, ODFDocument)
+        self._doc = doc
+        self._dict = doc.to_dict()
+
+    def block_quote_start(self):
+        pass
+
+    def block_quote_end(self):
+        pass
+
+    def heading(self, text, level):
+        pass
+
+    def list_start(self):
+        pass
+
+    def list_end(self):
+        pass
+
+    def list_item_start(self):
+        pass
+
+    def list_item_end(self):
+        pass
+
+    def newline(self):
+        pass
+
+    def code(self, text, lang=None):
+        pass
+
+    def paragraph(self):
+        pass
+
+    def codespan(self, text):
+        pass
+
+    def bold(self, text):
+        pass
+
+    def italic(self, text):
+        pass
+
+    def image(self, caption, url):
+        pass
+
+    def linebreak(self):
+        pass
+
+    def link(self, text, url):
+        pass
+
+    def text(self, text):
+        pass

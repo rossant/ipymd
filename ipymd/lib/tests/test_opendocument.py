@@ -8,16 +8,15 @@
 # -----------------------------------------------------------------------------
 
 from ..markdown import BlockLexer
-from ..opendocument import ODFDocument, ODFRenderer
+from ..opendocument import ODFDocument, ODFRenderer, BaseODFReader
 
 
 # -----------------------------------------------------------------------------
 # Test ODFDocument
 # -----------------------------------------------------------------------------
 
-def test_odf_document():
+def _example_document():
     doc = ODFDocument()
-    doc.show_styles()
 
     doc.heading("The title", 1)
 
@@ -61,7 +60,12 @@ def test_odf_document():
 
     doc.code("print('Hello world!')")
 
-    # doc.save('test.odt', overwrite=True)
+    return doc
+
+
+def test_odf_document():
+    doc = _example_document()
+    doc.show_styles()
 
 
 def test_odf_renderer():
@@ -70,3 +74,11 @@ def test_odf_renderer():
     block_lexer = BlockLexer(renderer=renderer)
     text = "Hello world!"
     block_lexer.read(text)
+
+
+def test_odf_reader():
+
+    doc = _example_document()
+
+    reader = BaseODFReader()
+    reader.read(doc)
