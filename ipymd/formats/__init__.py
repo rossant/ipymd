@@ -6,3 +6,4 @@ from .notebook import *
 from .markdown import *
 from .atlas import *
 from .python import *
+from .opendocument import *

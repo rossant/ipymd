@@ -15,9 +15,15 @@ from ..lib.opendocument import load, ODFDocument, ODFRenderer
 # ODF renderers
 # -----------------------------------------------------------------------------
 
+def _add_prompt(code):
+    # TODO
+    return code
+
+
 class ODFReader(object):
     def read(self, contents):
-        # conents is an ODFDocument.
+        # contents is an ODFDocument.
+        # TODO: yield a list of ipymd cells
         pass
 
 
@@ -26,8 +32,17 @@ class ODFWriter(object):
         self._doc = ODFDocument()
 
     def write(self, cell):
-        # TODO
-        pass
+        if cell['cell_type'] == 'markdown':
+            md = cell['source']
+            # Convert the Markdown cell to ODF.
+            renderer = ODFRenderer(self._doc)
+            block_lexer = BlockLexer(renderer=renderer)
+            block_lexer.read(md)
+        elif cell['cell_type'] == 'code':
+            # Add the code cell to ODF.
+            input = _add_prompt(cell['input'].rstrip())
+            output = cell['output'].rstrip()
+            self._doc.code(input + '\n' + output)
 
     @property
     def contents(self):
@@ -44,7 +59,7 @@ def save_odf(path, contents):
 
 
 ODF_FORMAT = dict(
-    name='odf',
+    name='opendocument',
     reader=ODFReader,
     writer=ODFWriter,
     file_extension='.odt',

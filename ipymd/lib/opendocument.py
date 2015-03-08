@@ -37,9 +37,17 @@ def _show_attrs(el):
                      for k, v in el.attributes.items())
 
 
+def _show_data(el):
+    if hasattr(el, 'data'):
+        return el.data
+    else:
+        return ''
+
+
 def _show_element(el, indent=''):
     if hasattr(el, 'tagName'):
-        print(indent + el.tagName + ' - ' + _show_attrs(el))
+        print(indent + el.tagName + ' - ' +
+              _show_attrs(el) + ' | ' + _show_data(el))
     for child in el.childNodes:
         _show_element(child, indent + '  ')
 
@@ -59,13 +67,6 @@ _STYLE_NAME = ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
 def _style_name(el):
     """Return the name of a style element."""
     return el.attributes.get(_STYLE_NAME, '').strip()
-
-
-def _create_style(name, family=None, **kwargs):
-    """Helper function for creating a new style."""
-    style = Style(name=name, family=family)
-    style.addElement(TextProperties(**kwargs))
-    return style
 
 
 def _numbered_style():
@@ -98,6 +99,13 @@ def _numbered_style():
     return style
 
 
+def _create_style(name, family=None, **kwargs):
+    """Helper function for creating a new style."""
+    style = Style(name=name, family=family)
+    style.addElement(TextProperties(**kwargs))
+    return style
+
+
 def default_styles():
     """Generate default ODF styles."""
 
@@ -119,8 +127,9 @@ def default_styles():
     _add_style('heading-6',
                family='paragraph', fontsize='14pt', fontweight='bold')
 
-    _add_style('code', family='paragraph', fontsize='12pt',
-               fontname='Courier New', color='#333333')
+    _add_style('code', family='paragraph', fontsize='10pt',
+               fontweight='bold', fontfamily='Courier New',
+               color='#555555')
     _add_style('quote', family='paragraph', fontsize='12pt',
                fontstyle='italic')
 
@@ -129,9 +138,9 @@ def default_styles():
     _add_style('bold', family='text', fontweight='bold', fontsize='12pt')
 
     _add_style('url', family='text', fontsize='12pt',
-               fontweight='bold', fontname='Courier')
-    _add_style('inline-code', family='text', fontsize='12pt',
-               fontname='Courier New', color='#333333')
+               fontweight='bold', fontfamily='Courier')
+    _add_style('inline-code', family='text', fontsize='10pt',
+               fontweight='bold', fontfamily='Courier New', color='#555555')
 
     return styles
 
@@ -372,12 +381,15 @@ class ODFDocument(object):
     # Inline methods
     # -------------------------------------------------------------------------
 
-    def text(self, text, stylename='normal'):
+    def text(self, text, stylename=None):
         """Add text within the current container."""
         assert self._containers
         container = self._containers[-1]
-        stylename = self._get_style(stylename)
-        container.addElement(Span(stylename=stylename, text=text))
+        if stylename is not None:
+            stylename = self._get_style(stylename)
+            container.addElement(Span(stylename=stylename, text=text))
+        else:
+            container.addElement(Span(text=text))
 
     def link(self, url):
         self.text(url, stylename='url')
