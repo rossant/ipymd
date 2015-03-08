@@ -20,6 +20,7 @@ The code has been adapted from the mistune library:
 import re
 
 from .base_lexer import BaseLexer, BaseRenderer
+from ..ext.six import StringIO
 
 
 # -----------------------------------------------------------------------------
@@ -499,3 +500,32 @@ class InlineLexer(BaseLexer):
     def parse_text(self, m):
         text = m.group(0)
         self.renderer.text(text)
+
+
+# -----------------------------------------------------------------------------
+# Markdown writer
+# -----------------------------------------------------------------------------
+
+class MarkdownWriter(object):
+    """A class for writing Markdown documents."""
+    def __init__(self):
+        self._output = StringIO()
+
+    def newline(self):
+        self._output.write('\n\n')
+
+    def linebreak(self):
+        self._output.write('\n')
+
+    def write(self, contents):
+        self._output.write(contents.rstrip())
+
+    @property
+    def contents(self):
+        return self._output.getvalue().rstrip() + '\n'  # end of file \n
+
+    def close(self):
+        self._output.close()
+
+    def __del__(self):
+        self.close()

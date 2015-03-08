@@ -10,7 +10,7 @@ import re
 from pprint import pprint
 
 from ..base_lexer import BaseRenderer
-from ..markdown import BlockLexer, InlineLexer
+from ..markdown import BlockLexer, InlineLexer, MarkdownWriter
 
 
 # -----------------------------------------------------------------------------
@@ -184,3 +184,12 @@ def test_full_lexer():
                 '<quote>', '<p>', 'End.', '</p>', '</quote>'
                 ]
     assert renderer.output == expected
+
+
+# -----------------------------------------------------------------------------
+# Test Markdown writer
+# -----------------------------------------------------------------------------
+
+def test_markdown_writer():
+    w = MarkdownWriter()
+    assert w.contents == '\n'
