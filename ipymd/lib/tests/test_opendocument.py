@@ -7,6 +7,7 @@
 # Imports
 # -----------------------------------------------------------------------------
 
+from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer
 from ..opendocument import ODFDocument, ODFRenderer, BaseODFReader
 
@@ -77,8 +78,6 @@ def test_odf_renderer():
 
 
 def test_odf_reader():
-
     doc = _example_document()
-
-    reader = BaseODFReader()
+    reader = BaseODFReader(verbose=True)
     reader.read(doc)

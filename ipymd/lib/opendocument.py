@@ -22,8 +22,9 @@ from odf.style import (Style, TextProperties, ListLevelProperties,
 from odf.text import (H, P, Span, LineBreak, List, ListItem,
                       ListStyle, ListLevelStyleNumber)
 
-from .markdown import BaseRenderer, InlineLexer
 from ..ext.six import string_types
+from .base_lexer import BaseRenderer
+from .markdown import BaseRenderer, InlineLexer
 
 
 # -----------------------------------------------------------------------------
@@ -565,68 +566,86 @@ class ODFRenderer(BaseRenderer):
 # ODF reader
 # -----------------------------------------------------------------------------
 
-class BaseODFReader(object):
+def _item_type(item):
+    tag = item['tag']
+    style = item.get('style', None)
+    if tag == 'p':
+        if style in (None, 'normal'):
+            return 'paragraph'
+    elif tag == 'span':
+        if style in (None, 'normal'):
+            return 'text'
+        elif style == 'url':
+            return 'link'
+    elif tag == 'h':
+        assert style is not None
+        return style
+    elif tag in ('list', 'list-item', 'line-break'):
+        return tag
+    else:
+        raise Exception("This tag has not been implemented: " + tag)
+    return style
+
+
+class BaseODFReader(BaseRenderer):
+    """Parse an ODF document."""
     def read(self, doc):
         # tag, style, children, text
         assert isinstance(doc, ODFDocument)
         self._doc = doc
         self._dict = doc.tree()
         assert self._dict['tag'] == 'root'
-        self._read_item(self._dict)
+        for child in self._dict['children']:
+            self._read_item(child)
+
+    def _process_children(self, item):
+        # Process the children recursively.
+        children = item.get('children', [])
+        for child in children:
+            self._read_item(child)
 
     def _read_item(self, item):
-        pass
+        # Process the current item.
+        text = item.get('text', None)
+        item_type = _item_type(item)
 
-    # Overridable methods
-    # -------------------------------------------------------------------------
+        # Block items.
+        if item_type.startswith('heading'):
+            self.heading(text, level=int(item_type[-1]))
+        elif item_type == 'paragraph':
+            self.paragraph_start()
+            self._process_children(item)
+            self.paragraph_end()
+        elif item_type == 'quote':
+            self.quote_start()
+            self._process_children(item)
+            self.quote_end()
+        elif item_type == 'code':
+            self.code_start()
+            self._process_children(item)
+            self.code_end()
+        elif item_type == 'list':
+            self.list_start()
+            self._process_children(item)
+            self.list_end()
+        elif item_type == 'list-item':
+            self.list_item_start()
+            self._process_children(item)
+            self.list_item_end()
 
-    def block_quote_start(self):
-        pass
-
-    def block_quote_end(self):
-        pass
-
-    def heading(self, text, level):
-        pass
-
-    def list_start(self):
-        pass
-
-    def list_end(self):
-        pass
-
-    def list_item_start(self):
-        pass
-
-    def list_item_end(self):
-        pass
-
-    def newline(self):
-        pass
-
-    def code(self, text, lang=None):
-        pass
-
-    def paragraph(self):
-        pass
-
-    def codespan(self, text):
-        pass
-
-    def bold(self, text):
-        pass
-
-    def italic(self, text):
-        pass
-
-    def image(self, caption, url):
-        pass
-
-    def linebreak(self):
-        pass
-
-    def link(self, text, url):
-        pass
-
-    def text(self, text):
-        pass
+        # Inline items.
+        elif item_type == 'line-break':
+            self.linebreak()
+        elif item_type == 'text':
+            self.text(text)
+        elif item_type == 'codespan':
+            self.codespan(text)
+        elif item_type == 'bold':
+            self.bold(text)
+        elif item_type == 'italic':
+            self.italic(text)
+        elif item_type == 'link':
+            self.link(text)
+        # elif item_type == 'image':
+        else:
+            raise NotImplementedError(item_type, item)
