@@ -62,11 +62,18 @@ def test_format_manager():
         path = op.join(tempdir, 'test.mock')
         fm.save(path, contents)
 
+        # Test the custom load/save functions.
         loaded = fm.load(path)
-        assert loaded == ['line 1', 'line 2', 'line 3']
+        assert loaded == contents
 
         fm.save(path, loaded)
         with open(path, 'r') as f:
             assert f.read() == 'mock\nline 1\nline 2\nline 3'
+
+        # Test the conversion from/to ipymd cells.
+        cells = fm.convert(contents, from_='mock')
+        assert cells == [{'cell_type': 'markdown',
+                          'source': line} for line in contents]
+        assert fm.convert(cells, to='mock') == contents
 
     fm.unregister('mock')
