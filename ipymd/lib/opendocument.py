@@ -30,6 +30,10 @@ from ..ext.six import string_types
 # Utility functions
 # -----------------------------------------------------------------------------
 
+_STYLE_NAME = ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
+               'display-name')
+
+
 def _show_attrs(el):
     if not el.attributes:
         return ''
@@ -37,17 +41,21 @@ def _show_attrs(el):
                      for k, v in el.attributes.items())
 
 
-def _show_data(el):
+def _tag_data(el):
     if hasattr(el, 'data'):
         return el.data
     else:
         return ''
 
 
+def _tag_name(el):
+    return (el.tagName.replace('text:', '').lower().strip())
+
+
 def _show_element(el, indent=''):
     if hasattr(el, 'tagName'):
         print(indent + el.tagName + ' - ' +
-              _show_attrs(el) + ' | ' + _show_data(el))
+              _show_attrs(el) + ' | ' + _tag_data(el))
     for child in el.childNodes:
         _show_element(child, indent + '  ')
 
@@ -59,15 +67,6 @@ def _is_paragraph(el):
 # -----------------------------------------------------------------------------
 # Style-related utility functions
 # -----------------------------------------------------------------------------
-
-_STYLE_NAME = ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
-               'display-name')
-
-
-def _style_name(el):
-    """Return the name of a style element."""
-    return el.attributes.get(_STYLE_NAME, '').strip()
-
 
 def _numbered_style():
     """Create a numbered list style."""
@@ -145,6 +144,10 @@ def default_styles():
     return styles
 
 
+def _style_name(el):
+    return el.attributes.get(_STYLE_NAME, '').strip()
+
+
 def load_styles(path):
     """Return a dictionary of all styles contained in an ODF document."""
     f = load(path)
@@ -174,6 +177,9 @@ class ODFDocument(object):
             self.add_styles(**styles)
         else:
             self._doc = doc
+
+        self.inverse_style_mapping = {v: k
+                                      for (k, v) in self.style_mapping.items()}
 
         self._containers = []  # Stack of currently-active containers.
         self._next_p_style = None  # Style of the next paragraph to be created.
@@ -240,6 +246,39 @@ class ODFDocument(object):
         el = cls(**kwargs)
         self._doc.text.addElement(el)
 
+    def _style_name(self, el):
+        """Return the style name of an element."""
+        if el.attributes is None:
+            return None
+        style_field = ('urn:oasis:names:tc:opendocument:xmlns:text:1.0',
+                       'style-name')
+        name = el.attributes.get(style_field, None)
+        if not name:
+            return None
+        return self.inverse_style_mapping.get(name, name)
+
+    def to_dict(self, el=None):
+        item = {}
+        # Name.
+        if el is None:
+            el = self._doc.text
+            item['name'] = 'root'
+        else:
+            item['name'] = _tag_name(el)
+        # Data.
+        item['data'] = _tag_data(el)
+        # Children.
+        children = [self.to_dict(child) for child in el.childNodes]
+        if (len(children) == 1) and (children[0]['name'] == 'text'):
+            item['text'] = children[0]['data']
+        else:
+            item['children'] = children
+        # Style.
+        item['style'] = self._style_name(el)
+        # Remove empty fields.
+        item = {k: v for k, v in item.items() if v}
+        return item
+
     # Block methods
     # -------------------------------------------------------------------------
 
@@ -284,6 +323,8 @@ class ODFDocument(object):
         if self._next_p_style is not None:
             stylename = self._next_p_style
             self._next_p_style = None
+        if stylename is None:
+            stylename = 'normal'
         self.start_container(P, stylename=stylename)
 
     def end_paragraph(self):

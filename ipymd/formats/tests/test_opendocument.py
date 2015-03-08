@@ -39,10 +39,11 @@ def _test_odf_odf(basename):
     assert _diff(contents, converted) == ''
 
 
-# def test():
-#     markdown = _read_test_file('ex1', 'markdown')
-#     odf = convert(markdown, from_='markdown', to='opendocument')
-#     odf.save('test.odt', overwrite=True)
+def test():
+    markdown = _read_test_file('ex1', 'markdown')
+    odf = convert(markdown, from_='markdown', to='opendocument')
+    # TODO: check
+    assert odf
 
 
 # def test_odf_reader():
