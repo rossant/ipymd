@@ -126,7 +126,7 @@ class SimplePromptManager(BasePromptManager):
         n = len(self.output_prompt_template)
         output = _to_code([line[n:] for line in output_l])
 
-        return input.rstrip() + '\n' + output.rstrip()
+        return input.rstrip(), output.rstrip()
 
 
 #------------------------------------------------------------------------------
@@ -175,3 +175,45 @@ class IPythonPromptManager(BasePromptManager):
         output = _to_code(output_l)
 
         return input, output
+
+
+#------------------------------------------------------------------------------
+# Python prompt manager
+#------------------------------------------------------------------------------
+
+class PythonPromptManager(SimplePromptManager):
+    input_prompt_template = '>>> '
+    second_input_prompt_template = '... '
+
+    output_prompt_template = ''
+
+    def from_cell(self, input, output):
+        lines = _to_lines(input)
+        first = self.input_prompt_template
+        second = self.second_input_prompt_template
+
+        lines_prompt = []
+        prompt = first
+        lock = False
+        for line in lines:
+            if line.startswith('%%'):
+                lines_prompt.append(prompt + line)
+                prompt = second
+                lock = True
+            elif line.startswith('#') or line.startswith('@'):
+                lines_prompt.append(prompt + line)
+                prompt = second
+            # Empty line = second prompt.
+            elif line.rstrip() == '':
+                lines_prompt.append((second + line).rstrip())
+            elif line.startswith('  '):
+                prompt = second
+                lines_prompt.append(prompt + line)
+                if not lock:
+                    prompt = first
+            else:
+                lines_prompt.append(prompt + line)
+                if not lock:
+                    prompt = first
+
+        return _to_code(lines_prompt) + '\n' + output.rstrip()
