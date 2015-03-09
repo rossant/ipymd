@@ -127,6 +127,11 @@ class MarkdownReader(BaseMarkdownReader):
         if lang == 'python':
             return self._code_cell(code)
         else:
+            # Test the first line of the cell.
+            if '\n' in code:
+                n = code.index('\n')
+                if self._prompt.is_input(code[:n]):
+                    return self._code_cell(code)
             return self._markdown_cell_from_regex(m)
 
     def parse_block_code(self, m):
