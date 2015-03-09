@@ -37,6 +37,13 @@ class MockPromptManager(SimplePromptManager):
     output_prompt_template = ''
 
 
+def test_simple_split():
+    pm = MockPromptManager()
+    assert pm.is_input('> 1')
+    assert not pm.is_input('>1')
+    assert not pm.is_input('1')
+
+
 def _test(prompt_manager_cls, in_out, text):
     input, output = in_out
 
