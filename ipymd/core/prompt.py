@@ -27,11 +27,19 @@ def _add_line_prefix(lines, prefix):
 
 def _template_to_regex(template):
     regex = template
-    regex = regex.replace('{n}', '\d+')
     # Escape special characters.
-    for char in '{}[]()+*?':
+    for char in r'{}[]()+*?:-':
         regex = regex.replace(char, '\\' + char)
+    regex = regex.replace(r'\{n\}', r'\d+')
     return regex
+
+
+def _start_with_regex(line, regex):
+    """Return whether a line starts with a regex or not."""
+    if not regex.startswith('^'):
+        regex = '^' + regex
+    reg = re.compile(regex)
+    return reg.match(line)
 
 
 class BasePromptManager(object):
@@ -42,9 +50,9 @@ class BasePromptManager(object):
 
     def __init__(self):
         # Compile the prompt regexes.
-        self._input_prompt_regex = _template_to_regex(
+        self.input_prompt_regex = _template_to_regex(
             self.input_prompt_template)
-        self._output_prompt_regex = _template_to_regex(
+        self.output_prompt_regex = _template_to_regex(
             self.output_prompt_template)
         self.reset()
 
@@ -67,28 +75,13 @@ class BasePromptManager(object):
     def output_prompt(self):
         return self._replace_template(self.output_prompt_template)
 
-    @property
-    def input_prompt_regex(self):
-        return self._input_prompt_regex
-
-    @property
-    def output_prompt_regex(self):
-        return self._output_prompt_regex
-
-    def start_with_regex(self, line, regex):
-        """Return whether a line starts with a regex or not."""
-        if not regex.startswith('^'):
-            regex = '^' + regex
-        reg = re.compile(regex)
-        return reg.match(line)
-
     def split_input_output(self, text):
         """Split code into input lines and output lines, according to the
         input and output prompt templates."""
         lines = _to_lines(text)
         i = 0
         for line in lines:
-            if not self.start_with_regex(line, self.output_prompt_regex):
+            if _start_with_regex(line, self.input_prompt_regex):
                 i += 1
             else:
                 break
@@ -137,6 +130,10 @@ class IPythonPromptManager(BasePromptManager):
     input_prompt_template = 'In [{n}]: '
     output_prompt_template = 'Out [{n}]: '
 
+    def __init__(self):
+        super(IPythonPromptManager, self).__init__()
+        self.input_prompt_regex = '(In \[\d+\]\: | {6,})'
+
     def _add_prompt(self, lines, prompt):
         lines[:1] = _add_line_prefix(lines[:1], prompt)
         lines[1:] = _add_line_prefix(lines[1:], ' ' * len(prompt))
@@ -159,13 +156,13 @@ class IPythonPromptManager(BasePromptManager):
     def to_cell(self, text):
         input_l, output_l = self.split_input_output(text)
 
-        m = self.start_with_regex(input_l[0], self.input_prompt_regex)
+        m = _start_with_regex(input_l[0], self.input_prompt_regex)
         assert m
         input_prompt = m.group(0)
         n_in = len(input_prompt)
         input_l = [line[n_in:] for line in input_l]
 
-        m = self.start_with_regex(output_l[0], self.output_prompt_regex)
+        m = _start_with_regex(output_l[0], self.output_prompt_regex)
         assert m
         output_prompt = m.group(0)
         n_out = len(output_prompt)
