@@ -14,7 +14,7 @@ import re
 #------------------------------------------------------------------------------
 
 def _to_lines(code):
-    return [line.rstrip() for line in input.rstrip().splitlines()]
+    return [line.rstrip() for line in code.rstrip().splitlines()]
 
 
 def _to_code(lines):
@@ -27,10 +27,10 @@ def _add_line_prefix(lines, prefix):
 
 def _template_to_regex(template):
     regex = template
-    # Escape special characters.
-    for char in '[]()+*?':
-        regex = regex.replace(char, '\\' + char)
     regex = regex.replace('{n}', '\d+')
+    # Escape special characters.
+    for char in '{}[]()+*?':
+        regex = regex.replace(char, '\\' + char)
     return regex
 
 
@@ -79,6 +79,48 @@ class BasePromptManager(object):
         reg = re.compile(regex)
         return reg.match(line)
 
+    def split_input_output(self, text):
+        lines = _to_lines(text)
+        i = 0
+        for line in lines:
+            if not self.start_with_regex(line, self.output_prompt_regex):
+                i += 1
+            else:
+                break
+        return lines[:i], lines[i:]
+
+    def from_cell(self, input, output):
+        raise NotImplementedError()
+
+    def to_cell(self, code):
+        raise NotImplementedError()
+
+
+class SimplePromptManager(BasePromptManager):
+    """No prompt number, same input prompt at every line, idem for output."""
+    input_prompt_template = ''
+    output_prompt_template = ''
+
+    def from_cell(self, input, output):
+        input_l = _to_lines(input)
+        output_l = _to_lines(output)
+
+        input_l = _add_line_prefix(input_l, self.input_prompt)
+        output_l = _add_line_prefix(output_l, self.output_prompt)
+
+        return _to_code(input_l) + '\n' + _to_code(output_l)
+
+    def to_cell(self, code):
+        input_l, output_l = self.split_input_output(code)
+
+        n = len(self.input_prompt_template)
+        input = _to_code([line[n:] for line in input_l])
+
+        n = len(self.output_prompt_template)
+        output = _to_code([line[n:] for line in output_l])
+
+        return input.rstrip() + '\n' + output.rstrip()
+
 
 #------------------------------------------------------------------------------
 # IPython prompt manager
@@ -106,33 +148,21 @@ class IPythonPromptManager(BasePromptManager):
         return input_p + '\n' + output_p
 
     def to_cell(self, text):
-        lines = _to_lines(text)
+        input_l, output_l = self.split_input_output(text)
 
-        m = self.start_with_regex(lines[0], self.input_prompt_regex)
+        m = self.start_with_regex(input_l[0], self.input_prompt_regex)
         assert m
         input_prompt = m.group(0)
         n_in = len(input_prompt)
+        input_l = [line[n_in:] for line in input_l]
 
-        # Process input lines until the first output line.
-        input_lines = []
-        for line in lines:
-            if not self.start_with_regex(line, self.output_prompt_regex):
-                input_lines.append(line[n_in:])
-            else:
-                break
-
-        m = self.start_with_regex(lines[len(input_lines)],
-                                  self.output_prompt_regex)
+        m = self.start_with_regex(output_l[0], self.output_prompt_regex)
         assert m
         output_prompt = m.group(0)
         n_out = len(output_prompt)
+        output_l = [line[n_out:] for line in output_l]
 
-        # Process the remaining output lines.
-        output_lines = []
-        for line in lines[len(input_lines):]:
-            output_lines.append(line[n_out:])
-
-        input = _to_code(input_lines)
-        output = _to_code(output_lines)
+        input = _to_code(input_l)
+        output = _to_code(output_l)
 
         return input, output
