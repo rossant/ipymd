@@ -16,7 +16,7 @@ from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
 # Test ODF parser
 #------------------------------------------------------------------------------
 
-def test_generate():
+def _test_generate():
     for ex in ('ex1', 'ex2'):
         markdown = _read_test_file(ex, 'markdown')
         odf = convert(markdown, from_='markdown', to='opendocument')
