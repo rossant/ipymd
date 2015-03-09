@@ -440,6 +440,7 @@ class ODFDocument(object):
             stylename = self._get_style(stylename)
             container.addElement(Span(stylename=stylename, text=text))
         else:
+            print(text)
             container.addElement(Span(text=text))
 
     def link(self, url):

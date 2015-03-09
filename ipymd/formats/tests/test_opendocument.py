@@ -11,21 +11,22 @@ from ...utils.utils import _remove_output
 from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
                      _exec_test_file, _read_test_file)
 
-# Code to generate test files:
-
-#     markdown = _read_test_file('ex2', 'markdown')
-#     odf = convert(markdown, from_='markdown', to='opendocument')
-#     odf.save('examples/ex2.opendocument.odt')
-
 
 #------------------------------------------------------------------------------
 # Test ODF parser
 #------------------------------------------------------------------------------
 
+def test_generate():
+    for ex in ('ex1', 'ex2'):
+        markdown = _read_test_file(ex, 'markdown')
+        odf = convert(markdown, from_='markdown', to='opendocument')
+        odf.save('examples/{0}.opendocument.odt'.format(ex), overwrite=True)
+
+
 def _test_odf_reader(basename):
     """Check that (test cells) and (test contents ==> cells) are the same."""
     converted, expected = _test_reader(basename, 'opendocument')
-    assert _remove_output(converted) == _remove_output(expected)
+    assert converted == expected
 
 
 def _test_odf_writer(basename):

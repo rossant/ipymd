@@ -7,30 +7,30 @@
 # Imports
 # -----------------------------------------------------------------------------
 
-from ..lib.markdown import InlineLexer, BlockLexer, BaseRenderer
-from ..lib.opendocument import load, ODFDocument, ODFRenderer
+from ..core.prompt import create_prompt
 from ..ext.six import text_type
+from ..lib.markdown import InlineLexer, BlockLexer, BaseRenderer
+from ..lib.opendocument import (load, ODFDocument, ODFRenderer,
+                                odf_to_markdown)
+from .markdown import MarkdownReader
 
 
 # -----------------------------------------------------------------------------
 # ODF renderers
 # -----------------------------------------------------------------------------
 
-def _add_prompt(code):
-    # TODO
-    return code
-
-
 class ODFReader(object):
     def read(self, contents):
         # contents is an ODFDocument.
-        # TODO: yield a list of ipymd cells
-        return []
+        md = odf_to_markdown(contents)
+        reader = MarkdownReader()
+        return reader.read(md)
 
 
 class ODFWriter(object):
-    def __init__(self):
+    def __init__(self, prompt=None):
         self._doc = ODFDocument()
+        self._prompt = create_prompt(prompt)
 
     def write(self, cell):
         if cell['cell_type'] == 'markdown':
@@ -41,9 +41,8 @@ class ODFWriter(object):
             block_lexer.read(md)
         elif cell['cell_type'] == 'code':
             # Add the code cell to ODF.
-            input = _add_prompt(cell['input'].rstrip())
-            output = cell['output'].rstrip()
-            self._doc.code(input + '\n' + output)
+            source = self._prompt.from_cell(cell['input'], cell['output'])
+            self._doc.code(source)
 
     @property
     def contents(self):

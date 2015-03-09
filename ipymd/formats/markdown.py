@@ -17,7 +17,7 @@ from ..ext.six import StringIO
 from ..utils.utils import _ensure_string, _preprocess
 from ..lib.markdown import (BlockGrammar, BlockLexer,
                             InlineGrammar, InlineLexer)
-from ..core.prompt import (BasePromptManager, create_prompt)
+from ..core.prompt import create_prompt
 
 
 #------------------------------------------------------------------------------
