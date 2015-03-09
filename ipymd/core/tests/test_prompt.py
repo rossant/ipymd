@@ -10,7 +10,7 @@ from ..prompt import (SimplePromptManager,
                       IPythonPromptManager,
                       PythonPromptManager,
                       _template_to_regex,
-                      _start_with_regex,
+                      _starts_with_regex,
                       )
 from ...formats.tests._utils import _show_outputs
 
@@ -24,12 +24,12 @@ def test_utils():
     regex = _template_to_regex(template)
     assert regex == r'In \[\d+\]\: '
 
-    assert not _start_with_regex('In []: ', regex)
-    assert not _start_with_regex('In [s]: ', regex)
-    assert not _start_with_regex('Out [1]: ', regex)
-    assert _start_with_regex('In [1]: ', regex)
-    assert _start_with_regex('In [23]: ', regex)
-    assert _start_with_regex('In [23]: print()\n', regex)
+    assert not _starts_with_regex('In []: ', regex)
+    assert not _starts_with_regex('In [s]: ', regex)
+    assert not _starts_with_regex('Out [1]: ', regex)
+    assert _starts_with_regex('In [1]: ', regex)
+    assert _starts_with_regex('In [23]: ', regex)
+    assert _starts_with_regex('In [23]: print()\n', regex)
 
 
 class MockPromptManager(SimplePromptManager):

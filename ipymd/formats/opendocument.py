@@ -25,7 +25,7 @@ class ODFReader(object):
     def read(self, contents):
         # contents is an ODFDocument.
         # TODO: yield a list of ipymd cells
-        pass
+        return []
 
 
 class ODFWriter(object):

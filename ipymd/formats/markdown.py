@@ -123,8 +123,9 @@ class MarkdownReader(BaseMarkdownReader):
 
     def parse_fences(self, m):
         lang = m.group(2)
+        code = m.group(3).rstrip()
         if lang == 'python':
-            return self._code_cell(m.group(3).rstrip())
+            return self._code_cell(code)
         else:
             return self._markdown_cell_from_regex(m)
 

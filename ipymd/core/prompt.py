@@ -34,7 +34,7 @@ def _template_to_regex(template):
     return regex
 
 
-def _start_with_regex(line, regex):
+def _starts_with_regex(line, regex):
     """Return whether a line starts with a regex or not."""
     if not regex.startswith('^'):
         regex = '^' + regex
@@ -79,13 +79,18 @@ class BasePromptManager(object):
     def output_prompt(self):
         return self._replace_template(self.output_prompt_template)
 
+    def is_input(self, line):
+        """Return whether a code line is an input, based on the input
+        prompt."""
+        return _starts_with_regex(line, self.input_prompt_regex)
+
     def split_input_output(self, text):
         """Split code into input lines and output lines, according to the
         input and output prompt templates."""
         lines = _to_lines(text)
         i = 0
         for line in lines:
-            if _start_with_regex(line, self.input_prompt_regex):
+            if _starts_with_regex(line, self.input_prompt_regex):
                 i += 1
             else:
                 break
@@ -162,14 +167,14 @@ class IPythonPromptManager(BasePromptManager):
     def to_cell(self, text):
         input_l, output_l = self.split_input_output(text)
 
-        m = _start_with_regex(input_l[0], self.input_prompt_regex)
+        m = _starts_with_regex(input_l[0], self.input_prompt_regex)
         assert m
         input_prompt = m.group(0)
         n_in = len(input_prompt)
         input_l = [line[n_in:] for line in input_l]
         input = _to_code(input_l)
 
-        m = _start_with_regex(output_l[0], self.output_prompt_regex)
+        m = _starts_with_regex(output_l[0], self.output_prompt_regex)
         assert m
         output_prompt = m.group(0)
         n_out = len(output_prompt)
