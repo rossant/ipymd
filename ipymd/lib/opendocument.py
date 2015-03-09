@@ -716,10 +716,11 @@ class ODFMarkdownConverter(BaseODFReader):
         self._in_list = kind
 
     def list_end(self):
-        self._writer.newline()
+        # self._writer.newline()
         self._list_level -= 1
         if self._list_level == 0:
             self._in_list = None
+            self._writer.linebreak()
 
     def numbered_list_start(self):
         self.list_start('numbered')
@@ -734,7 +735,8 @@ class ODFMarkdownConverter(BaseODFReader):
             self._writer.numbered_list_item(level=(self._list_level - 1))
 
     def list_item_end(self):
-        self._writer.linebreak()
+        # self._writer.linebreak()
+        pass
 
     # -------------------------------------------------------------------------
     # Inline

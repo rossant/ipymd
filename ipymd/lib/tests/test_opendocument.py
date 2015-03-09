@@ -100,5 +100,25 @@ def test_odf_reader():
 def test_odf_markdown_converter():
     doc = _example_document()
     md = odf_to_markdown(doc)
-    print(md)
-    assert md
+    expected = '\n'.join(('# The title',
+                          '',
+                          'Some text. **This is bold.**',
+                          '',
+                          '* Item 1.',
+                          '* Item 2.',
+                          ('  * Item 2.1. This is `code`. '
+                           'Oh, and here is a link: http://google.com.'),
+                          '* Item 3.',
+                          '',
+                          '> This is a citation.',
+                          '> End.',
+                          '',
+                          '1. Item 1.',
+                          '2. Item 2.',
+                          '',
+                          '```',
+                          'print(\'Hello world!\')',
+                          '```',
+                          ''))
+
+    assert md == expected
