@@ -581,7 +581,10 @@ def _item_type(item):
         assert style is not None
         return style
     elif tag in ('list', 'list-item', 'line-break'):
-        return tag
+        if style == '_numbered_list':
+            return 'numbered-list'
+        else:
+            return tag
     else:
         raise Exception("This tag has not been implemented: " + tag)
     return style
@@ -628,6 +631,10 @@ class BaseODFReader(BaseRenderer):
             self.list_start()
             self._process_children(item)
             self.list_end()
+        elif item_type == 'numbered-list':
+            self.numbered_list_start()
+            self._process_children(item)
+            self.numbered_list_end()
         elif item_type == 'list-item':
             self.list_item_start()
             self._process_children(item)
@@ -638,7 +645,7 @@ class BaseODFReader(BaseRenderer):
             self.linebreak()
         elif item_type == 'text':
             self.text(text)
-        elif item_type == 'codespan':
+        elif item_type == 'inline-code':
             self.codespan(text)
         elif item_type == 'bold':
             self.bold(text)
@@ -658,70 +665,105 @@ class BaseODFReader(BaseRenderer):
 class ODFMarkdownConverter(BaseODFReader):
     def __init__(self):
         self._writer = MarkdownWriter()
+        self._in_list = None  # None, 'list' or 'numbered'
+        self._list_level = 0
 
     @property
     def contents(self):
         return self._writer.contents
 
+    # -------------------------------------------------------------------------
+    # Block
+    # -------------------------------------------------------------------------
+
     def heading(self, text, level):
-        pass
+        self._writer.heading(text, level=level)
+        self._writer.newline()
 
     def newline(self):
-        pass
+        self._writer.newline()
 
     def paragraph_start(self):
+        # self._writer.newline()
         pass
 
     def paragraph_end(self):
-        pass
+        if self._in_list:
+            self._writer.linebreak()
+        else:
+            self._writer.newline()
 
     def quote_start(self):
-        pass
+        # self._writer.newline()
+        self._writer.quote_start()
 
     def quote_end(self):
-        pass
-
-    def list_start(self):
-        pass
-
-    def list_end(self):
-        pass
-
-    def list_item_start(self):
-        pass
-
-    def list_item_end(self):
-        pass
+        self._writer.quote_end()
+        self._writer.newline()
 
     def code_start(self):
-        pass
+        self._writer.code_start()
 
     def code_end(self):
-        pass
+        self._writer.code_end()
+
+    # -------------------------------------------------------------------------
+    # Lists
+    # -------------------------------------------------------------------------
+
+    def list_start(self, kind='list'):
+        self._list_level += 1
+        self._in_list = kind
+
+    def list_end(self):
+        self._writer.newline()
+        self._list_level -= 1
+        if self._list_level == 0:
+            self._in_list = None
+
+    def numbered_list_start(self):
+        self.list_start('numbered')
+
+    def numbered_list_end(self):
+        self.list_end()
+
+    def list_item_start(self):
+        if self._in_list == 'list':
+            self._writer.list_item(level=(self._list_level - 1))
+        if self._in_list == 'numbered':
+            self._writer.numbered_list_item(level=(self._list_level - 1))
+
+    def list_item_end(self):
+        self._writer.linebreak()
+
+    # -------------------------------------------------------------------------
+    # Inline
+    # -------------------------------------------------------------------------
 
     def codespan(self, text):
-        pass
+        self._writer.inline_code(text)
 
     def bold(self, text):
-        pass
+        self._writer.bold(text)
 
     def italic(self, text):
-        pass
+        self._writer.italic(text)
+
+    def linebreak(self):
+        self._writer.linebreak()
 
     def image(self, caption, url):
-        pass
-
-    def linebreak(self, ):
-        pass
+        self._writer.image(caption, url)
 
     def link(self, url):
-        pass
+        self._writer.text(url)
 
     def text(self, text):
-        pass
+        self._writer.text(text)
 
 
 def odf_to_markdown(doc):
     converter = ODFMarkdownConverter()
+    # converter = BaseODFReader(verbose=True)
     converter.read(doc)
     return converter.contents

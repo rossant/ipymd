@@ -567,6 +567,7 @@ class MarkdownWriter(object):
                        suffix='. ')
 
     def list_item(self, text='', level=0, bullet='*', suffix=' '):
+        assert level >= 0
         self.text(('  ' * level) + bullet + suffix + text)
 
     def code_start(self, lang=None):

@@ -24,7 +24,7 @@ def _example_document():
 
     with doc.paragraph():
         doc.text("Some text. ")
-        doc.bold("This is bold. ")
+        doc.bold("This is bold.")
 
     with doc.list():
         with doc.list_item():
@@ -37,7 +37,7 @@ def _example_document():
                 with doc.list_item():
                     with doc.paragraph():
                         doc.text("Item 2.1. This is ")
-                        doc.code_line("code")
+                        doc.inline_code("code")
                         doc.text(". Oh, and here is a link: ")
                         doc.link("http://google.com")
                         doc.text(".")
@@ -91,7 +91,6 @@ def test_odf_reader():
     reader.read(doc)
 
     assert len(_items) == 53
-
 
 
 # -----------------------------------------------------------------------------
