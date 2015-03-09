@@ -32,10 +32,9 @@ def test_simple_prompt_manager():
 def test_ipython_prompt_manager():
 
     input, output = 'print("1")\nprint("2")', '1\n2'
-    text_e = 'In [1]: print("1")\n        print("2")\nOut[1]: 1\n        2'
+    text_e = 'In [1]: print("1")\n        print("2")\nOut [1]: 1\n         2'
 
     pm = IPythonPromptManager()
-    pm.from_cell(input, output)
+    text = pm.from_cell(input, output)
 
-    _show_outputs(text, text_e)
     assert text == text_e

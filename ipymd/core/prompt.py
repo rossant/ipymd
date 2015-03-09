@@ -132,15 +132,15 @@ class IPythonPromptManager(BasePromptManager):
 
     def _add_prompt(self, lines, prompt):
         lines[:1] = _add_line_prefix(lines[:1], prompt)
-        lines[1:] = _add_line_prefix(lines[1], ' ' * len(prompt))
+        lines[1:] = _add_line_prefix(lines[1:], ' ' * len(prompt))
         return lines
 
     def from_cell(self, input, output=None):
         input_l = _to_lines(input)
         output_l = _to_lines(output)
 
-        input_l = self._add_prompt(input_l, self._input_prompt())
-        output_l = self._add_prompt(output_l, self._output_prompt())
+        input_l = self._add_prompt(input_l, self.input_prompt)
+        output_l = self._add_prompt(output_l, self.output_prompt)
 
         input_p = _to_code(input_l)
         output_p = _to_code(output_l)
