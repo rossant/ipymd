@@ -76,7 +76,6 @@ def test_ipython_split():
 
 
 def test_ipython_prompt_manager():
-
     input, output = 'print("1")\nprint("2")', '1\n2'
     text = 'In [1]: print("1")\n        print("2")\nOut [1]: 1\n         2'
 
@@ -96,7 +95,6 @@ def test_python_split():
 
 
 def test_python_prompt_manager():
-
     input, output = 'print("1")\nprint("2")\ndef f():\n    pass', '1\n2'
     text = '>>> print("1")\n>>> print("2")\n>>> def f():\n...     pass\n1\n2'
 

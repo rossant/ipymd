@@ -18,7 +18,7 @@ def _to_lines(code):
 
 
 def _to_code(lines):
-    return '\n'.join(line.rstrip() for line in lines if line.rstrip())
+    return '\n'.join(line.rstrip() for line in lines)
 
 
 def _add_line_prefix(lines, prefix):
@@ -99,6 +99,10 @@ class BasePromptManager(object):
         """Convert code text with prompts to input and output."""
         raise NotImplementedError()
 
+
+#------------------------------------------------------------------------------
+# Simple prompt manager
+#------------------------------------------------------------------------------
 
 class SimplePromptManager(BasePromptManager):
     """No prompt number, same input prompt at every line, idem for output."""
@@ -183,8 +187,7 @@ class PythonPromptManager(SimplePromptManager):
     input_prompt_template = '>>> '
     second_input_prompt_template = '... '
 
-    input_prompt_regex = (input_prompt_template + '|' +
-                          second_input_prompt_template)
+    input_prompt_regex = r'>>>|\.\.\.'
 
     output_prompt_template = ''
 
@@ -218,3 +221,15 @@ class PythonPromptManager(SimplePromptManager):
                     prompt = first
 
         return _to_code(lines_prompt) + '\n' + output.rstrip()
+
+
+def create_prompt(prompt):
+    """Create a prompt manager."""
+    if prompt is None:
+        prompt = 'python'
+    if prompt == 'python':
+        prompt = PythonPromptManager
+    elif prompt == 'ipython':
+        prompt = IPythonPromptManager
+    # Instanciate the class.
+    return prompt()

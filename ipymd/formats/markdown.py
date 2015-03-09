@@ -17,6 +17,7 @@ from ..ext.six import StringIO
 from ..utils.utils import _ensure_string, _preprocess
 from ..lib.markdown import (BlockGrammar, BlockLexer,
                             InlineGrammar, InlineLexer)
+from ..core.prompt import (BasePromptManager, create_prompt)
 
 
 #------------------------------------------------------------------------------
@@ -100,57 +101,19 @@ class BaseMarkdownWriter(object):
 # Default Markdown
 #------------------------------------------------------------------------------
 
-# TODO: Configurable prompts
 class MarkdownReader(BaseMarkdownReader):
     """Default Markdown reader."""
 
-    prompt_first = '>>> '
-    prompt_next = '... '
-
-    # Handle code prompts
-    # -------------------------------------------------------------------------
-
-    def _has_input_prompt(self, lines):
-        """Return whether the line or set of lines has an input prompt."""
-        # Note: the rstrip() is necessary for empty lines with the
-        # leading '...' prompt but not the trailing space. See PR #25.
-        if isinstance(lines, list):
-            return any(line for line in lines
-                       if line.startswith(self.prompt_first.rstrip()))
-        else:
-            return lines.startswith((self.prompt_first.rstrip(),
-                                     self.prompt_next.rstrip()))
-
-    def _remove_prompt(self, line):
-        """Remove the prompt in a line."""
-        if line.startswith(self.prompt_first.rstrip()):
-            return line[len(self.prompt_first):]
-        elif line.startswith(self.prompt_next.rstrip()):
-            return line[len(self.prompt_next):]
-        else:
-            return line
-
-    def _get_code_input_output(self, lines):
-        """Return the input and output lines with prompt for input lines."""
-        if self._has_input_prompt(lines):
-            input = [self._remove_prompt(line) for line in lines
-                     if self._has_input_prompt(line)]
-            output = [line for line in lines
-                      if not self._has_input_prompt(line)]
-            return '\n'.join(input), '\n'.join(output)
-        else:
-            return '\n'.join(lines), ''
+    def __init__(self, prompt=None):
+        super(MarkdownReader, self).__init__()
+        self._prompt = create_prompt(prompt)
 
     # Helper functions to generate ipymd cells
     # -------------------------------------------------------------------------
 
     def _code_cell(self, source):
         """Split the source into input and output."""
-        lines = source.splitlines()
-        if self._has_input_prompt(lines):
-            input, output = self._get_code_input_output(lines)
-        else:
-            input, output = source, None
+        input, output = self._prompt.to_cell(source)
         return {'cell_type': 'code',
                 'input': input,
                 'output': output}
@@ -178,41 +141,12 @@ class MarkdownReader(BaseMarkdownReader):
 class MarkdownWriter(BaseMarkdownWriter):
     """Default Markdown writer."""
 
-    prompt_first = MarkdownReader.prompt_first
-    prompt_next = MarkdownReader.prompt_next
-
-    def _add_prompt(self, source):
-        """Add input prompts to code."""
-        lines = source.strip().splitlines()
-        lines_prompt = []
-        prompt = self.prompt_first
-        lock = False
-        for line in lines:
-            if line.startswith('%%'):
-                lines_prompt.append(prompt + line)
-                prompt = self.prompt_next
-                lock = True
-            elif line.startswith('#') or line.startswith('@'):
-                lines_prompt.append(prompt + line)
-                prompt = self.prompt_next
-            # Empty line = second prompt.
-            elif line.rstrip() == '':
-                lines_prompt.append((self.prompt_next + line).rstrip())
-            elif line.startswith('  '):
-                prompt = self.prompt_next
-                lines_prompt.append(prompt + line)
-                if not lock:
-                    prompt = self.prompt_first
-            else:
-                lines_prompt.append(prompt + line)
-                if not lock:
-                    prompt = self.prompt_first
-        return '\n'.join(lines_prompt).rstrip()
+    def __init__(self, prompt=None):
+        super(MarkdownWriter, self).__init__()
+        self._prompt = create_prompt(prompt)
 
     def append_code(self, input, output=None):
-        code = self._add_prompt(input)
-        if output is not None:
-            code += '\n' + output
+        code = self._prompt.from_cell(input, output)
         wrapped = '```python\n{code}\n```'.format(code=code.rstrip())
         self._output.write(wrapped)
 

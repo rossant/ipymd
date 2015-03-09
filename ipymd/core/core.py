@@ -40,9 +40,11 @@ class FormatManager(object):
             The file extension with the leading dot, like '.md'
         file_type : 'text' or 'json'
             The type of the file format.
-        load : a custom `contents = load(path)` function if no file type
+        load : function
+            a custom `contents = load(path)` function if no file type
                is specified.
-        save : a custom `save(path, contents)` function if no file type
+        save : function
+            a custom `save(path, contents)` function if no file type
                is specified.
 
         """
