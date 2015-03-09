@@ -357,7 +357,7 @@ class ODFDocument(object):
         yield
         self.end_paragraph()
 
-    def code_line(self, line):
+    def _code_line(self, line):
         """Add a code line."""
         self.text(line)
 
@@ -366,9 +366,9 @@ class ODFDocument(object):
         with self.paragraph(stylename='code'):
             lines = text.splitlines()
             for line in lines[:-1]:
-                self.code_line(line)
+                self._code_line(line)
                 self.linebreak()
-            self.code_line(lines[-1])
+            self._code_line(lines[-1])
 
     def start_quote(self):
         """Start a block quote. Require a new paragraph afterwards."""
