@@ -127,6 +127,8 @@ class SimplePromptManager(BasePromptManager):
 #------------------------------------------------------------------------------
 
 class IPythonPromptManager(BasePromptManager):
+    input_prompt_template = 'In [{n}]: '
+    output_prompt_template = 'Out [{n}]: '
 
     def _add_prompt(self, lines, prompt):
         lines[:1] = _add_line_prefix(lines[:1], prompt)
