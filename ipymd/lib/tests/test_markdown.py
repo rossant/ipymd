@@ -11,6 +11,7 @@ from pprint import pprint
 
 from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer, InlineLexer, MarkdownWriter
+from ...formats.tests._utils import _show_outputs
 
 
 # -----------------------------------------------------------------------------
@@ -231,10 +232,11 @@ def test_markdown_writer():
     w.text('.')
     w.newline()
 
-    w.quote('Good, and you?')
+    w.quote_start()
+    w.text('Good, and you?')
     w.linebreak()
-    w.quote('End of citation.')
-    w.newline()
+    w.text('End of citation.')
+    w.quote_end()
 
     w.list_item('Item ')
     w.bold('1')
