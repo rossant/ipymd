@@ -32,6 +32,11 @@ def test_utils():
     assert _start_with_regex('In [23]: print()\n', regex)
 
 
+class MockPromptManager(SimplePromptManager):
+    input_prompt_template = '> '
+    output_prompt_template = ''
+
+
 def _test(prompt_manager_cls, in_out, text):
     input, output = in_out
 
@@ -43,12 +48,8 @@ def _test(prompt_manager_cls, in_out, text):
     # Text => cell.
     input_pm, output_pm = pm.to_cell(text)
     assert input_pm == input
+
     assert output_pm == output
-
-
-class MockPromptManager(SimplePromptManager):
-    input_prompt_template = '> '
-    output_prompt_template = ''
 
 
 def test_simple_split():
@@ -80,6 +81,18 @@ def test_ipython_prompt_manager():
     text = 'In [1]: print("1")\n        print("2")\nOut [1]: 1\n         2'
 
     _test(IPythonPromptManager, (input, output), text)
+
+
+def test_python_split():
+    pm = PythonPromptManager()
+    text = '>>> print("1")\n>>> print("2")\n>>> def f():\n...     pass\n1\n2'
+
+    assert pm.split_input_output(text) == (['>>> print("1")',
+                                            '>>> print("2")',
+                                            '>>> def f():',
+                                            '...     pass'],
+                                           ['1',
+                                            '2'])
 
 
 def test_python_prompt_manager():

@@ -48,13 +48,17 @@ class BasePromptManager(object):
     input_prompt_template = ''  # may contain {n} for the input number
     output_prompt_template = ''
 
+    input_prompt_regex = ''
+    output_prompt_regex = ''
+
     def __init__(self):
-        # Compile the prompt regexes.
-        self.input_prompt_regex = _template_to_regex(
-            self.input_prompt_template)
-        self.output_prompt_regex = _template_to_regex(
-            self.output_prompt_template)
         self.reset()
+        if not self.input_prompt_regex:
+            self.input_prompt_regex = _template_to_regex(
+                self.input_prompt_template)
+        if not self.output_prompt_regex:
+            self.output_prompt_regex = _template_to_regex(
+                self.output_prompt_template)
 
     def reset(self):
         self._number = 1
@@ -128,11 +132,9 @@ class SimplePromptManager(BasePromptManager):
 
 class IPythonPromptManager(BasePromptManager):
     input_prompt_template = 'In [{n}]: '
-    output_prompt_template = 'Out [{n}]: '
+    input_prompt_regex = '(In \[\d+\]\: | {6,})'
 
-    def __init__(self):
-        super(IPythonPromptManager, self).__init__()
-        self.input_prompt_regex = '(In \[\d+\]\: | {6,})'
+    output_prompt_template = 'Out [{n}]: '
 
     def _add_prompt(self, lines, prompt):
         lines[:1] = _add_line_prefix(lines[:1], prompt)
@@ -161,14 +163,13 @@ class IPythonPromptManager(BasePromptManager):
         input_prompt = m.group(0)
         n_in = len(input_prompt)
         input_l = [line[n_in:] for line in input_l]
+        input = _to_code(input_l)
 
         m = _start_with_regex(output_l[0], self.output_prompt_regex)
         assert m
         output_prompt = m.group(0)
         n_out = len(output_prompt)
         output_l = [line[n_out:] for line in output_l]
-
-        input = _to_code(input_l)
         output = _to_code(output_l)
 
         return input, output
@@ -181,6 +182,9 @@ class IPythonPromptManager(BasePromptManager):
 class PythonPromptManager(SimplePromptManager):
     input_prompt_template = '>>> '
     second_input_prompt_template = '... '
+
+    input_prompt_regex = (input_prompt_template + '|' +
+                          second_input_prompt_template)
 
     output_prompt_template = ''
 
