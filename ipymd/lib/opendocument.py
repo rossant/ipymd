@@ -24,7 +24,7 @@ from odf.text import (H, P, Span, LineBreak, List, ListItem,
 
 from ..ext.six import string_types
 from .base_lexer import BaseRenderer
-from .markdown import BaseRenderer, InlineLexer
+from .markdown import BaseRenderer, InlineLexer, MarkdownWriter
 
 
 # -----------------------------------------------------------------------------
@@ -649,3 +649,79 @@ class BaseODFReader(BaseRenderer):
         # elif item_type == 'image':
         else:
             raise NotImplementedError(item_type, item)
+
+
+# -----------------------------------------------------------------------------
+# ODF => Markdown converter
+# -----------------------------------------------------------------------------
+
+class ODFMarkdownConverter(BaseODFReader):
+    def __init__(self):
+        self._writer = MarkdownWriter()
+
+    @property
+    def contents(self):
+        return self._writer.contents
+
+    def heading(self, text, level):
+        pass
+
+    def newline(self):
+        pass
+
+    def paragraph_start(self):
+        pass
+
+    def paragraph_end(self):
+        pass
+
+    def quote_start(self):
+        pass
+
+    def quote_end(self):
+        pass
+
+    def list_start(self):
+        pass
+
+    def list_end(self):
+        pass
+
+    def list_item_start(self):
+        pass
+
+    def list_item_end(self):
+        pass
+
+    def code_start(self):
+        pass
+
+    def code_end(self):
+        pass
+
+    def codespan(self, text):
+        pass
+
+    def bold(self, text):
+        pass
+
+    def italic(self, text):
+        pass
+
+    def image(self, caption, url):
+        pass
+
+    def linebreak(self, ):
+        pass
+
+    def link(self, url):
+        pass
+
+    def text(self, text):
+        pass
+
+
+def odf_to_markdown(doc):
+    converter = ODFMarkdownConverter()
+    converter.read(doc)
+    return converter.contents

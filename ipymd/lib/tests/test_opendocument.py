@@ -9,7 +9,8 @@
 
 from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer
-from ..opendocument import ODFDocument, ODFRenderer, BaseODFReader
+from ..opendocument import (ODFDocument, ODFRenderer, BaseODFReader,
+                            odf_to_markdown)
 
 
 # -----------------------------------------------------------------------------
@@ -90,3 +91,15 @@ def test_odf_reader():
     reader.read(doc)
 
     assert len(_items) == 53
+
+
+
+# -----------------------------------------------------------------------------
+# Test ODF => Markdown converter
+# -----------------------------------------------------------------------------
+
+def test_odf_markdown_converter():
+    doc = _example_document()
+    md = odf_to_markdown(doc)
+    print(md)
+    assert md
