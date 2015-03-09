@@ -35,6 +35,8 @@ def _template_to_regex(template):
 
 
 class BasePromptManager(object):
+    """Add and remove prompt from code cells."""
+
     input_prompt_template = ''  # may contain {n} for the input number
     output_prompt_template = ''
 
@@ -74,12 +76,15 @@ class BasePromptManager(object):
         return self._output_prompt_regex
 
     def start_with_regex(self, line, regex):
+        """Return whether a line starts with a regex or not."""
         if not regex.startswith('^'):
             regex = '^' + regex
         reg = re.compile(regex)
         return reg.match(line)
 
     def split_input_output(self, text):
+        """Split code into input lines and output lines, according to the
+        input and output prompt templates."""
         lines = _to_lines(text)
         i = 0
         for line in lines:
@@ -90,9 +95,11 @@ class BasePromptManager(object):
         return lines[:i], lines[i:]
 
     def from_cell(self, input, output):
+        """Convert input and output to code text with prompts."""
         raise NotImplementedError()
 
     def to_cell(self, code):
+        """Convert code text with prompts to input and output."""
         raise NotImplementedError()
 
 
