@@ -191,6 +191,23 @@ def test_full_lexer():
 # Test Markdown writer
 # -----------------------------------------------------------------------------
 
+def test_markdown_writer_newline():
+    w = MarkdownWriter()
+    w.text('Hello.')
+    w.ensure_newline(1)
+    w.text('Hello.\n')
+    w.ensure_newline(1)
+    w.text('Hello.\n\n')
+    w.ensure_newline(1)
+    w.text('Hello.\n\n\n')
+    w.ensure_newline(2)
+    w.text('End')
+
+    expected = ('Hello.\n' * 4) + '\nEnd\n'
+
+    assert w.contents == expected
+
+
 def test_markdown_writer():
     w = MarkdownWriter()
 
@@ -237,20 +254,27 @@ def test_markdown_writer():
     w.linebreak()
     w.text('End of citation.')
     w.quote_end()
+    w.newline()
 
     w.list_item('Item ')
     w.bold('1')
     w.text('.')
+    w.linebreak()
     w.list_item('Item 2.')
     w.newline()
 
     w.numbered_list_item('1')
+    w.linebreak()
     w.list_item('1.1', level=1)
+    w.linebreak()
     w.list_item('1.1.1', level=2)
+    w.linebreak()
     w.numbered_list_item('2')
     w.newline()
 
-    w.code('print("Hello world!")')
+    w.code_start()
+    w.text('print("Hello world!")')
+    w.code_end()
     w.newline()
 
     w.text('Go to ')
@@ -260,4 +284,5 @@ def test_markdown_writer():
 
     w.image('Some image', 'my_image.png')
 
+    _show_outputs(w.contents, expected)
     assert w.contents == expected

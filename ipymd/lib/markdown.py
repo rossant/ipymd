@@ -513,8 +513,24 @@ class MarkdownWriter(object):
         self._list_number = 0
         self._in_quote = False
 
+    # Buffer methods
+    # -------------------------------------------------------------------------
+
+    @property
+    def contents(self):
+        return self._output.getvalue().rstrip() + '\n'  # end of file \n
+
+    def close(self):
+        self._output.close()
+
+    def __del__(self):
+        self.close()
+
     def _write(self, contents):
         self._output.write(contents.rstrip('\n'))
+
+    # New line methods
+    # -------------------------------------------------------------------------
 
     def newline(self):
         self._output.write('\n\n')
@@ -524,14 +540,17 @@ class MarkdownWriter(object):
         self._output.write('\n')
 
     def ensure_newline(self, n):
-        """Make sure there are one or two line breaks at the end."""
-        assert 1 <= n <= 2
-        text = self._output.getvalue()
+        """Make sure there are 'n' line breaks at the end."""
+        assert n >= 0
+        text = self._output.getvalue().rstrip('\n')
         if not text:
             return
-        k = text[-n:].count('\n')
-        self._output.write('\n' * (n - k))
-        assert self._output.getvalue()[-n:] == '\n' * n
+        self._output = StringIO()
+        self._output.write(text)
+        self._output.write('\n' * n)
+        text = self._output.getvalue()
+        assert text[-n-1] != '\n'
+        assert text[-n:] == '\n' * n
 
     # Block methods
     # -------------------------------------------------------------------------
@@ -548,22 +567,23 @@ class MarkdownWriter(object):
                        suffix='. ')
 
     def list_item(self, text='', level=0, bullet='*', suffix=' '):
-        self.ensure_newline(1)
         self.text(('  ' * level) + bullet + suffix + text)
 
-    def code(self, text, lang=None):
-        self.ensure_newline(1)
+    def code_start(self, lang=None):
         if lang is None:
             lang = ''
-        self.text('```{0}\n{1}\n```'.format(lang, text))
+        self.text('```{0}'.format(lang))
+        self.ensure_newline(1)
+
+    def code_end(self):
+        self.ensure_newline(1)
+        self.text('```')
 
     def quote_start(self):
-        self.ensure_newline(2)
         self._in_quote = True
 
     def quote_end(self):
         self._in_quote = False
-        self.ensure_newline(2)
 
     # Inline methods
     # -------------------------------------------------------------------------
@@ -589,16 +609,3 @@ class MarkdownWriter(object):
             if self._output.getvalue()[-1] == '\n':
                 text = '> ' + text
         self._write(text)
-
-    # Misc. methods
-    # -------------------------------------------------------------------------
-
-    @property
-    def contents(self):
-        return self._output.getvalue().rstrip() + '\n'  # end of file \n
-
-    def close(self):
-        self._output.close()
-
-    def __del__(self):
-        self.close()
