@@ -63,7 +63,7 @@ def _test_odf_odf(basename):
     cells = convert(contents, from_='opendocument')
     converted = convert(cells, to='opendocument')
 
-    assert _diff(contents, converted) == ''
+    assert contents.tree() == converted.tree()
 
 
 def test_odf_reader():
@@ -76,6 +76,6 @@ def test_odf_writer():
     _test_odf_writer('ex2')
 
 
-# def test_odf_odf():
-#     _test_odf_odf('ex1')
-#     _test_odf_odf('ex2')
+def test_odf_odf():
+    _test_odf_odf('ex1')
+    # _test_odf_odf('ex2')
