@@ -70,8 +70,8 @@ def _load_file(file, from_):
     return format_manager().load(file, name=from_)
 
 
-def _save_file(file, to, contents):
-    format_manager().save(file, contents, name=to)
+def _save_file(file, to, contents, overwrite=False):
+    format_manager().save(file, contents, name=to, overwrite=overwrite)
 
 
 #------------------------------------------------------------------------------
@@ -98,11 +98,7 @@ def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
         # contents = _load_file(file, from_)
         converted = convert(file, from_, to)
         file_to = _converted_filename(file, from_, to)
-        if op.exists(file_to) and not overwrite:
-            print("The file already exists, please use --overwrite.")
-            continue
-        else:
-            _save_file(file_to, to, converted)
+        _save_file(file_to, to, converted, overwrite=overwrite)
 
 
 def main():

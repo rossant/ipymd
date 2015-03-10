@@ -228,13 +228,7 @@ class ODFDocument(object):
     def show(self):
         _show_element(self._doc.text)
 
-    def save(self, path, overwrite=False):
-        if op.exists(path):
-            if overwrite:
-                os.remove(path)
-            else:
-                raise IOError("The file does already exist, "
-                              "use overwrite=True.")
+    def save(self, path):
         self._doc.save(path)
 
     # Style methods

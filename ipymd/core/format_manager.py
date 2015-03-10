@@ -112,7 +112,7 @@ class FormatManager(object):
                               "load/save functions.")
             return load_function(file)
 
-    def save(self, file, contents, name=None):
+    def save(self, file, contents, name=None, overwrite=False):
         """Save contents into a file. The format name can be specified
         explicitly or inferred from the file extension."""
         if name is None:
@@ -127,6 +127,9 @@ class FormatManager(object):
             if write_function is None:
                 raise IOError("The format must declare a file type or "
                               "load/save functions.")
+            if op.exists(file) and not overwrite:
+                print("The file already exists, please use overwrite=True.")
+                return
             write_function(file, contents)
 
     def create_reader(self, name, *args, **kwargs):
