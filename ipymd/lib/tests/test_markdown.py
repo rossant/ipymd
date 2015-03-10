@@ -136,6 +136,25 @@ def test_block_lexer():
     assert renderer.output == expected
 
 
+def test_block_lexer_list():
+    renderer = BlockRenderer()
+    text = "* 1\n* 2\n  * 2.1\n* 3"
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = [
+                '<ul>',
+                    '<li>', '1', '</li>',
+                    '<li>', '2',
+                        '<ul>',
+                            '<li>', '2.1', '</li>',
+                        '</ul>',
+                    '</li>',
+                    '<li>', '3', '</li>',
+                '</ul>',
+                ]
+    assert renderer.output == expected
+
+
 # -----------------------------------------------------------------------------
 # Tests Markdown inline lexer
 # -----------------------------------------------------------------------------
