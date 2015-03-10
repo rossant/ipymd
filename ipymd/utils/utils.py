@@ -57,6 +57,17 @@ def _remove_output(cells):
     return [_remove_output_cell(cell) for cell in cells]
 
 
+def _remove_code_lang_code(cell):
+    if cell['cell_type'] == 'markdown':
+        cell['source'] = re.sub(r'```[^\n]*', '```', cell['source'])
+    return cell
+
+
+def _remove_code_lang(cells):
+    """Remove all lang in code cells."""
+    return [_remove_code_lang_code(cell) for cell in cells]
+
+
 #------------------------------------------------------------------------------
 # Reading/writing files from/to disk
 #------------------------------------------------------------------------------

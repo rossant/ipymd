@@ -382,8 +382,9 @@ class ODFDocument(object):
                 container.addElement(Span(text=text))
                 text = ''
 
-    def code(self, text):
+    def code(self, text, lang=None):
         """Add a code block."""
+        # WARNING: lang is discarded currently.
         with self.paragraph(stylename='code'):
             lines = text.splitlines()
             for line in lines[:-1]:
@@ -580,7 +581,7 @@ class ODFRenderer(BaseRenderer):
             self._paragraph_created_after_item_start = False
 
     def block_code(self, code, lang=None):
-        self._doc.code(code)
+        self._doc.code(code, lang=lang)
 
 
 # -----------------------------------------------------------------------------
@@ -647,7 +648,7 @@ class BaseODFReader(BaseRenderer):
             self._process_children(item)
             self.quote_end()
         elif item_type == 'code':
-            self.code_start()
+            self.code_start(lang=item.get('lang', None))
             self._process_children(item)
             self.code_end()
         elif item_type == 'list':
@@ -726,11 +727,12 @@ class ODFMarkdownConverter(BaseODFReader):
         self._writer.quote_end()
         self._writer.newline()
 
-    def code_start(self):
-        self._writer.code_start()
+    def code_start(self, lang=None):
+        self._writer.code_start(lang=lang)
 
     def code_end(self):
         self._writer.code_end()
+        self._writer.newline()
 
     # -------------------------------------------------------------------------
     # Lists

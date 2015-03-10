@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ...core.core import format_manager, convert
-from ...utils.utils import _remove_output
+from ...utils.utils import _remove_output, _remove_code_lang
 from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
                      _exec_test_file, _read_test_file)
 
@@ -17,6 +17,7 @@ from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
 #------------------------------------------------------------------------------
 
 def _test_generate():
+    """Regenerate the ODF example documents."""
     for ex in ('ex1', 'ex2'):
         markdown = _read_test_file(ex, 'markdown')
         odf = convert(markdown, from_='markdown', to='opendocument')
@@ -26,7 +27,7 @@ def _test_generate():
 def _test_odf_reader(basename):
     """Check that (test cells) and (test contents ==> cells) are the same."""
     converted, expected = _test_reader(basename, 'opendocument')
-    assert converted == expected
+    assert _remove_code_lang(converted) == _remove_code_lang(expected)
 
 
 def _test_odf_writer(basename):
@@ -47,8 +48,7 @@ def _test_odf_odf(basename):
 
 
 def test_odf_reader():
-    pass
-    # _test_odf_reader('ex1')
+    _test_odf_reader('ex1')
     # _test_odf_reader('ex2')
 
 

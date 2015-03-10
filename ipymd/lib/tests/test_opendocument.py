@@ -63,6 +63,9 @@ def _example_document():
     doc.code("def f():\n"
              "    print('Hello world!')\n")
 
+    with doc.paragraph():
+        doc.text("End.")
+
     return doc
 
 
@@ -91,7 +94,7 @@ def test_odf_reader():
 
     reader.read(doc)
 
-    # assert len(_items) == 53
+    assert len(_items) == 59
 
 
 # -----------------------------------------------------------------------------
@@ -121,6 +124,8 @@ def test_odf_markdown_converter():
                           'def f():',
                           '    print(\'Hello world!\')',
                           '```',
+                          '',
+                          'End.',
                           ''))
 
     assert md == expected
