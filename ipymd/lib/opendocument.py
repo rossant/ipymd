@@ -25,7 +25,7 @@ from odf.text import (H, P, S, Span, LineBreak, List, ListItem,
 
 from ..ext.six import string_types
 from .base_lexer import BaseRenderer
-from .markdown import BaseRenderer, InlineLexer, MarkdownWriter
+from .markdown import BaseRenderer, InlineLexer, MarkdownWriter, BlockLexer
 
 
 # -----------------------------------------------------------------------------
@@ -311,7 +311,7 @@ class ODFDocument(object):
         container = cls(**kwargs)
         self._containers.append(container)
 
-    def end_container(self, cancel=False):
+    def end_container(self, cancel=None):
         """Finishes and registers the currently-active container, unless
         'cancel' is True."""
         if not self._containers:
@@ -341,9 +341,12 @@ class ODFDocument(object):
             stylename = 'normal'
         self.start_container(P, stylename=stylename)
 
-    def end_paragraph(self):
+    def is_in_paragraph(self):
+        return self._containers and _tag_name(self._containers[-1]) == 'p'
+
+    def end_paragraph(self, cancel=None):
         """End the current paragraph."""
-        self.end_container()
+        self.end_container(cancel=cancel)
 
     def require_paragraph(self):
         """Create a new paragraph unless the currently-active container
@@ -523,7 +526,8 @@ class ODFRenderer(BaseRenderer):
     def __init__(self, doc):
         super(ODFRenderer, self).__init__()
         self._doc = doc
-        self._paragraph_created_after_item_start = False
+        self._level = 0
+        self._paragraph_created_after_item_start = None
 
     def text(self, text):
         inline_renderer = ODFInlineRenderer(self._doc)
@@ -547,11 +551,8 @@ class ODFRenderer(BaseRenderer):
         self._doc.heading(text, level)
 
     def list_start(self, ordered=False):
-        # HACK: cancel the newly-created paragraph after the list item.
-        if self._paragraph_created_after_item_start:
-            self._doc.end_container(cancel=True)
-            self._paragraph_created_after_item_start = False
-
+        if self._doc.is_in_paragraph():
+            self._doc.end_paragraph()
         if ordered:
             self._doc.start_numbered_list()
         else:
@@ -563,19 +564,14 @@ class ODFRenderer(BaseRenderer):
     def list_item_start(self):
         self._doc.start_list_item()
         self._doc.start_paragraph()
-        self._paragraph_created_after_item_start = True
 
     def loose_item_start(self):
         self.list_item_start()
 
     def list_item_end(self):
-        self._doc.end_list_item()
-
-        # HACK: validate the automatically-created paragraph at the end
-        # of the list item.
-        if self._paragraph_created_after_item_start:
+        if self._doc.is_in_paragraph():
             self._doc.end_paragraph()
-            self._paragraph_created_after_item_start = False
+        self._doc.end_list_item()
 
     def block_code(self, code, lang=None):
         self._doc.code(code, lang=lang)
@@ -793,6 +789,13 @@ class ODFMarkdownConverter(BaseODFReader):
 
 def odf_to_markdown(doc):
     converter = ODFMarkdownConverter()
-    # converter = BaseODFReader(verbose=True)
     converter.read(doc)
     return converter.contents
+
+
+def markdown_to_odf(md):
+    doc = ODFDocument()
+    renderer = ODFRenderer(doc)
+    block_lexer = BlockLexer(renderer=renderer)
+    block_lexer.read(md)
+    return doc

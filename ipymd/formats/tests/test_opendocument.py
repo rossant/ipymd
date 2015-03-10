@@ -68,7 +68,7 @@ def _test_odf_odf(basename):
 
 def test_odf_reader():
     _test_odf_reader('ex1')
-    # _test_odf_reader('ex2')
+    _test_odf_reader('ex2')
 
 
 def test_odf_writer():

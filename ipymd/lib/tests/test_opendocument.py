@@ -10,14 +10,16 @@
 from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer
 from ..opendocument import (ODFDocument, ODFRenderer, BaseODFReader,
-                            odf_to_markdown)
+                            odf_to_markdown,
+                            markdown_to_odf)
+from ...formats.tests._utils import _show_outputs
 
 
 # -----------------------------------------------------------------------------
 # Test ODFDocument
 # -----------------------------------------------------------------------------
 
-def _example_document():
+def _example_opendocument():
     doc = ODFDocument()
 
     doc.heading("The title", 1)
@@ -72,8 +74,35 @@ def _example_document():
     return doc
 
 
+def _example_markdown():
+    return '\n'.join(('# The title',
+                      '',
+                      'Some text. **This is bold.**',
+                      '',
+                      '* Item 1.',
+                      '* Item 2.',
+                      ('  * Item 2.1. This is `code`. '
+                       'Oh, and here is a link: http://google.com.'),
+                      '  * Item 2.2.',
+                      '* Item 3.',
+                      '',
+                      '> This is a citation.',
+                      '> End.',
+                      '',
+                      '1. Item 1.',
+                      '2. Item 2.',
+                      '',
+                      '```',
+                      'def f():',
+                      '    print(\'Hello world!\')',
+                      '```',
+                      '',
+                      'End.',
+                      ''))
+
+
 def test_odf_document():
-    doc = _example_document()
+    doc = _example_opendocument()
     doc.show_styles()
 
 
@@ -86,7 +115,7 @@ def test_odf_renderer():
 
 
 def test_odf_reader():
-    doc = _example_document()
+    doc = _example_opendocument()
     reader = BaseODFReader()
 
     _items = []
@@ -101,35 +130,20 @@ def test_odf_reader():
 
 
 # -----------------------------------------------------------------------------
-# Test ODF => Markdown converter
+# Test ODF <=> Markdown converter
 # -----------------------------------------------------------------------------
 
 def test_odf_markdown_converter():
-    doc = _example_document()
-    md = odf_to_markdown(doc)
-    expected = '\n'.join(('# The title',
-                          '',
-                          'Some text. **This is bold.**',
-                          '',
-                          '* Item 1.',
-                          '* Item 2.',
-                          ('  * Item 2.1. This is `code`. '
-                           'Oh, and here is a link: http://google.com.'),
-                          '  * Item 2.2.',
-                          '* Item 3.',
-                          '',
-                          '> This is a citation.',
-                          '> End.',
-                          '',
-                          '1. Item 1.',
-                          '2. Item 2.',
-                          '',
-                          '```',
-                          'def f():',
-                          '    print(\'Hello world!\')',
-                          '```',
-                          '',
-                          'End.',
-                          ''))
+    doc = _example_opendocument()
+    md = _example_markdown()
+    converted = odf_to_markdown(doc)
 
-    assert md == expected
+    assert md == converted
+
+
+def test_markdown_odf_converter():
+    doc = _example_opendocument()
+    md = _example_markdown()
+    converted = markdown_to_odf(md)
+
+    assert doc == converted
