@@ -1,6 +1,6 @@
 # # Test notebook
 
-# This is a text notebook. Here _are_ some **rich text**, `code`, $\pi\simeq 3.1415$ equations.
+# This is a text notebook. Here *are* some **rich text**, `code`, $\pi\simeq 3.1415$ equations.
 
 # Another equation:
 

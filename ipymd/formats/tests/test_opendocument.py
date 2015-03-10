@@ -7,7 +7,11 @@
 #------------------------------------------------------------------------------
 
 from ...core.core import format_manager, convert
-from ...utils.utils import _remove_output, _remove_code_lang
+from ...utils.utils import (_remove_output,
+                            _remove_code_lang,
+                            _remove_images,
+                            _flatten_links,
+                            )
 from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
                      _exec_test_file, _read_test_file)
 
@@ -24,10 +28,22 @@ def _test_generate():
         odf.save('examples/{0}.opendocument.odt'.format(ex), overwrite=True)
 
 
+def _process_md(md):
+    for f in (_remove_code_lang,
+              _remove_images,
+              _flatten_links):
+        md = f(md)
+    return md
+
+
 def _test_odf_reader(basename):
     """Check that (test cells) and (test contents ==> cells) are the same."""
     converted, expected = _test_reader(basename, 'opendocument')
-    assert _remove_code_lang(converted) == _remove_code_lang(expected)
+
+    converted = _process_md(converted)
+    expected = _process_md(expected)
+
+    assert converted == expected
 
 
 def _test_odf_writer(basename):
@@ -48,8 +64,8 @@ def _test_odf_odf(basename):
 
 
 def test_odf_reader():
-    _test_odf_reader('ex1')
-    # _test_odf_reader('ex2')
+    # _test_odf_reader('ex1')
+    _test_odf_reader('ex2')
 
 
 def test_odf_writer():

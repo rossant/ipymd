@@ -68,6 +68,24 @@ def _remove_code_lang(cells):
     return [_remove_code_lang_code(cell) for cell in cells]
 
 
+def _remove_images(cells):
+    """Remove markdown cells with images."""
+    return [cell for cell in cells
+            if not cell.get('source', '').startswith('![')]
+
+
+def _flatten_links_cell(cell):
+    if cell['cell_type'] == 'markdown':
+        cell['source'] = re.sub(r'\[([^\]]+)\]\(([^\)]+)\)', r'\1 (\2)',
+                                cell['source'])
+    return cell
+
+
+def _flatten_links(cells):
+    """Replace hypertext links by simple URL text."""
+    return [_flatten_links_cell(cell) for cell in cells]
+
+
 #------------------------------------------------------------------------------
 # Reading/writing files from/to disk
 #------------------------------------------------------------------------------
