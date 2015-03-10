@@ -16,7 +16,7 @@ from pprint import pprint
 try:
     import odf
 except ImportError:
-    raise ValueError("The odfpy library is required.")
+    raise ImportError("The odfpy library is required.")
 from odf.opendocument import OpenDocumentText, load
 from odf.style import (Style, TextProperties, ListLevelProperties,
                        ListLevelLabelAlignment)
