@@ -11,7 +11,7 @@ import os.path as op
 import difflib
 from pprint import pprint
 
-from ...core.core import format_manager, convert
+from ...core.format_manager import format_manager, convert
 from ...core.scripts import _load_file, _save_file
 from ...ext.six import exec_
 

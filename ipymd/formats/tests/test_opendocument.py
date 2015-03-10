@@ -6,7 +6,7 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ...core.core import format_manager, convert
+from ...core.format_manager import format_manager, convert
 from ...utils.utils import (_remove_output,
                             _remove_code_lang,
                             _remove_images,

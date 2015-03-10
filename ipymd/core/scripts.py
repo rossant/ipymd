@@ -13,7 +13,7 @@ import glob
 import json
 
 from ..ext.six import string_types
-from .core import convert, format_manager
+from .format_manager import convert, format_manager
 
 
 #------------------------------------------------------------------------------

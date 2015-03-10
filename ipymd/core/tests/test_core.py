@@ -9,7 +9,7 @@
 import os.path as op
 import shutil
 
-from ..core import FormatManager, format_manager
+from ..format_manager import FormatManager, format_manager
 from ...utils.tempdir import TemporaryDirectory
 
 

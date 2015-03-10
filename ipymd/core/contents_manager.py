@@ -17,7 +17,7 @@ from IPython.config.configurable import Configurable
 from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 
-from .core import convert, format_manager
+from .format_manager import convert, format_manager
 
 
 #------------------------------------------------------------------------------
