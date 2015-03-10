@@ -11,13 +11,26 @@ from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer
 from ..opendocument import (ODFDocument, ODFRenderer, BaseODFReader,
                             odf_to_markdown,
-                            markdown_to_odf)
+                            markdown_to_odf,
+                            _merge_text)
 from ...formats.tests._utils import _show_outputs
 
 
 # -----------------------------------------------------------------------------
 # Test ODFDocument
 # -----------------------------------------------------------------------------
+
+def test_merge_text():
+    items = [{'tag': 'span', 'text': '1'},
+             {'tag': 'span', 'text': '2'},
+             {'tag': 'span', 'text': '-', 'style': 'bold'},
+             {'tag': 'span', 'text': '3'},
+             {'tag': 'span', 'text': '4'}]
+    merged = _merge_text(*items)
+    assert merged == [{'tag': 'span', 'text': '12'},
+                      {'tag': 'span', 'text': '-', 'style': 'bold'},
+                      {'tag': 'span', 'text': '34'}]
+
 
 def _example_opendocument():
     doc = ODFDocument()

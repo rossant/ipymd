@@ -66,6 +66,35 @@ def _is_paragraph(el):
     return el.tagName == 'text:p'
 
 
+def _is_normal_text(item):
+    return item['tag'] == 'span' and item.get('style', 'normal') == 'normal'
+
+
+def _merge_text(*children):
+    children = list(children)
+    if not children:
+        return children
+    head, tail = children[0:1], children[1:]
+    if _is_normal_text(head[0]):
+        if not tail:
+            return head
+        else:
+            merged = _merge_text(*tail)
+            if _is_normal_text(merged[0]):
+                merged[0]['text'] = head[0]['text'] + merged[0]['text']
+                return merged
+            else:
+                return head + merged
+    else:
+        return head + _merge_text(*tail)
+
+
+def _is_empty(el):
+    if _is_paragraph(el):
+        return not(el.childNodes)
+    return False
+
+
 # -----------------------------------------------------------------------------
 # Style-related utility functions
 # -----------------------------------------------------------------------------
@@ -246,13 +275,17 @@ class ODFDocument(object):
             item['count'] = int(el.attributes.get(
                 ('urn:oasis:names:tc:opendocument:xmlns:text:1.0', 'c'), 1))
         # Children.
-        children = [self.tree(child) for child in el.childNodes]
+        children = [self.tree(child) for child in el.childNodes
+                    if not _is_empty(child)]
         if (len(children) == 1) and (children[0]['tag'] == 'text'):
             item['text'] = children[0]['data']
         else:
             item['children'] = children
         # Style.
         item['style'] = self._style_name(el)
+        # Merge consecutive text children.
+        if item.get('children', []):
+            item['children'] = _merge_text(*item['children'])
         # Remove empty fields.
         item = {k: v for k, v in item.items() if v}
         return item
@@ -342,7 +375,7 @@ class ODFDocument(object):
         self.start_container(P, stylename=stylename)
 
     def is_in_paragraph(self):
-        return self._containers and _tag_name(self._containers[-1]) == 'p'
+        return self._containers and _is_paragraph(self._containers[-1])
 
     def end_paragraph(self, cancel=None):
         """End the current paragraph."""

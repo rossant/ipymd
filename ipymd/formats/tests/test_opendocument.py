@@ -20,6 +20,16 @@ from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
 # Test ODF parser
 #------------------------------------------------------------------------------
 
+def _diff_trees(tree_0, tree_1):
+    for ch_0, ch_1 in zip(tree_0.get('children', []),
+                          tree_1.get('children', [])):
+        if ch_0 != ch_1:
+            print('****')
+            print(ch_0)
+            print(ch_1)
+            return
+
+
 def _test_generate():
     """Regenerate the ODF example documents."""
     for ex in ('ex1',
@@ -78,4 +88,4 @@ def test_odf_writer():
 
 def test_odf_odf():
     _test_odf_odf('ex1')
-    # _test_odf_odf('ex2')
+    _test_odf_odf('ex2')
