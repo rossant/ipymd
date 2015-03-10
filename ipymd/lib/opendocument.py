@@ -9,6 +9,7 @@
 
 import os
 import os.path as op
+import re
 from contextlib import contextmanager
 from pprint import pprint
 
@@ -19,7 +20,7 @@ except ImportError:
 from odf.opendocument import OpenDocumentText, load
 from odf.style import (Style, TextProperties, ListLevelProperties,
                        ListLevelLabelAlignment)
-from odf.text import (H, P, Span, LineBreak, List, ListItem,
+from odf.text import (H, P, S, Span, LineBreak, List, ListItem,
                       ListStyle, ListLevelStyleNumber)
 
 from ..ext.six import string_types
@@ -241,6 +242,9 @@ class ODFDocument(object):
             item['tag'] = _tag_name(el)
         # Data.
         item['data'] = _tag_data(el)
+        if item['tag'] == 's':
+            item['count'] = int(el.attributes.get(
+                ('urn:oasis:names:tc:opendocument:xmlns:text:1.0', 'c'), 1))
         # Children.
         children = [self.tree(child) for child in el.childNodes]
         if (len(children) == 1) and (children[0]['tag'] == 'text'):
@@ -361,7 +365,22 @@ class ODFDocument(object):
         """Add a code line."""
         assert self._containers
         container = self._containers[-1]
-        container.addElement(Span(text=line))
+        # Handle extra spaces.
+        text = line
+        while text:
+            if text.startswith('  '):
+                r = re.match(r'(^ +)', text)
+                n = len(r.group(1))
+                container.addElement(S(c=n))
+                text = text[n:]
+            elif '  ' in text:
+                assert not text.startswith(' ')
+                i = text.index('  ')
+                container.addElement(Span(text=text[:i]))
+                text = text[i:]
+            else:
+                container.addElement(Span(text=text))
+                text = ''
 
     def code(self, text):
         """Add a code block."""
@@ -587,6 +606,8 @@ def _item_type(item):
             return 'numbered-list'
         else:
             return tag
+    elif tag == 's':
+        return 'spaces'
     else:
         raise Exception("This tag has not been implemented: " + tag)
     return style
@@ -655,6 +676,8 @@ class BaseODFReader(BaseRenderer):
             self.italic(text)
         elif item_type == 'link':
             self.link(text)
+        elif item_type == 'spaces':
+            self.spaces(item.get('count', 1))
         # elif item_type == 'image':
         else:
             raise NotImplementedError(item_type, item)
@@ -743,6 +766,9 @@ class ODFMarkdownConverter(BaseODFReader):
     # -------------------------------------------------------------------------
     # Inline
     # -------------------------------------------------------------------------
+
+    def spaces(self, count=1):
+        self._writer.text(' ' * count)
 
     def codespan(self, text):
         self._writer.inline_code(text)
