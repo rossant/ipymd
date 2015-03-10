@@ -71,8 +71,8 @@ output = [
     {'cell_type': 'markdown',
      'source': '* One [small](http://www.google.fr) link!\n'
                '* Two\n'
-               '    * 2.1\n'
-               '    * 2.2\n'
+               '  * 2.1\n'
+               '  * 2.2\n'
                '* Three'},
 
     {'cell_type': 'markdown',
