@@ -11,8 +11,9 @@ from ...utils.utils import (_remove_output,
                             _remove_code_lang,
                             _remove_images,
                             _flatten_links,
+                            _diff
                             )
-from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
+from ._utils import (_test_reader, _test_writer,
                      _exec_test_file, _read_test_file)
 
 
@@ -51,11 +52,8 @@ def _process_md(md):
 def _test_odf_reader(basename):
     """Check that (test cells) and (test contents ==> cells) are the same."""
     converted, expected = _test_reader(basename, 'opendocument')
-
     converted = _process_md(converted)
     expected = _process_md(expected)
-
-    _show_outputs(converted, expected)
     assert converted == expected
 
 
@@ -72,7 +70,6 @@ def _test_odf_odf(basename):
     contents = _read_test_file(basename, 'opendocument')
     cells = convert(contents, from_='opendocument')
     converted = convert(cells, to='opendocument')
-
     assert contents.tree() == converted.tree()
 
 

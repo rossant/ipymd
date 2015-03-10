@@ -9,6 +9,8 @@
 import os
 import os.path as op
 import re
+import difflib
+from pprint import pprint
 import json
 
 from ..ext.six import exec_, string_types
@@ -84,6 +86,23 @@ def _flatten_links_cell(cell):
 def _flatten_links(cells):
     """Replace hypertext links by simple URL text."""
     return [_flatten_links_cell(cell) for cell in cells]
+
+
+def _diff_removed_lines(diff):
+    return ''.join(x[2:] for x in diff if x.startswith('- '))
+
+
+def _diff(text_0, text_1):
+    """Return a diff between two strings."""
+    diff = difflib.ndiff(text_0.splitlines(), text_1.splitlines())
+    return _diff_removed_lines(diff)
+
+
+def _show_outputs(*outputs):
+    for output in outputs:
+        print()
+        print("-" * 30)
+        pprint(output)
 
 
 #------------------------------------------------------------------------------

@@ -7,7 +7,8 @@
 #------------------------------------------------------------------------------
 
 from ...core.format_manager import format_manager, convert
-from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
+from ...utils.utils import _diff, _show_outputs
+from ._utils import (_test_reader, _test_writer,
                      _exec_test_file, _read_test_file)
 
 

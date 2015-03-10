@@ -12,7 +12,7 @@ from ..prompt import (SimplePromptManager,
                       _template_to_regex,
                       _starts_with_regex,
                       )
-from ...formats.tests._utils import _show_outputs
+from ...utils.utils import _show_outputs
 
 
 #------------------------------------------------------------------------------

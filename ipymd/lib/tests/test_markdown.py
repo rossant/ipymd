@@ -11,7 +11,7 @@ from pprint import pprint
 
 from ..base_lexer import BaseRenderer
 from ..markdown import BlockLexer, InlineLexer, MarkdownWriter
-from ...formats.tests._utils import _show_outputs
+from ...utils.utils import _show_outputs
 
 
 # -----------------------------------------------------------------------------

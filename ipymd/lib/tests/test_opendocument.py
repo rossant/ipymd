@@ -13,7 +13,7 @@ from ..opendocument import (ODFDocument, ODFRenderer, BaseODFReader,
                             odf_to_markdown,
                             markdown_to_odf,
                             _merge_text)
-from ...formats.tests._utils import _show_outputs
+from ...utils.utils import _show_outputs
 
 
 # -----------------------------------------------------------------------------
