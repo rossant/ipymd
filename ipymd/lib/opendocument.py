@@ -359,7 +359,9 @@ class ODFDocument(object):
 
     def _code_line(self, line):
         """Add a code line."""
-        self.text(line)
+        assert self._containers
+        container = self._containers[-1]
+        container.addElement(Span(text=line))
 
     def code(self, text):
         """Add a code block."""
@@ -440,7 +442,6 @@ class ODFDocument(object):
             stylename = self._get_style(stylename)
             container.addElement(Span(stylename=stylename, text=text))
         else:
-            print(text)
             container.addElement(Span(text=text))
 
     def link(self, url):
