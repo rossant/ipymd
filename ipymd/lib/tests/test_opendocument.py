@@ -41,6 +41,9 @@ def _example_document():
                         doc.text(". Oh, and here is a link: ")
                         doc.link("http://google.com")
                         doc.text(".")
+                with doc.list_item():
+                    with doc.paragraph():
+                        doc.text("Item 2.2.")
         with doc.list_item():
             with doc.paragraph():
                 doc.text("Item 3.")
@@ -94,7 +97,7 @@ def test_odf_reader():
 
     reader.read(doc)
 
-    assert len(_items) == 59
+    assert len(_items) == 64
 
 
 # -----------------------------------------------------------------------------
@@ -112,6 +115,7 @@ def test_odf_markdown_converter():
                           '* Item 2.',
                           ('  * Item 2.1. This is `code`. '
                            'Oh, and here is a link: http://google.com.'),
+                          '  * Item 2.2.',
                           '* Item 3.',
                           '',
                           '> This is a citation.',

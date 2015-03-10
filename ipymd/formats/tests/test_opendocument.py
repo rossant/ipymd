@@ -22,7 +22,9 @@ from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
 
 def _test_generate():
     """Regenerate the ODF example documents."""
-    for ex in ('ex1', 'ex2'):
+    for ex in ('ex1',
+               'ex2',
+               ):
         markdown = _read_test_file(ex, 'markdown')
         odf = convert(markdown, from_='markdown', to='opendocument')
         odf.save('examples/{0}.opendocument.odt'.format(ex), overwrite=True)
@@ -43,6 +45,7 @@ def _test_odf_reader(basename):
     converted = _process_md(converted)
     expected = _process_md(expected)
 
+    _show_outputs(converted, expected)
     assert converted == expected
 
 
@@ -64,8 +67,8 @@ def _test_odf_odf(basename):
 
 
 def test_odf_reader():
-    # _test_odf_reader('ex1')
-    _test_odf_reader('ex2')
+    _test_odf_reader('ex1')
+    # _test_odf_reader('ex2')
 
 
 def test_odf_writer():
