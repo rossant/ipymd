@@ -6,9 +6,10 @@
 # Imports
 #------------------------------------------------------------------------------
 
-from ...core.core import format_manager, convert
+from ...core.format_manager import format_manager, convert
 from ..notebook import _compare_notebooks
-from ._utils import (_test_reader, _test_writer, _diff, _show_outputs,
+from ...utils.utils import _diff, _show_outputs
+from ._utils import (_test_reader, _test_writer,
                      _exec_test_file, _read_test_file)
 
 

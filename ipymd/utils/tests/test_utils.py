@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 
-"""Test tempdir."""
+"""Test utils."""
 
 #------------------------------------------------------------------------------
 # Imports
 #------------------------------------------------------------------------------
 
-from ..tempdir import TemporaryDirectory
+from ..utils import _diff
 
 
 #------------------------------------------------------------------------------
 # Tests
 #------------------------------------------------------------------------------
 
-def test_temporary_directory():
-    with TemporaryDirectory() as temporary_directory:
-        assert temporary_directory is not None
+def test_diff():
+    s = 'abcdef ghijkl'
+    assert _diff(s, s) == ''
+
+    assert _diff(s, ' ' + s) == s
+    assert _diff(s, s + ' ') == s

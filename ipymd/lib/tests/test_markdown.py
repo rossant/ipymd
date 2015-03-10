@@ -10,7 +10,8 @@ import re
 from pprint import pprint
 
 from ..base_lexer import BaseRenderer
-from ..markdown import BlockLexer, InlineLexer
+from ..markdown import BlockLexer, InlineLexer, MarkdownWriter
+from ...utils.utils import _show_outputs
 
 
 # -----------------------------------------------------------------------------
@@ -135,6 +136,24 @@ def test_block_lexer():
     assert renderer.output == expected
 
 
+def test_block_lexer_list():
+    renderer = BlockRenderer()
+    text = "* 1\n* 2\n  * 2.1\n* 3"
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['<ul>',
+                '<li>', '1', '</li>',
+                '<li>', '2',
+                '<ul>',
+                '<li>', '2.1', '</li>',
+                '</ul>',
+                '</li>',
+                '<li>', '3', '</li>',
+                '</ul>',
+                ]
+    assert renderer.output == expected
+
+
 # -----------------------------------------------------------------------------
 # Tests Markdown inline lexer
 # -----------------------------------------------------------------------------
@@ -184,3 +203,104 @@ def test_full_lexer():
                 '<quote>', '<p>', 'End.', '</p>', '</quote>'
                 ]
     assert renderer.output == expected
+
+
+# -----------------------------------------------------------------------------
+# Test Markdown writer
+# -----------------------------------------------------------------------------
+
+def test_markdown_writer_newline():
+    w = MarkdownWriter()
+    w.text('Hello.')
+    w.ensure_newline(1)
+    w.text('Hello.\n')
+    w.ensure_newline(1)
+    w.text('Hello.\n\n')
+    w.ensure_newline(1)
+    w.text('Hello.\n\n\n')
+    w.ensure_newline(2)
+    w.text('End')
+
+    expected = ('Hello.\n' * 4) + '\nEnd\n'
+
+    assert w.contents == expected
+
+
+def test_markdown_writer():
+    w = MarkdownWriter()
+
+    expected = '\n'.join(("# First chapter",
+                          "",
+                          "**Hello** *world*!",
+                          "How are you? Some `code`.",
+                          "",
+                          "> Good, and you?",
+                          "> End of citation.",
+                          "",
+                          "* Item **1**.",
+                          "* Item 2.",
+                          "",
+                          "1. 1",
+                          "  * 1.1",
+                          "    * 1.1.1",
+                          "2. 2",
+                          "",
+                          "```",
+                          "print(\"Hello world!\")",
+                          "```",
+                          "",
+                          ("Go to [google](http://www.google.com). "
+                           "And here is an image for you:"),
+                          "",
+                          "![Some image](my_image.png)\n"))
+
+    w.heading('First chapter', 1)
+    w.newline()
+
+    w.bold('Hello')
+    w.text(' ')
+    w.italic('world')
+    w.text('!')
+    w.linebreak()
+    w.text('How are you? Some ')
+    w.inline_code('code')
+    w.text('.')
+    w.newline()
+
+    w.quote_start()
+    w.text('Good, and you?')
+    w.linebreak()
+    w.text('End of citation.')
+    w.quote_end()
+    w.newline()
+
+    w.list_item('Item ')
+    w.bold('1')
+    w.text('.')
+    w.linebreak()
+    w.list_item('Item 2.')
+    w.newline()
+
+    w.numbered_list_item('1')
+    w.linebreak()
+    w.list_item('1.1', level=1)
+    w.linebreak()
+    w.list_item('1.1.1', level=2)
+    w.linebreak()
+    w.numbered_list_item('2')
+    w.newline()
+
+    w.code_start()
+    w.text('print("Hello world!")')
+    w.code_end()
+    w.newline()
+
+    w.text('Go to ')
+    w.link('google', 'http://www.google.com')
+    w.text('. And here is an image for you:')
+    w.newline()
+
+    w.image('Some image', 'my_image.png')
+
+    _show_outputs(w.contents, expected)
+    assert w.contents == expected

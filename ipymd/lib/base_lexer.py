@@ -30,6 +30,10 @@ class BaseGrammar(object):
 class BaseRenderer(object):
     def __init__(self, verbose=False):
         self._verbose = verbose
+        self._handler = self._process
+
+    def handler(self, func):
+        self._handler = func
 
     def _process(self, name, *args, **kwargs):
         if self._verbose:
@@ -39,7 +43,7 @@ class BaseRenderer(object):
             print(name, sargs, skwargs)
 
     def __getattr__(self, name):
-        return partial(self._process, name)
+        return partial(self._handler, name)
 
 
 class BaseLexer(object):

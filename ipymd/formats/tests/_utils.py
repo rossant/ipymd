@@ -11,8 +11,8 @@ import os.path as op
 import difflib
 from pprint import pprint
 
-from ...core.core import format_manager, convert
-from ...core.scripts import _read_file, _write_file
+from ...core.format_manager import format_manager, convert
+from ...core.scripts import _load_file, _save_file
 from ...ext.six import exec_
 
 
@@ -49,34 +49,8 @@ def _exec_test_file(basename):
 def _read_test_file(basename, format):
     """Read a test file."""
     path = _test_file_path(basename, format)
-    return _read_file(path, format)
+    return _load_file(path, format)
 
-
-#------------------------------------------------------------------------------
-# Test Markdown parser
-#------------------------------------------------------------------------------
-
-
-def _diff_removed_lines(diff):
-    return ''.join(x[2:] for x in diff if x.startswith('- '))
-
-
-def _diff(text_0, text_1):
-    """Return a diff between two strings."""
-    diff = difflib.ndiff(text_0.splitlines(), text_1.splitlines())
-    return _diff_removed_lines(diff)
-
-
-def _show_outputs(*outputs):
-    for output in outputs:
-        print()
-        print("-" * 30)
-        pprint(output)
-
-
-#------------------------------------------------------------------------------
-# Test Markdown parser
-#------------------------------------------------------------------------------
 
 def _test_reader(basename, format):
     """Return converted and expected ipymd cells of a given example."""

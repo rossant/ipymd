@@ -9,6 +9,8 @@
 import os
 import os.path as op
 import re
+import difflib
+from pprint import pprint
 import json
 
 from ..ext.six import exec_, string_types
@@ -55,6 +57,52 @@ def _remove_output_cell(cell):
 def _remove_output(cells):
     """Remove all code outputs from a list of ipymd cells."""
     return [_remove_output_cell(cell) for cell in cells]
+
+
+def _remove_code_lang_code(cell):
+    if cell['cell_type'] == 'markdown':
+        cell['source'] = re.sub(r'```[^\n]*', '```', cell['source'])
+    return cell
+
+
+def _remove_code_lang(cells):
+    """Remove all lang in code cells."""
+    return [_remove_code_lang_code(cell) for cell in cells]
+
+
+def _remove_images(cells):
+    """Remove markdown cells with images."""
+    return [cell for cell in cells
+            if not cell.get('source', '').startswith('![')]
+
+
+def _flatten_links_cell(cell):
+    if cell['cell_type'] == 'markdown':
+        cell['source'] = re.sub(r'\[([^\]]+)\]\(([^\)]+)\)', r'\1 (\2)',
+                                cell['source'])
+    return cell
+
+
+def _flatten_links(cells):
+    """Replace hypertext links by simple URL text."""
+    return [_flatten_links_cell(cell) for cell in cells]
+
+
+def _diff_removed_lines(diff):
+    return ''.join(x[2:] for x in diff if x.startswith('- '))
+
+
+def _diff(text_0, text_1):
+    """Return a diff between two strings."""
+    diff = difflib.ndiff(text_0.splitlines(), text_1.splitlines())
+    return _diff_removed_lines(diff)
+
+
+def _show_outputs(*outputs):
+    for output in outputs:
+        print()
+        print("-" * 30)
+        pprint(output)
 
 
 #------------------------------------------------------------------------------

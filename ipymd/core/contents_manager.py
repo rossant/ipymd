@@ -17,7 +17,8 @@ from IPython.config.configurable import Configurable
 from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 
-from .core import convert, format_manager
+from .format_manager import convert, format_manager
+from ipymd.ext.six.moves.urllib.error import HTTPError
 
 
 #------------------------------------------------------------------------------
@@ -76,6 +77,7 @@ class IPymdContentsManager(FileContentsManager, Configurable):
             model = self._file_model(path, content=content, format=format)
         return model
 
+
     def _read_notebook(self, os_path, as_version=4):
         """Read a notebook from an os path."""
         with self.open(os_path, 'r', encoding='utf-8') as f:
@@ -86,7 +88,7 @@ class IPymdContentsManager(FileContentsManager, Configurable):
                 if file_ext == '.ipynb':
                     return nbformat.read(f, as_version=as_version)
                 else:
-                    return convert(f.read(), from_=self.format, to='notebook')
+                    return convert(os_path, from_=self.format, to='notebook')
 
             except Exception as e:
                 raise HTTPError(
@@ -122,7 +124,16 @@ class IPymdContentsManager(FileContentsManager, Configurable):
                                        from_='notebook',
                                        to=self.format)
 
-                    self._save_file(os_path, contents, 'text')
+                    # Save a text file.
+                    if (format_manager().file_type(self.format) in
+                        ('text', 'json')):
+                        self._save_file(os_path, contents, 'text')
+                    # Save to a binary file.
+                    else:
+                        format_manager().save(os_path, contents,
+                                              name=self.format,
+                                              overwrite=True)
+
                 # One checkpoint should always exist for notebooks.
                 if not self.checkpoints.list_checkpoints(path):
                     self.create_checkpoint(path)

@@ -134,7 +134,8 @@ ipymd uses a modular architecture that lets you define new formats. The followin
     * `c.IPymdContentsManager.format = 'markdown'`
 * [O'Reilly Atlas](http://odewahn.github.io/publishing-workflows-for-jupyter/#1)  (`.md` with special HTML tags for code and mathematical equations)
     * `c.IPymdContentsManager.format = 'atlas'`
-* Python (`.py`): code cells are delimited by double line breaks. Markdown cells = Python comments.
+* Python (`.py`): code cells are delimited by double line breaks. Markdown cells = Python comments. [TODO: this doesn't work well, see #28 and #31]
+* Opendocument (`.odt`). You need to install the [development version of odfpy](https://github.com/eea/odfpy/).
 
 You can convert from any supported format to any supported format. This works by converting to an intermediate format that is basically a list of notebook cells.
 

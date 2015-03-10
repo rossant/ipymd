@@ -1,6 +1,6 @@
 # Test notebook
 
-This is a text notebook. Here _are_ some **rich text**, `code`, <span class="math-tex" data-type="tex">\\(\pi\simeq 3.1415\\)</span> equations.
+This is a text notebook. Here *are* some **rich text**, `code`, <span class="math-tex" data-type="tex">\\(\pi\simeq 3.1415\\)</span> equations.
 
 Another equation:
 
@@ -79,8 +79,8 @@ a list
 
 * One [small](http://www.google.fr) link!
 * Two
-    * 2.1
-    * 2.2
+  * 2.1
+  * 2.2
 * Three
 
 and
