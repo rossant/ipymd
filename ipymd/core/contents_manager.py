@@ -78,7 +78,10 @@ class IPymdContentsManager(FileContentsManager, Configurable):
 
     def _read_notebook(self, os_path, as_version=4):
         """Read a notebook from an os path."""
-        with self.open(os_path, 'r', encoding='utf-8') as f:
+
+        mode = ('r' if format_manager().file_type(self.format)
+                in ('text', 'json') else 'rb')
+        with self.open(os_path, mode, encoding='utf-8') as f:
             try:
 
                 # NEW
