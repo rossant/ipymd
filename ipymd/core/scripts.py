@@ -95,8 +95,8 @@ def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
     # Convert all files.
     for file in files:
         print("Converting {0:s}...".format(file))
-        contents = _load_file(file, from_)
-        converted = convert(contents, from_, to)
+        # contents = _load_file(file, from_)
+        converted = convert(file, from_, to)
         file_to = _converted_filename(file, from_, to)
         if op.exists(file_to) and not overwrite:
             print("The file already exists, please use --overwrite.")

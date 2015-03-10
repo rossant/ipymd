@@ -18,6 +18,7 @@ from IPython.utils.traitlets import Unicode, Bool
 from IPython.html.services.contents.filemanager import FileContentsManager
 
 from .format_manager import convert, format_manager
+from ipymd.ext.six.moves.urllib.error import HTTPError
 
 
 #------------------------------------------------------------------------------
@@ -76,12 +77,17 @@ class IPymdContentsManager(FileContentsManager, Configurable):
             model = self._file_model(path, content=content, format=format)
         return model
 
+
+    def _open_nb(self, os_path):
+        if format_manager().file_type(self.format) in ('text', 'json'):
+            return self.open(os_path, 'r', encoding='utf-8')
+        else:
+            return self.open(os_path, 'rb')
+
+
     def _read_notebook(self, os_path, as_version=4):
         """Read a notebook from an os path."""
-
-        mode = ('r' if format_manager().file_type(self.format)
-                in ('text', 'json') else 'rb')
-        with self.open(os_path, mode, encoding='utf-8') as f:
+        with self._open_nb(os_path) as f:
             try:
 
                 # NEW

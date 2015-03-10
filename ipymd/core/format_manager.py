@@ -22,6 +22,14 @@ from .. import formats
 # Format manager
 #------------------------------------------------------------------------------
 
+def _is_path(s):
+    """Return whether an object is a path."""
+    if isinstance(s, string_types):
+        return op.exists(s)
+    else:
+        return False
+
+
 class FormatManager(object):
     def __init__(self):
         self._formats = {}
@@ -132,7 +140,7 @@ class FormatManager(object):
         return self._formats[name]['writer'](*args, **kwargs)
 
     def convert(self,
-                contents,
+                contents_or_path,
                 from_=None,
                 to=None,
                 from_kwargs=None,
@@ -157,6 +165,12 @@ class FormatManager(object):
             Optional keyword arguments to pass to the writer instance.
 
         """
+
+        # Load the file if 'contents_or_path' is a path.
+        if _is_path(contents_or_path):
+            contents = self.load(contents_or_path, from_)
+        else:
+            contents = contents_or_path
 
         if from_kwargs is None:
             from_kwargs = {}
