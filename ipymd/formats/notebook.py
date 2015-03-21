@@ -90,6 +90,8 @@ class NotebookWriter(object):
     def append_markdown(self, source):
         # Filter Markdown contents.
         source = self._markdown_filter(source)
+        if not source:
+            return
         self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
 
     def append_code(self, input, output=None, image=None):
