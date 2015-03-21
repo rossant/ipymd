@@ -8,3 +8,4 @@ images
 *checkpoints*
 .fuse*
 *.pyc
+*.egg-info
