@@ -9,9 +9,25 @@
 import os.path as op
 import shutil
 
-from ..scripts import _cli
+from ..scripts import _cli, _common_prefix
 from ...formats.tests._utils import _test_file_path
 from ...utils.tempdir import TemporaryDirectory
+
+
+#------------------------------------------------------------------------------
+# Test utility functions
+#------------------------------------------------------------------------------
+
+def test_common_prefix():
+    assert not _common_prefix([])
+    assert _common_prefix(['a', 'b'])
+    root = op.dirname(op.realpath(__file__))
+    if not root.endswith('/'):
+        root = root + '/'
+    assert _common_prefix([op.join(root, 'a'),
+                           op.join(root, 'b')]) == root
+    assert (_common_prefix([op.join(root, '../tests/a'),
+                            op.join(root, '../tests/b')]) == root)
 
 
 #------------------------------------------------------------------------------

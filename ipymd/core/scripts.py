@@ -56,6 +56,17 @@ def _expand_dirs_to_files(files_or_dirs):
     return files
 
 
+def _common_prefix(files):
+    files = [op.realpath(file) for file in files]
+    root = op.commonprefix(files)
+    if not op.exists(root):
+        root = op.dirname(root)
+    if root:
+        assert op.exists(root)
+        assert op.isdir(root)
+    return root
+
+
 def _file_has_extension(file, extensions):
     if not isinstance(extensions, list):
         extensions = [extensions]
