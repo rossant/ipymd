@@ -12,6 +12,7 @@ from collections import OrderedDict
 
 from ..lib.base_lexer import BaseGrammar, BaseLexer
 from ..lib.markdown import MarkdownFilter
+from ..lib.python import _is_python
 from ..ext.six import StringIO
 from ..utils.utils import _ensure_string, _preprocess
 
@@ -109,11 +110,7 @@ def _is_chunk_markdown(source):
             return True
         # Try to parse the chunk: if it fails, it is Markdown, otherwise,
         # it is Python.
-        try:
-            ast.parse(source)
-            return False
-        except SyntaxError:
-            return True
+        return not _is_python(source)
     return False
 
 
