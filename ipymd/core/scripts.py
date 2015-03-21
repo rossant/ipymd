@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 
 """CLI scripts."""
 
@@ -134,10 +135,11 @@ def convert_files(files_or_dirs,
 
     # Convert all files.
     for file in files:
-        print("Converting {0:s}...".format(file))
+        print("Converting {0:s}...".format(file), end=' ')
         converted = convert(file, from_, to,
                             from_kwargs=from_kwargs, to_kwargs=to_kwargs)
         file_to = _converted_filename(file, from_, to)
+        print("done.")
 
         # Compute the output path.
         if output_folder:
@@ -149,8 +151,12 @@ def convert_files(files_or_dirs,
             # Create the subfolders if necessary.
             _construct_tree(file_to)
 
-        if not simulate:
+        print(" Saving to {0:s}...".format(file_to), end=' ')
+        if simulate:
+            print("skipped (simulation).")
+        else:
             _save_file(file_to, to, converted, overwrite=overwrite)
+            print('done.')
 
 
 def main():
