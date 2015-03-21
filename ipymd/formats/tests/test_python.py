@@ -93,7 +93,7 @@ def test_commented_python():
         '# pass',
         '# Hello world.',
         '',
-        '# this is commented Python code: should not be converted to Markdown',
+        '# # commented Python code should not be converted to Markdown',
         '# print(1)',
         '# 3+3',
         '# if False:',
@@ -102,4 +102,8 @@ def test_commented_python():
         '# Text again.',
     ))
     cells = convert(python, from_='python')
-    _show_outputs(cells)
+    assert [cell['cell_type'] for cell in cells] == ['markdown',
+                                                     'markdown',
+                                                     'code',
+                                                     'markdown',
+                                                     ]

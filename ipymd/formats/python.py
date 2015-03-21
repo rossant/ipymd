@@ -7,6 +7,7 @@
 #------------------------------------------------------------------------------
 
 import re
+import ast
 from collections import OrderedDict
 
 from ..ext.six import StringIO
@@ -29,10 +30,22 @@ def _split_python(python):
     return cells
 
 
-def _is_chunk_comment(source):
-    """Return whether a chunk is a comment."""
-    if all(line.startswith('# ') for line in source.splitlines()):
-        return True
+def _is_chunk_markdown(source):
+    """Return whether a chunk contains Markdown contents."""
+    lines = source.splitlines()
+    if all(line.startswith('# ') for line in lines):
+        # The chunk is a Markdown *unless* it is commented Python code.
+        source = '\n'.join(line[2:] for line in lines
+                           if not line[2:].startswith('#'))  # skip headers
+        if not source:
+            return True
+        # Try to parse the chunk: if it fails, it is Markdown, otherwise,
+        # it is Python.
+        try:
+            ast.parse(source)
+            return False
+        except SyntaxError:
+            return True
     return False
 
 
@@ -72,7 +85,7 @@ class PythonReader(object):
     def read(self, python):
         chunks = _split_python(python)
         for chunk in chunks:
-            if _is_chunk_comment(chunk):
+            if _is_chunk_markdown(chunk):
                 yield self._markdown_cell(_remove_hash(chunk))
             else:
                 yield self._code_cell(chunk)
