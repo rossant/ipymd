@@ -1,3 +1,4 @@
 from . import formats
 from .core.format_manager import convert, format_manager
-from .core.contents_manager import *
+from .core.contents_manager import IPymdContentsManager
+from .core.scripts import convert_files
