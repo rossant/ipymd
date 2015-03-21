@@ -20,4 +20,7 @@ def test_python():
 
 def test_python_filter():
     filter = PythonFilter()
+    assert filter('a\nb # ipymd-skip\nc\n') == 'a\nb # ipymd-skip\nc'
+
+    filter = PythonFilter(ipymd_skip=True)
     assert filter('a\nb # ipymd-skip\nc\n') == 'a\nc'

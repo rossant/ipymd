@@ -12,6 +12,7 @@ import IPython.nbformat as nbf
 from IPython.nbformat.v4.nbbase import validate
 
 from ..lib.markdown import MarkdownFilter
+from ..lib.python import PythonFilter
 from ..ext.six import string_types
 from ..utils.utils import _ensure_string
 
@@ -83,10 +84,11 @@ class NotebookReader(object):
 #------------------------------------------------------------------------------
 
 class NotebookWriter(object):
-    def __init__(self, keep_markdown=None):
+    def __init__(self, keep_markdown=None, ipymd_skip=False):
         self._nb = nbf.v4.new_notebook()
         self._count = 1
         self._markdown_filter = MarkdownFilter(keep_markdown)
+        self._code_filter = PythonFilter(ipymd_skip=ipymd_skip)
 
     def append_markdown(self, source):
         # Filter Markdown contents.
@@ -96,6 +98,7 @@ class NotebookWriter(object):
         self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
 
     def append_code(self, input, output=None, image=None):
+        input = self._code_filter(input)
         cell = nbf.v4.new_code_cell(input, execution_count=self._count)
         if output:
             cell.outputs.append(nbf.v4.new_output('execute_result',

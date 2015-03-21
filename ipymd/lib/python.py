@@ -26,12 +26,16 @@ def _is_python(source):
 
 
 class PythonFilter(object):
-    def __init__(self):
-        pass
+    def __init__(self, ipymd_skip=None):
+        self._ipymd_skip = ipymd_skip
 
     def filter(self, code):
-        return '\n'.join(line for line in code.splitlines()
-                         if 'ipymd-skip' not in line)
+        code = code.rstrip()
+        if self._ipymd_skip:
+            return '\n'.join(line for line in code.splitlines()
+                             if 'ipymd-skip' not in line)
+        else:
+            return code
 
     def __call__(self, code):
         return self.filter(code)
