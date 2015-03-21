@@ -56,7 +56,7 @@ def _expand_dirs_to_files(files_or_dirs):
     return files
 
 
-def _common_prefix(files):
+def _common_root(files):
     files = [op.realpath(file) for file in files]
     root = op.commonprefix(files)
     if not op.exists(root):
