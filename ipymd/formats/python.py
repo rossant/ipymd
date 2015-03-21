@@ -10,6 +10,7 @@ import re
 import ast
 from collections import OrderedDict
 
+from ..lib.base_lexer import BaseGrammar, BaseLexer
 from ..ext.six import StringIO
 from ..utils.utils import _ensure_string, _preprocess
 
@@ -17,6 +18,60 @@ from ..utils.utils import _ensure_string, _preprocess
 #------------------------------------------------------------------------------
 # Python reader and writer
 #------------------------------------------------------------------------------
+
+class PythonSplitGrammar(BaseGrammar):
+    _triple_quotes = "'''"
+    _triple_doublequotes = '"""'
+    _triple = _triple_quotes + '|' + _triple_doublequotes
+
+    # '''text''' or """text""".
+    text_var = re.compile(r"^({0})((?!{0}).|\n)*?\1".format(_triple))
+
+    # Two new lines followed by non-space
+    newline = re.compile(r'^[\n]{2,}(?=[^ ])')
+
+    linebreak = re.compile(r'^\n+')
+    other = re.compile(r'^(?!{0}).'.format(_triple))
+
+
+class PythonSplitLexer(BaseLexer):
+    grammar_class = PythonSplitGrammar
+    default_rules = ['text_var', 'newline', 'linebreak', 'other']
+    chunks = ['']
+
+    @property
+    def current(self):
+        if not self.chunks:
+            return None
+        else:
+            return self.chunks[-1]
+
+    @current.setter
+    def current(self, value):
+        self.chunks[-1] = value
+
+    def new_chunk(self):
+        self.chunks.append('')
+
+    def append(self, text):
+        self.current += text
+
+    def parse_newline(self, m):
+        # print("parse_newline")
+        self.new_chunk()
+
+    def parse_linebreak(self, m):
+        # print("parse_linebreak")
+        self.append(m.group(0))
+
+    def parse_text_var(self, m):
+        print("parse_text_var")
+        self.append(m.group(0))
+
+    def parse_other(self, m):
+        # print("parse_other")
+        self.append(m.group(0))
+
 
 def _split_python(python):
     """Split Python source into chunks.
@@ -26,8 +81,11 @@ def _split_python(python):
 
     """
     python = _preprocess(python)
-    cells = re.split(r'[\n]{2,}(?=[^ ])', python)
-    return cells
+    if not python:
+        return []
+    lexer = PythonSplitLexer()
+    lexer.read(python)
+    return lexer.chunks
 
 
 def _is_chunk_markdown(source):
