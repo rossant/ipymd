@@ -56,6 +56,21 @@ def _expand_dirs_to_files(files_or_dirs):
     return files
 
 
+def _common_root(files):
+    files = [op.realpath(file) for file in files]
+    root = op.commonprefix(files)
+    if not op.exists(root):
+        root = op.dirname(root)
+    if root:
+        assert op.exists(root)
+        assert op.isdir(root)
+    return root
+
+
+def _construct_tree(path):
+    os.makedirs(op.dirname(path))
+
+
 def _file_has_extension(file, extensions):
     if not isinstance(extensions, list):
         extensions = [extensions]
@@ -84,7 +99,12 @@ def _converted_filename(file, from_, to):
     return ''.join((base, to_extension))
 
 
-def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
+def _cli(files_or_dirs,
+         overwrite=None,
+         from_=None,
+         to=None,
+         output_folder=None,
+         ):
     # Find all files.
     files = _expand_dirs_to_files(files_or_dirs)
 
@@ -92,12 +112,26 @@ def _cli(files_or_dirs, overwrite=None, from_=None, to=None):
     from_extension = format_manager().file_extension(from_)
     files = _filter_files_by_extension(files, from_extension)
 
+    # Get the common root of all files.
+    if output_folder:
+        root = _common_root(files)
+
     # Convert all files.
     for file in files:
         print("Converting {0:s}...".format(file))
-        # contents = _load_file(file, from_)
         converted = convert(file, from_, to)
         file_to = _converted_filename(file, from_, to)
+
+        # Compute the output path.
+        if output_folder:
+            # Path relative to the common root.
+            rel_file = op.relpath(file_to, root)
+            # Reconstruct the internal folder structure within the output
+            # folder.
+            file_to = op.join(output_folder, rel_file)
+            # Create the subfolders if necessary.
+            _construct_tree(file_to)
+
         _save_file(file_to, to, converted, overwrite=overwrite)
 
 
