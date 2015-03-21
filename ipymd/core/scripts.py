@@ -99,12 +99,12 @@ def _converted_filename(file, from_, to):
     return ''.join((base, to_extension))
 
 
-def _cli(files_or_dirs,
-         overwrite=None,
-         from_=None,
-         to=None,
-         output_folder=None,
-         ):
+def convert_files(files_or_dirs,
+                  overwrite=None,
+                  from_=None,
+                  to=None,
+                  output_folder=None,
+                  ):
     # Find all files.
     files = _expand_dirs_to_files(files_or_dirs)
 
@@ -155,11 +155,11 @@ def main():
 
     # Parse the CLI arguments.
     args = parser.parse_args()
-    _cli(args.files_or_dirs,
-         overwrite=args.overwrite,
-         from_=args.from_,
-         to=args.to,
-         )
+    convert_files(args.files_or_dirs,
+                  overwrite=args.overwrite,
+                  from_=args.from_,
+                  to=args.to,
+                  )
 
 
 if __name__ == '__main__':

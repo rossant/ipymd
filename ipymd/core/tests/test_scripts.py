@@ -10,7 +10,7 @@ import os
 import os.path as op
 import shutil
 
-from ..scripts import _cli, _common_root
+from ..scripts import convert_files, _common_root
 from ...formats.tests._utils import _test_file_path
 from ...utils.tempdir import TemporaryDirectory
 
@@ -35,7 +35,7 @@ def test_common_root():
 # Test CLI conversion tool
 #------------------------------------------------------------------------------
 
-def test_cli():
+def test_convert_files():
     basename = 'ex1'
     with TemporaryDirectory() as tempdir:
 
@@ -45,7 +45,7 @@ def test_cli():
         shutil.copy(md_orig, md_temp)
 
         # Launch the CLI conversion tool.
-        _cli(md_temp, from_='markdown', to='notebook')
+        convert_files(md_temp, from_='markdown', to='notebook')
 
         # TODO: more tests
         assert op.exists(op.join(tempdir, basename + '.ipynb'))
@@ -68,8 +68,8 @@ def test_output_folder():
         shutil.copy(md_orig, md_temp_1)
 
         # Launch the CLI conversion tool.
-        _cli([md_temp_0, md_temp_1], from_='markdown', to='notebook',
-             output_folder=op.join(tempdir, 'output'))
+        convert_files([md_temp_0, md_temp_1], from_='markdown', to='notebook',
+                      output_folder=op.join(tempdir, 'output'))
 
         assert op.exists(op.join(tempdir, 'output/ex1.ipynb'))
         assert op.exists(op.join(tempdir, 'output/subfolder/ex1.ipynb'))
