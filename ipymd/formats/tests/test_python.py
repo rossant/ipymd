@@ -7,9 +7,87 @@
 #------------------------------------------------------------------------------
 
 from ...core.format_manager import format_manager, convert
-from ...utils.utils import _remove_output, _diff
+from ...utils.utils import _remove_output, _diff, _show_outputs
 from ._utils import (_test_reader, _test_writer,
                      _exec_test_file, _read_test_file)
+from ..python import _split_python
+
+
+#------------------------------------------------------------------------------
+# Test Python utility functions
+#------------------------------------------------------------------------------
+
+def test_split_python():
+    python = '\n'.join((
+        'a',
+        'b = "1"',
+        '',
+        "c = '''",
+        'd',
+        '',
+        '',
+        'e',
+        "'''",
+        '',
+        '# comment',
+    ))
+    chunks = _split_python(python)
+    assert len(chunks) == 3
+
+
+def test_python_headers():
+    cells = _exec_test_file('ex2')
+
+    # Keep H1.
+    converted = convert(cells, to='python',
+                        to_kwargs={'keep_markdown': 'h1'})
+    assert converted.startswith('# # Test notebook\n\n# some code in python')
+    assert len(converted.splitlines()) == 30
+
+    # Keep H2, H3.
+    converted = convert(cells, to='python',
+                        to_kwargs={'keep_markdown': 'h2,h3'})
+    assert not converted.startswith('# # Test notebook\n\n# some code')
+    assert len(converted.splitlines()) == 30
+
+    # Keep all headers.
+    converted = convert(cells, to='python',
+                        to_kwargs={'keep_markdown': 'headers'})
+    assert converted.startswith('# # Test notebook\n\n# some code in python')
+    assert len(converted.splitlines()) == 32
+
+    # Keep all Markdown.
+    converted = convert(cells, to='python',
+                        to_kwargs={'keep_markdown': 'all'})
+    assert len(converted.splitlines()) == 72
+
+    # Keep no Markdown.
+    converted = convert(cells, to='python',
+                        to_kwargs={'keep_markdown': False})
+    assert len(converted.splitlines()) == 28
+
+
+def test_commented_python():
+    python = '\n'.join((
+        '# # Title',
+        '',
+        '# pass',
+        '# Hello world.',
+        '',
+        '# # commented Python code should not be converted to Markdown',
+        '# print(1)',
+        '# 3+3',
+        '# if False:',
+        '#     exit(1/0)',
+        '',
+        '# Text again.',
+    ))
+    cells = convert(python, from_='python')
+    assert [cell['cell_type'] for cell in cells] == ['markdown',
+                                                     'markdown',
+                                                     'code',
+                                                     'markdown',
+                                                     ]
 
 
 #------------------------------------------------------------------------------

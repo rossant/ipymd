@@ -229,7 +229,16 @@ class PythonPromptManager(SimplePromptManager):
 
 
 def create_prompt(prompt):
-    """Create a prompt manager."""
+    """Create a prompt manager.
+
+    Parameters
+    ----------
+
+    prompt : str or class driving from BasePromptManager
+        The prompt name ('python' or 'ipython') or a custom PromptManager
+        class.
+
+    """
     if prompt is None:
         prompt = 'python'
     if prompt == 'python':
