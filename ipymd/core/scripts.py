@@ -67,6 +67,10 @@ def _common_root(files):
     return root
 
 
+def _construct_tree(path):
+    os.makedirs(op.dirname(path))
+
+
 def _file_has_extension(file, extensions):
     if not isinstance(extensions, list):
         extensions = [extensions]
@@ -125,6 +129,8 @@ def _cli(files_or_dirs,
             # Reconstruct the internal folder structure within the output
             # folder.
             file_to = op.join(output_folder, rel_file)
+            # Create the subfolders if necessary.
+            _construct_tree(file_to)
 
         _save_file(file_to, to, converted, overwrite=overwrite)
 
