@@ -35,20 +35,27 @@ def _ensure_list(l):
 
 
 def _to_skip(dirname):
-    return op.basename(dirname).startswith('._/')
+    out = op.basename(dirname).startswith(('.', '_', '/'))
+    return out
 
 
-def _expand_dirs_to_files(files_or_dirs):
+def _expand_dirs_to_files(files_or_dirs, recursive=False):
     files = []
     files_or_dirs = _ensure_list(files_or_dirs)
     for file_or_dir in files_or_dirs:
+        file_or_dir = op.realpath(file_or_dir)
         if op.isdir(file_or_dir):
             # Skip dirnames starting with '.'
             if _to_skip(file_or_dir):
                 continue
             # Recursively visit the directories and add the files.
-            files.extend(_expand_dirs_to_files([op.join(file_or_dir, file)
-                         for file in os.listdir(file_or_dir)]))
+            if recursive:
+                files.extend(_expand_dirs_to_files([op.join(file_or_dir, file)
+                             for file in os.listdir(file_or_dir)],
+                             recursive=recursive))
+            else:
+                files.extend([op.join(file_or_dir, file)
+                              for file in os.listdir(file_or_dir)])
         elif '*' in file_or_dir:
             files.extend(glob.glob(file_or_dir))
         else:
@@ -63,12 +70,16 @@ def _common_root(files):
         root = op.dirname(root)
     if root:
         assert op.exists(root)
-        assert op.isdir(root)
+        assert op.isdir(root), root
     return root
 
 
 def _construct_tree(path):
-    os.makedirs(op.dirname(path))
+    if not op.exists(path):
+        try:
+            os.makedirs(op.dirname(path))
+        except FileExistsError:
+            pass
 
 
 def _file_has_extension(file, extensions):
@@ -103,10 +114,14 @@ def convert_files(files_or_dirs,
                   overwrite=None,
                   from_=None,
                   to=None,
+                  from_kwargs=None,
+                  to_kwargs=None,
                   output_folder=None,
+                  recursive=False,
+                  simulate=False,
                   ):
     # Find all files.
-    files = _expand_dirs_to_files(files_or_dirs)
+    files = _expand_dirs_to_files(files_or_dirs, recursive=recursive)
 
     # Filter by from extension.
     from_extension = format_manager().file_extension(from_)
@@ -114,12 +129,14 @@ def convert_files(files_or_dirs,
 
     # Get the common root of all files.
     if output_folder:
+        output_folder = op.realpath(output_folder)
         root = _common_root(files)
 
     # Convert all files.
     for file in files:
         print("Converting {0:s}...".format(file))
-        converted = convert(file, from_, to)
+        converted = convert(file, from_, to,
+                            from_kwargs=from_kwargs, to_kwargs=to_kwargs)
         file_to = _converted_filename(file, from_, to)
 
         # Compute the output path.
@@ -132,7 +149,8 @@ def convert_files(files_or_dirs,
             # Create the subfolders if necessary.
             _construct_tree(file_to)
 
-        _save_file(file_to, to, converted, overwrite=overwrite)
+        if not simulate:
+            _save_file(file_to, to, converted, overwrite=overwrite)
 
 
 def main():
