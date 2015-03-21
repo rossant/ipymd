@@ -151,7 +151,7 @@ class PythonReader(object):
 
 class PythonWriter(object):
     """Python writer."""
-    def __init__(self, keep_markdown='all'):
+    def __init__(self, keep_markdown=None):
         self._output = StringIO()
         self._markdown_filter = MarkdownFilter(keep_markdown)
 

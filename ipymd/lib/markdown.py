@@ -650,7 +650,9 @@ class MarkdownFilter(object):
         * 'h1,h3': just keep headers of level 1 and 3 (can be any combination)
 
     """
-    def __init__(self, keep):
+    def __init__(self, keep=None):
+        if keep is None:
+            keep = 'all'
         if keep == 'headers':
             keep = 'h1,h2,h3,h4,h5,h6'
         if isinstance(keep, string_types) and keep != 'all':

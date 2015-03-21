@@ -10,6 +10,7 @@ import json
 
 import IPython.nbformat as nbf
 
+from ..lib.markdown import MarkdownFilter
 from ..ext.six import string_types
 from ..utils.utils import _ensure_string
 
@@ -81,11 +82,14 @@ class NotebookReader(object):
 #------------------------------------------------------------------------------
 
 class NotebookWriter(object):
-    def __init__(self):
+    def __init__(self, keep_markdown=None):
         self._nb = nbf.v4.new_notebook()
         self._count = 1
+        self._markdown_filter = MarkdownFilter(keep_markdown)
 
     def append_markdown(self, source):
+        # Filter Markdown contents.
+        source = self._markdown_filter(source)
         self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
 
     def append_code(self, input, output=None, image=None):
