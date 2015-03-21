@@ -20,6 +20,9 @@ from ..utils.utils import _ensure_string, _preprocess
 #------------------------------------------------------------------------------
 
 class PythonSplitGrammar(BaseGrammar):
+    """Grammar used to split Python code into chunks while not cutting
+    long Python strings."""
+
     _triple_quotes = "'''"
     _triple_doublequotes = '"""'
     _triple = _triple_quotes + '|' + _triple_doublequotes
@@ -35,6 +38,8 @@ class PythonSplitGrammar(BaseGrammar):
 
 
 class PythonSplitLexer(BaseLexer):
+    """Lexer for splitting Python code into chunks."""
+
     grammar_class = PythonSplitGrammar
     default_rules = ['text_var', 'newline', 'linebreak', 'other']
 
@@ -80,7 +85,8 @@ def _split_python(python):
     """Split Python source into chunks.
 
     Chunks are separated by at least two return lines. The break must not
-    be followed by a space.
+    be followed by a space. Also, long Python strings spanning several lines
+    are not splitted.
 
     """
     python = _preprocess(python)
