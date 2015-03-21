@@ -37,39 +37,42 @@ class PythonSplitGrammar(BaseGrammar):
 class PythonSplitLexer(BaseLexer):
     grammar_class = PythonSplitGrammar
     default_rules = ['text_var', 'newline', 'linebreak', 'other']
-    chunks = ['']
+
+    def __init__(self):
+        super(PythonSplitLexer, self).__init__()
+        self._chunks = ['']
 
     @property
     def current(self):
-        if not self.chunks:
+        if not self._chunks:
             return None
         else:
-            return self.chunks[-1]
+            return self._chunks[-1]
+
+    @property
+    def chunks(self):
+        return [chunk for chunk in self._chunks if chunk]
 
     @current.setter
     def current(self, value):
-        self.chunks[-1] = value
+        self._chunks[-1] = value
 
     def new_chunk(self):
-        self.chunks.append('')
+        self._chunks.append('')
 
     def append(self, text):
         self.current += text
 
     def parse_newline(self, m):
-        # print("parse_newline")
         self.new_chunk()
 
     def parse_linebreak(self, m):
-        # print("parse_linebreak")
         self.append(m.group(0))
 
     def parse_text_var(self, m):
-        print("parse_text_var")
         self.append(m.group(0))
 
     def parse_other(self, m):
-        # print("parse_other")
         self.append(m.group(0))
 
 
