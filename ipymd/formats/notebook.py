@@ -9,6 +9,7 @@
 import json
 
 import IPython.nbformat as nbf
+from IPython.nbformat.v4.nbbase import validate
 
 from ..lib.markdown import MarkdownFilter
 from ..ext.six import string_types
@@ -95,7 +96,7 @@ class NotebookWriter(object):
         self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
 
     def append_code(self, input, output=None, image=None):
-        cell = nbf.v4.new_code_cell(input)
+        cell = nbf.v4.new_code_cell(input, execution_count=self._count)
         if output:
             cell.outputs.append(nbf.v4.new_output('execute_result',
                                 {'text/plain': output},
@@ -116,6 +117,7 @@ class NotebookWriter(object):
 
     @property
     def contents(self):
+        validate(self._nb)
         return self._nb
 
 
