@@ -31,7 +31,9 @@ def _split_python(python):
 
 def _is_chunk_comment(source):
     """Return whether a chunk is a comment."""
-    return all(line.startswith('# ') for line in source.splitlines())
+    if all(line.startswith('# ') for line in source.splitlines()):
+        return True
+    return False
 
 
 def _remove_hash(source):

@@ -7,7 +7,7 @@
 #------------------------------------------------------------------------------
 
 from ...core.format_manager import format_manager, convert
-from ...utils.utils import _remove_output, _diff
+from ...utils.utils import _remove_output, _diff, _show_outputs
 from ._utils import (_test_reader, _test_writer,
                      _exec_test_file, _read_test_file)
 
@@ -84,3 +84,22 @@ def test_python_headers():
     converted = convert(cells, to='python',
                         to_kwargs={'keep_markdown': False})
     assert len(converted.splitlines()) == 28
+
+
+def test_commented_python():
+    python = '\n'.join((
+        '# # Title',
+        '',
+        '# pass',
+        '# Hello world.',
+        '',
+        '# this is commented Python code: should not be converted to Markdown',
+        '# print(1)',
+        '# 3+3',
+        '# if False:',
+        '#     exit(1/0)',
+        '',
+        '# Text again.',
+    ))
+    cells = convert(python, from_='python')
+    _show_outputs(cells)
