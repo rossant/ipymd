@@ -20,7 +20,7 @@ The code has been adapted from the mistune library:
 import re
 
 from .base_lexer import BaseLexer, BaseRenderer
-from ..ext.six import StringIO
+from ..ext.six import StringIO, string_types
 
 
 # -----------------------------------------------------------------------------
@@ -610,3 +610,61 @@ class MarkdownWriter(object):
             if self._output.getvalue()[-1] == '\n':
                 text = '> ' + text
         self._write(text)
+
+
+# -----------------------------------------------------------------------------
+# Markdown filter
+# -----------------------------------------------------------------------------
+
+def _replace_header_filter(filter):
+    return {'h1': '# ',
+            'h2': '## ',
+            'h3': '### ',
+            'h4': '#### ',
+            'h5': '##### ',
+            'h6': '###### ',
+            }[filter]
+
+
+def _filter_markdown(source, filters):
+    """Only keep some Markdown headers from a Markdown string."""
+    lines = source.splitlines()
+    # Filters is a list of 'hN' strings where 1 <= N <= 6.
+    headers = [_replace_header_filter(filter) for filter in filters]
+    lines = [line for line in lines if line.startswith(tuple(headers))]
+    return '\n'.join(lines)
+
+
+class MarkdownFilter(object):
+    """Filter Marakdown contents by keeping a subset of the contents.
+
+    Parameters
+    ----------
+
+    keep : str | None or False
+        What to keep from Markdown cells. Can be:
+
+        * None or False: don't keep Markdown contents
+        * 'all': keep all Markdown contents
+        * 'headers': just keep Markdown headers
+        * 'h1,h3': just keep headers of level 1 and 3 (can be any combination)
+
+    """
+    def __init__(self, keep):
+        if keep == 'headers':
+            keep = 'h1,h2,h3,h4,h5,h6'
+        if isinstance(keep, string_types) and keep != 'all':
+            keep = keep.split(',')
+        self._keep = keep
+
+    def filter(self, source):
+        # Skip Markdown cell.
+        if not self._keep:
+            return ''
+        # Only keep some Markdown headers if keep_markdown is not 'all'.
+        elif self._keep != 'all':
+            source = _filter_markdown(source, self._keep)
+        return source
+
+    def __call__(self, source):
+        return self.filter(source)
