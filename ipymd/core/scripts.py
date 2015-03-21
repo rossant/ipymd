@@ -79,7 +79,7 @@ def _construct_tree(path):
     if not op.exists(path):
         try:
             os.makedirs(op.dirname(path))
-        except FileExistsError:
+        except OSError:
             pass
 
 
