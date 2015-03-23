@@ -471,10 +471,8 @@ class ODFDocument(object):
     def start_paragraph(self, stylename=None):
         """Start a new paragraph."""
         # Use the next paragraph style if one was set.
-        if self._next_p_style:
-            stylename = self._next_p_style
         if stylename is None:
-            stylename = 'normal-paragraph'
+            stylename = self._next_p_style or 'normal-paragraph'
         self.start_container(P, stylename=stylename)
 
     def is_in_paragraph(self):
