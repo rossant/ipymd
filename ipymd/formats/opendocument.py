@@ -8,10 +8,10 @@
 # -----------------------------------------------------------------------------
 
 from ..core.prompt import create_prompt
-from ..ext.six import text_type
 from ..lib.markdown import InlineLexer, BlockLexer, BaseRenderer
-from ..lib.opendocument import (load, ODFDocument, ODFRenderer,
-                                odf_to_markdown)
+from ..lib.opendocument import (ODFDocument, ODFRenderer,
+                                odf_to_markdown,
+                                load_odf, save_odf)
 from .markdown import MarkdownReader
 
 
@@ -28,8 +28,8 @@ class ODFReader(object):
 
 
 class ODFWriter(object):
-    def __init__(self, prompt=None):
-        self._doc = ODFDocument()
+    def __init__(self, prompt=None, **kwargs):
+        self._doc = ODFDocument(**kwargs)
         self._prompt = create_prompt(prompt)
 
     def write(self, cell):
@@ -47,17 +47,6 @@ class ODFWriter(object):
     @property
     def contents(self):
         return self._doc
-
-
-def load_odf(path):
-    # HACK: work around a bug in odfpy: make sure the path string is unicode.
-    path = text_type(path)
-    doc = load(path)
-    return ODFDocument(doc=doc)
-
-
-def save_odf(path, contents):
-    contents.save(path)
 
 
 ODF_FORMAT = dict(

@@ -23,7 +23,7 @@ from odf.style import (Style, TextProperties, ListLevelProperties,
 from odf.text import (H, P, S, Span, LineBreak, List, ListItem,
                       ListStyle, ListLevelStyleNumber)
 
-from ..ext.six import string_types
+from ..ext.six import text_type, string_types
 from .base_lexer import BaseRenderer
 from .markdown import BaseRenderer, InlineLexer, MarkdownWriter, BlockLexer
 
@@ -93,6 +93,17 @@ def _is_empty(el):
     if _is_paragraph(el):
         return not(el.childNodes)
     return False
+
+
+def load_odf(path):
+    # HACK: work around a bug in odfpy: make sure the path string is unicode.
+    path = text_type(path)
+    doc = load(path)
+    return ODFDocument(doc=doc)
+
+
+def save_odf(path, contents):
+    contents.save(path)
 
 
 # -----------------------------------------------------------------------------
@@ -194,11 +205,7 @@ def load_styles(path_or_doc):
 # -----------------------------------------------------------------------------
 
 class ODFDocument(object):
-
-    """Default stylename ==> actual stylename mapping."""
-    style_mapping = {}
-
-    def __init__(self, styles=None, doc=None):
+    def __init__(self, doc=None, styles=None, style_mapping=None):
 
         # Add default styles if necessary.
         self._styles = {}  # Dictionary of current styles.
@@ -215,6 +222,8 @@ class ODFDocument(object):
         else:
             self._doc = doc
 
+        # Default stylename ==> actual stylename mapping.
+        self.style_mapping = style_mapping or {}
         self.inverse_style_mapping = {v: k
                                       for (k, v) in self.style_mapping.items()}
 
