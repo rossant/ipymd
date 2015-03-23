@@ -305,7 +305,7 @@ class StyleManager(object):
         if not self._mapping:
             return name
         if name in self._default:
-            actual_name = self._mapping[name]
+            actual_name = self._mapping.get(name, name)
             return actual_name
         elif name in self._styles:
             return name
