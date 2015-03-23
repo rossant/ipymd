@@ -31,14 +31,14 @@ class ODFWriter(object):
     def __init__(self, prompt=None, odfdoc=None):
         self._odfdoc = odfdoc or ODFDocument()
         self._prompt = create_prompt(prompt)
+        renderer = ODFRenderer(self._odfdoc)
+        self._block_lexer = BlockLexer(renderer=renderer)
 
     def write(self, cell):
         if cell['cell_type'] == 'markdown':
             md = cell['source']
             # Convert the Markdown cell to ODF.
-            renderer = ODFRenderer(self._odfdoc)
-            block_lexer = BlockLexer(renderer=renderer)
-            block_lexer.read(md)
+            self._block_lexer.read(md)
         elif cell['cell_type'] == 'code':
             # Add the code cell to ODF.
             source = self._prompt.from_cell(cell['input'], cell['output'])

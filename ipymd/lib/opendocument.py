@@ -670,7 +670,6 @@ class ODFRenderer(BaseRenderer):
     def __init__(self, doc):
         super(ODFRenderer, self).__init__()
         self._doc = doc
-        self._level = 0
         self._paragraph_created_after_item_start = None
 
     def text(self, text):
