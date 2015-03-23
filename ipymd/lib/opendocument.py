@@ -200,7 +200,7 @@ def load_styles(path_or_doc):
             doc = path_or_doc._doc
         else:
             doc = path_or_doc
-        assert isinstance(path_or_doc, OpenDocument)
+        assert isinstance(doc, OpenDocument), doc
     styles = {_style_name(style): style for style in doc.styles.childNodes}
     return styles
 
