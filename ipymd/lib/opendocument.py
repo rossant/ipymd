@@ -531,13 +531,19 @@ class ODFDocument(object):
                 self.linebreak()
             self._code_line(lines[-1])
 
+    def set_next_paragraph_style(self, style):
+        self._next_p_style = style
+
+    def clear_next_paragraph_style(self):
+        self._next_p_style = None
+
     def start_quote(self):
         """Start a block quote. Require a new paragraph afterwards."""
-        self._next_p_style = 'quote'
+        self.set_next_paragraph_style('quote')
 
     def end_quote(self):
         """End a block quote."""
-        self._next_p_style = None
+        self.clear_next_paragraph_style()
 
     # List methods
     # -------------------------------------------------------------------------
