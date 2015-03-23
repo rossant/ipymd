@@ -260,6 +260,8 @@ def default_styles():
                color='#555555',
                )
 
+    styles['_numbered_list'] = _numbered_style()
+
     return styles
 
 
@@ -282,6 +284,36 @@ def load_styles(path_or_doc):
     return styles
 
 
+class StyleManager(object):
+    def __init__(self, styles=None, mapping=None):
+        self._default = default_styles()
+        self._styles = styles or self._default
+
+        # Mapping and inverse mapping.
+        self._mapping = mapping
+        if mapping:
+            assert set(mapping.keys()) <= set(self._default.keys())
+            self._inverse_mapping = {v: k for (k, v) in mapping.items()}
+
+    @property
+    def styles(self):
+        return self._styles
+
+    def __getitem__(self, name):
+        if name is None:
+            return None
+        if not self._mapping:
+            return name
+        if name in self._default:
+            actual_name = self._mapping[name]
+            return actual_name
+        elif name in self._styles:
+            return name
+        else:
+            raise ValueError("The style '{0}' hasn't been ".format(name) +
+                             "defined.")
+
+
 # -----------------------------------------------------------------------------
 # ODF Document
 # -----------------------------------------------------------------------------
@@ -289,25 +321,17 @@ def load_styles(path_or_doc):
 class ODFDocument(object):
     def __init__(self, doc=None, styles=None, style_mapping=None):
 
-        # Add default styles if necessary.
-        self._styles = {}  # Dictionary of current styles.
-        if styles is None:
-            if doc is None:
-                styles = default_styles()
-            else:
-                styles = load_styles(doc)
-        styles['_numbered_list'] = _numbered_style()
+        # Create the document.
+        self._doc = doc or OpenDocumentText()
 
-        if doc is None:
-            self._doc = OpenDocumentText()
-            self.add_styles(**styles)
-        else:
-            self._doc = doc
+        # Load styles.
+        if styles is None and doc is not None:
+            styles = load_styles(doc)
 
-        # Default stylename ==> actual stylename mapping.
-        self.style_mapping = style_mapping or {}
-        self.inverse_style_mapping = {v: k
-                                      for (k, v) in self.style_mapping.items()}
+        # Create the style manager.
+        self._style_manager = StyleManager(styles=styles,
+                                           mapping=style_mapping)
+        self.add_styles(**self._style_manager.styles)
 
         self._containers = []  # Stack of currently-active containers.
         self._next_p_style = None  # Style of the next paragraph to be created.
@@ -327,24 +351,19 @@ class ODFDocument(object):
 
     def add_styles(self, **styles):
         """Add ODF styles to the current document."""
-        self._styles.update(styles)
         for stylename in sorted(styles):
             self._doc.styles.addElement(styles[stylename])
 
-    def _get_style(self, default_name):
-        """Return a style from its default name."""
-        actual_name = self.style_mapping.get(default_name, default_name)
-        if actual_name not in self._styles:
-            raise RuntimeError("The style {0} ".format(actual_name) +
-                               "doesn't exist.")
-        return self._styles.get(actual_name, None)
+    def _get_style_name(self, name):
+        """Return a style from its default or actual name."""
+        return self._style_manager[name]
 
     @property
     def styles(self):
-        return self._styles
+        return self._style_manager.styles
 
     def show_styles(self):
-        pprint(self._styles)
+        pprint(self.styles)
 
     def tree(self, el=None):
         item = {}
@@ -390,7 +409,7 @@ class ODFDocument(object):
     def _replace_stylename(self, kwargs):
         if 'stylename' in kwargs:
             if isinstance(kwargs['stylename'], string_types):
-                kwargs['stylename'] = self._get_style(kwargs['stylename'])
+                kwargs['stylename'] = self._get_style_name(kwargs['stylename'])
         return kwargs
 
     def _add_element(self, cls, **kwargs):
@@ -409,7 +428,7 @@ class ODFDocument(object):
         name = el.attributes.get(style_field, None)
         if not name:
             return None
-        return self.inverse_style_mapping.get(name, name)
+        return self._get_style_name(name)
 
     # Block methods
     # -------------------------------------------------------------------------
@@ -454,7 +473,6 @@ class ODFDocument(object):
         # Use the next paragraph style if one was set.
         if self._next_p_style is not None:
             stylename = self._next_p_style
-            # self._next_p_style = None
         if stylename is None:
             stylename = 'normal-paragraph'
         self.start_container(P, stylename=stylename)
@@ -588,7 +606,7 @@ class ODFDocument(object):
         assert self._containers
         container = self._containers[-1]
         if stylename is not None:
-            stylename = self._get_style(stylename)
+            stylename = self._get_style_name(stylename)
             container.addElement(Span(stylename=stylename, text=text))
         else:
             container.addElement(Span(text=text))
