@@ -67,7 +67,8 @@ def _is_paragraph(el):
 
 
 def _is_normal_text(item):
-    return item['tag'] == 'span' and item.get('style', 'normal') == 'normal'
+    return (item['tag'] == 'span' and
+            item.get('style', 'normal-text') == 'normal-text')
 
 
 def _merge_text(*children):
@@ -167,17 +168,19 @@ def default_styles():
                family='paragraph', fontsize='16pt', fontweight='bold')
     _add_style('heading-6',
                family='paragraph', fontsize='14pt', fontweight='bold')
-
     _add_style('code', family='paragraph', fontsize='10pt',
                fontweight='bold', fontfamily='Courier New',
                color='#555555')
     _add_style('quote', family='paragraph', fontsize='12pt',
                fontstyle='italic')
+    _add_style('list', family='paragraph', fontsize='12pt')
+    _add_style('sublist', family='paragraph', fontsize='12pt')
+    _add_style('numbered-list', family='paragraph', fontsize='12pt')
 
-    _add_style('normal', family='text', fontsize='12pt')
+    _add_style('normal-text', family='text', fontsize='12pt')
+    _add_style('normal-paragraph', family='paragraph', fontsize='12pt')
     _add_style('italic', family='text', fontstyle='italic', fontsize='12pt')
     _add_style('bold', family='text', fontweight='bold', fontsize='12pt')
-
     _add_style('url', family='text', fontsize='12pt',
                fontweight='bold', fontfamily='Courier')
     _add_style('inline-code', family='text', fontsize='10pt',
@@ -377,9 +380,9 @@ class ODFDocument(object):
         # Use the next paragraph style if one was set.
         if self._next_p_style is not None:
             stylename = self._next_p_style
-            self._next_p_style = None
+            # self._next_p_style = None
         if stylename is None:
-            stylename = 'normal'
+            stylename = 'normal-paragraph'
         self.start_container(P, stylename=stylename)
 
     def is_in_paragraph(self):
@@ -451,9 +454,12 @@ class ODFDocument(object):
         """Start a numbered list."""
         self._ordered = True
         self.start_container(List, stylename='_numbered_list')
+        # self._next_p_style = ('numbered-list' if self._item_level <= 1
+        #                       else 'sublist')
 
     def end_numbered_list(self):
         """End a numbered list."""
+        self._next_p_style = None
         self.end_container()
         self._ordered = None
 
@@ -461,10 +467,13 @@ class ODFDocument(object):
         """Start a list."""
         self._ordered = False
         self.start_container(List)
+        # self._next_p_style = ('list' if self._item_level <= 1
+        #                       else 'sublist')
 
     def end_list(self):
         """End a list."""
         self.end_container()
+        self._next_p_style = None
 
     @contextmanager
     def list(self):
@@ -626,10 +635,10 @@ def _item_type(item):
     tag = item['tag']
     style = item.get('style', None)
     if tag == 'p':
-        if style in (None, 'normal'):
+        if style in (None, 'normal-paragraph'):
             return 'paragraph'
     elif tag == 'span':
-        if style in (None, 'normal'):
+        if style in (None, 'normal-text'):
             return 'text'
         elif style == 'url':
             return 'link'
