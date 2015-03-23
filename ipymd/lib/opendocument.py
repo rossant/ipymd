@@ -319,7 +319,7 @@ class StyleManager(object):
 # -----------------------------------------------------------------------------
 
 class ODFDocument(object):
-    def __init__(self, doc=None, styles=None, style_mapping=None):
+    def __init__(self, styles=None, style_mapping=None, doc=None):
 
         # Create the document.
         self._doc = doc or OpenDocumentText()

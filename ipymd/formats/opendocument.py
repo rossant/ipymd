@@ -28,25 +28,25 @@ class ODFReader(object):
 
 
 class ODFWriter(object):
-    def __init__(self, prompt=None, **kwargs):
-        self._doc = ODFDocument(**kwargs)
+    def __init__(self, prompt=None, odfdoc=None):
+        self._odfdoc = odfdoc or ODFDocument()
         self._prompt = create_prompt(prompt)
 
     def write(self, cell):
         if cell['cell_type'] == 'markdown':
             md = cell['source']
             # Convert the Markdown cell to ODF.
-            renderer = ODFRenderer(self._doc)
+            renderer = ODFRenderer(self._odfdoc)
             block_lexer = BlockLexer(renderer=renderer)
             block_lexer.read(md)
         elif cell['cell_type'] == 'code':
             # Add the code cell to ODF.
             source = self._prompt.from_cell(cell['input'], cell['output'])
-            self._doc.code(source)
+            self._odfdoc.code(source)
 
     @property
     def contents(self):
-        return self._doc
+        return self._odfdoc
 
 
 ODF_FORMAT = dict(
