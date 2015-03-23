@@ -146,6 +146,8 @@ class FormatManager(object):
                 contents_or_path,
                 from_=None,
                 to=None,
+                reader=None,
+                writer=None,
                 from_kwargs=None,
                 to_kwargs=None,
                 ):
@@ -162,6 +164,8 @@ class FormatManager(object):
         to : str or None
             The name of the target format. If None, this is the
             ipymd_cells format.
+        reader : a Reader instance or None
+        writer : a Writer instance or None
         from_kwargs : dict
             Optional keyword arguments to pass to the reader instance.
         to_kwargs : dict
@@ -180,11 +184,13 @@ class FormatManager(object):
         if to_kwargs is None:
             to_kwargs = {}
 
-        reader = (self.create_reader(from_, **from_kwargs)
-                  if from_ is not None else None)
+        if reader is None:
+            reader = (self.create_reader(from_, **from_kwargs)
+                      if from_ is not None else None)
 
-        writer = (self.create_writer(to, **to_kwargs)
-                  if to is not None else None)
+        if writer is None:
+            writer = (self.create_writer(to, **to_kwargs)
+                      if to is not None else None)
 
         if reader is not None:
             # Convert from the source format to ipymd cells.
