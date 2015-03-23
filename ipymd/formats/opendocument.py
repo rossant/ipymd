@@ -28,10 +28,12 @@ class ODFReader(object):
 
 
 class ODFWriter(object):
-    def __init__(self, prompt=None, odfdoc=None):
-        self._odfdoc = odfdoc or ODFDocument()
+    def __init__(self, prompt=None, odf_doc=None, odf_renderer=None):
+        self._odf_doc = odf_doc or ODFDocument()
+        if odf_renderer is None:
+            odf_renderer = ODFRenderer
         self._prompt = create_prompt(prompt)
-        renderer = ODFRenderer(self._odfdoc)
+        renderer = odf_renderer(self._odf_doc)
         self._block_lexer = BlockLexer(renderer=renderer)
 
     def write(self, cell):
@@ -42,11 +44,11 @@ class ODFWriter(object):
         elif cell['cell_type'] == 'code':
             # Add the code cell to ODF.
             source = self._prompt.from_cell(cell['input'], cell['output'])
-            self._odfdoc.code(source)
+            self._odf_doc.code(source)
 
     @property
     def contents(self):
-        return self._odfdoc
+        return self._odf_doc
 
 
 ODF_FORMAT = dict(
