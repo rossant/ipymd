@@ -18,7 +18,10 @@ try:
 except ImportError:
     raise ImportError("The odfpy library is required.")
 from odf.opendocument import OpenDocument, OpenDocumentText, load
-from odf.style import (Style, TextProperties, ListLevelProperties,
+from odf.style import (Style,
+                       TextProperties,
+                       ParagraphProperties,
+                       ListLevelProperties,
                        ListLevelLabelAlignment)
 from odf.text import (H, P, S, Span, LineBreak, List, ListItem,
                       ListStyle, ListLevelStyleNumber)
@@ -143,8 +146,18 @@ def _numbered_style():
 
 def _create_style(name, family=None, **kwargs):
     """Helper function for creating a new style."""
+    if family == 'paragraph' and 'marginbottom' not in kwargs:
+        kwargs['marginbottom'] = '.5cm'
     style = Style(name=name, family=family)
+    # Extract paragraph properties.
+    kwargs_par = {}
+    keys = sorted(kwargs.keys())
+    for k in keys:
+        if 'margin' in k:
+            kwargs_par[k] = kwargs.pop(k)
     style.addElement(TextProperties(**kwargs))
+    if kwargs_par:
+        style.addElement(ParagraphProperties(**kwargs_par))
     return style
 
 
@@ -157,34 +170,95 @@ def default_styles():
         styles[name] = _create_style(name, **kwargs)
 
     _add_style('heading-1',
-               family='paragraph', fontsize='24pt', fontweight='bold')
+               family='paragraph',
+               fontsize='24pt',
+               fontweight='bold',
+               )
     _add_style('heading-2',
-               family='paragraph', fontsize='22pt', fontweight='bold')
+               family='paragraph',
+               fontsize='22pt',
+               fontweight='bold',
+               )
     _add_style('heading-3',
-               family='paragraph', fontsize='20pt', fontweight='bold')
+               family='paragraph',
+               fontsize='20pt',
+               fontweight='bold',
+               )
     _add_style('heading-4',
-               family='paragraph', fontsize='18pt', fontweight='bold')
+               family='paragraph',
+               fontsize='18pt',
+               fontweight='bold',
+               )
     _add_style('heading-5',
-               family='paragraph', fontsize='16pt', fontweight='bold')
+               family='paragraph',
+               fontsize='16pt',
+               fontweight='bold',
+               )
     _add_style('heading-6',
-               family='paragraph', fontsize='14pt', fontweight='bold')
-    _add_style('code', family='paragraph', fontsize='10pt',
-               fontweight='bold', fontfamily='Courier New',
-               color='#555555')
-    _add_style('quote', family='paragraph', fontsize='12pt',
-               fontstyle='italic')
-    _add_style('list', family='paragraph', fontsize='12pt')
-    _add_style('sublist', family='paragraph', fontsize='12pt')
-    _add_style('numbered-list', family='paragraph', fontsize='12pt')
+               family='paragraph',
+               fontsize='14pt',
+               fontweight='bold',
+               )
+    _add_style('normal-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='0.25cm',
+               )
+    _add_style('code',
+               family='paragraph',
+               fontsize='10pt',
+               fontweight='bold',
+               fontfamily='Courier New',
+               color='#555555',
+               )
+    _add_style('quote',
+               family='paragraph',
+               fontsize='12pt',
+               fontstyle='italic',
+               )
+    _add_style('list-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='.1cm',
+               )
+    _add_style('sublist-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='.1cm',
+               )
+    _add_style('numbered-list-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='.1cm',
+               )
 
-    _add_style('normal-text', family='text', fontsize='12pt')
-    _add_style('normal-paragraph', family='paragraph', fontsize='12pt')
-    _add_style('italic', family='text', fontstyle='italic', fontsize='12pt')
-    _add_style('bold', family='text', fontweight='bold', fontsize='12pt')
-    _add_style('url', family='text', fontsize='12pt',
-               fontweight='bold', fontfamily='Courier')
-    _add_style('inline-code', family='text', fontsize='10pt',
-               fontweight='bold', fontfamily='Courier New', color='#555555')
+    _add_style('normal-text',
+               family='text',
+               fontsize='12pt',
+               )
+    _add_style('italic',
+               family='text',
+               fontstyle='italic',
+               fontsize='12pt',
+               )
+    _add_style('bold',
+               family='text',
+               fontweight='bold',
+               fontsize='12pt',
+               )
+    _add_style('url',
+               family='text',
+               fontsize='12pt',
+               fontweight='bold',
+               fontfamily='Courier',
+               )
+    _add_style('inline-code',
+               family='text',
+               fontsize='10pt',
+               fontweight='bold',
+               fontfamily='Courier New',
+               color='#555555',
+               )
 
     return styles
 
@@ -454,8 +528,9 @@ class ODFDocument(object):
         """Start a numbered list."""
         self._ordered = True
         self.start_container(List, stylename='_numbered_list')
-        # self._next_p_style = ('numbered-list' if self._item_level <= 1
-        #                       else 'sublist')
+        self._next_p_style = ('numbered-list-paragraph'
+                              if self._item_level <= 0
+                              else 'sublist-paragraph')
 
     def end_numbered_list(self):
         """End a numbered list."""
@@ -467,8 +542,9 @@ class ODFDocument(object):
         """Start a list."""
         self._ordered = False
         self.start_container(List)
-        # self._next_p_style = ('list' if self._item_level <= 1
-        #                       else 'sublist')
+        self._next_p_style = ('list-paragraph'
+                              if self._item_level <= 0
+                              else 'sublist-paragraph')
 
     def end_list(self):
         """End a list."""
@@ -632,16 +708,21 @@ class ODFRenderer(BaseRenderer):
 # -----------------------------------------------------------------------------
 
 def _item_type(item):
+    """Indicate to the ODF reader the type of the block or text."""
     tag = item['tag']
     style = item.get('style', None)
     if tag == 'p':
-        if style in (None, 'normal-paragraph'):
+        if style is None or 'paragraph' in style:
             return 'paragraph'
+        else:
+            return style
     elif tag == 'span':
         if style in (None, 'normal-text'):
             return 'text'
         elif style == 'url':
             return 'link'
+        else:
+            return style
     elif tag == 'h':
         assert style is not None
         return style
@@ -652,9 +733,8 @@ def _item_type(item):
             return tag
     elif tag == 's':
         return 'spaces'
-    else:
-        raise Exception("This tag has not been implemented: " + tag)
-    return style
+    raise Exception("The tag '{0}' with style '{1}' hasn't "
+                    "been implemented.".format(tag, style))
 
 
 class BaseODFReader(BaseRenderer):
