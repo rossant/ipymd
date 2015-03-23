@@ -471,7 +471,7 @@ class ODFDocument(object):
     def start_paragraph(self, stylename=None):
         """Start a new paragraph."""
         # Use the next paragraph style if one was set.
-        if self._next_p_style is not None:
+        if self._next_p_style:
             stylename = self._next_p_style
         if stylename is None:
             stylename = 'normal-paragraph'
@@ -534,6 +534,9 @@ class ODFDocument(object):
     def set_next_paragraph_style(self, style):
         self._next_p_style = style
 
+    def next_paragraph_style(self):
+        return self._next_p_style
+
     def clear_next_paragraph_style(self):
         self._next_p_style = None
 
@@ -552,13 +555,13 @@ class ODFDocument(object):
         """Start a numbered list."""
         self._ordered = True
         self.start_container(List, stylename='_numbered_list')
-        self._next_p_style = ('numbered-list-paragraph'
-                              if self._item_level <= 0
-                              else 'sublist-paragraph')
+        self.set_next_paragraph_style('numbered-list-paragraph'
+                                      if self._item_level <= 0
+                                      else 'sublist-paragraph')
 
     def end_numbered_list(self):
         """End a numbered list."""
-        self._next_p_style = None
+        self.clear_next_paragraph_style()
         self.end_container()
         self._ordered = None
 
@@ -566,14 +569,14 @@ class ODFDocument(object):
         """Start a list."""
         self._ordered = False
         self.start_container(List)
-        self._next_p_style = ('list-paragraph'
-                              if self._item_level <= 0
-                              else 'sublist-paragraph')
+        self.set_next_paragraph_style('list-paragraph'
+                                      if self._item_level <= 0
+                                      else 'sublist-paragraph')
 
     def end_list(self):
         """End a list."""
         self.end_container()
-        self._next_p_style = None
+        self.clear_next_paragraph_style()
 
     @contextmanager
     def list(self):
