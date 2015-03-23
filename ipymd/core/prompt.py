@@ -143,7 +143,7 @@ class IPythonPromptManager(BasePromptManager):
     input_prompt_template = 'In [{n}]: '
     input_prompt_regex = '(In \[\d+\]\: | {6,})'
 
-    output_prompt_template = 'Out [{n}]: '
+    output_prompt_template = 'Out[{n}]: '
 
     def _add_prompt(self, lines, prompt):
         lines[:1] = _add_line_prefix(lines[:1], prompt)
@@ -246,4 +246,7 @@ def create_prompt(prompt):
     elif prompt == 'ipython':
         prompt = IPythonPromptManager
     # Instanciate the class.
-    return prompt()
+    if isinstance(prompt, BasePromptManager):
+        return prompt
+    else:
+        return prompt()
