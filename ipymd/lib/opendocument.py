@@ -35,8 +35,10 @@ from .markdown import BaseRenderer, InlineLexer, MarkdownWriter, BlockLexer
 # Utility functions
 # -----------------------------------------------------------------------------
 
-_STYLE_NAME = ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
-               'display-name')
+_STYLE_NAMES = (('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
+                'display-name'),
+                ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
+                'name'))
 
 
 def _show_attrs(el):
@@ -266,7 +268,11 @@ def default_styles():
 
 
 def _style_name(el):
-    return el.attributes.get(_STYLE_NAME, '').strip()
+    for name in _STYLE_NAMES:
+        out = el.attributes.get(name, '').strip()
+        if out:
+            return out
+    return ''
 
 
 def load_styles(path_or_doc):
