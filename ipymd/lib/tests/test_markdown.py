@@ -94,6 +94,11 @@ class InlineRenderer(BaseRenderer):
     def linebreak(self):
         self.output.append('<br>')
 
+    def link(self, link, title, text):
+        self.output.append('<a>')
+        self.text(text)
+        self.output('</a>')
+
 
 class FullBlockRenderer(BlockRenderer):
     def text(self, text):
@@ -169,6 +174,17 @@ def test_inline_lexer():
                 '<br>',
                 '<b>', 'Second', '</b>',
                 ' line.'
+                ]
+    assert renderer.output == expected
+
+
+def test_brackets():
+    renderer = InlineRenderer()
+    text = ("Some [1] reference.")
+    lexer = InlineLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['Some ',
+                '[1] reference.',
                 ]
     assert renderer.output == expected
 

@@ -56,6 +56,7 @@ class BlockGrammar(object):
         r'^ *\[([^^\]]+)\]: *'  # [key]:
         r'<?([^\s>]+)>?'  # <link> or link
         r'(?: +["(]([^\n]+)[")])? *(?:\n+|$)'
+        # r'(?:["(]([^\n]+)[")])? *(?:\n+|$)'
     )
     def_footnotes = re.compile(
         r'^\[\^([^\]]+)\]: *('
@@ -393,7 +394,7 @@ class InlineLexer(BaseLexer):
 
     default_rules = [
         'escape', 'autolink', 'url', 'tag',
-        'footnote', 'link', 'reflink', 'nolink',
+        'footnote', 'link', 'reflink',  # 'nolink',
         'double_emphasis', 'emphasis', 'code',
         'linebreak', 'strikethrough', 'text',
     ]
