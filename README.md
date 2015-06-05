@@ -113,16 +113,34 @@ All pros of IPython notebook and Markdown, no cons!
 
 ## Installation
 
-1. You need IPython 3.0.
-2. `git clone https://github.com/rossant/ipymd`
-3. `python setup.py install`
-4. Add this in your `ipython_notebook_config.py` file:
+1. Install ipymd:
+
+    To install the latest release version:
+
+    ```shell
+    pip install ipymd
+    ```
+
+    Alternatively, to install the development version:
+
+    ```shell
+    pip install git+https://github.com/rossant/ipymd[test]
+    ```
+
+2. **Optional:**  
+    To interact with `.odt` files:
+
+    ```shell
+    pip install git+https://github.com/eea/odfpy.git
+    ```
+
+3. Add this to your `ipython_notebook_config.py` file:
 
     ```python
     c.NotebookApp.contents_manager_class = 'ipymd.IPymdContentsManager'
     ```
 
-5. Now, you can open `.md` files in the notebook.
+4. Now, you can open `.md` files in the notebook.
 
 
 ## Formats
