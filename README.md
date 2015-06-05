@@ -124,14 +124,14 @@ All pros of IPython notebook and Markdown, no cons!
     Alternatively, to install the development version:
 
     ```shell
-    pip install git+https://github.com/rossant/ipymd[test]
+    pip install git+https://github.com/rossant/ipymd
     ```
 
 2. **Optional:**  
     To interact with `.odt` files:
 
     ```shell
-    pip install git+https://github.com/eea/odfpy.git
+    pip install git+https://github.com/eea/odfpy
     ```
 
 3. Add this to your `ipython_notebook_config.py` file:
