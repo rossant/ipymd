@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
+import os.path
+import re
 from setuptools import setup, find_packages
 
 
-__version__ = '0.1.0-dev'
+curdir = os.path.dirname(os.path.realpath(__file__))
+filename = os.path.join(curdir, 'ipymd', '__init__.py')
+with open(filename, 'r') as f:
+    version = re.search(r"__version__ = '([^']+)'", f.read()).group(1)
 
 classes = """
-    Development Status :: 3 - ALpha
+    Development Status :: 3 - Alpha
     License :: OSI Approved :: BSD License
     Environment :: Console
     Framework :: IPython
@@ -33,14 +38,14 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(name='ipymd',
-      version=__version__,
+      version=version,
       license='BSD',
       description=description,
       long_description=long_description,
       author='Cyrille Rossant',
-      author_email='',
+      author_email='cyrille.rossant at gmail.com',
       maintainer='Cyrille Rossant',
-      maintainer_email='',
+      maintainer_email='cyrille.rossant at gmail.com',
       url='https://github.com/rossant/ipymd',
       classifiers=classifiers,
       packages=find_packages(),
