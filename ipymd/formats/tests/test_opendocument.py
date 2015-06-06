@@ -38,7 +38,7 @@ def _test_generate():
                ):
         markdown = _read_test_file(ex, 'markdown')
         odf = convert(markdown, from_='markdown', to='opendocument')
-        odf.save('examples/{0}.opendocument.odt'.format(ex), overwrite=True)
+        odf.save('examples/{0}.opendocument.odt'.format(ex))
 
 
 def _process_md(md):

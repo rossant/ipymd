@@ -8,10 +8,10 @@
 # -----------------------------------------------------------------------------
 
 from ..core.prompt import create_prompt
-from ..ext.six import text_type
 from ..lib.markdown import InlineLexer, BlockLexer, BaseRenderer
-from ..lib.opendocument import (load, ODFDocument, ODFRenderer,
-                                odf_to_markdown)
+from ..lib.opendocument import (ODFDocument, ODFRenderer,
+                                odf_to_markdown,
+                                load_odf, save_odf)
 from .markdown import MarkdownReader
 
 
@@ -28,36 +28,27 @@ class ODFReader(object):
 
 
 class ODFWriter(object):
-    def __init__(self, prompt=None):
-        self._doc = ODFDocument()
+    def __init__(self, prompt=None, odf_doc=None, odf_renderer=None):
+        self._odf_doc = odf_doc or ODFDocument()
+        if odf_renderer is None:
+            odf_renderer = ODFRenderer
         self._prompt = create_prompt(prompt)
+        renderer = odf_renderer(self._odf_doc)
+        self._block_lexer = BlockLexer(renderer=renderer)
 
     def write(self, cell):
         if cell['cell_type'] == 'markdown':
             md = cell['source']
             # Convert the Markdown cell to ODF.
-            renderer = ODFRenderer(self._doc)
-            block_lexer = BlockLexer(renderer=renderer)
-            block_lexer.read(md)
+            self._block_lexer.read(md)
         elif cell['cell_type'] == 'code':
             # Add the code cell to ODF.
             source = self._prompt.from_cell(cell['input'], cell['output'])
-            self._doc.code(source)
+            self._odf_doc.code(source)
 
     @property
     def contents(self):
-        return self._doc
-
-
-def load_odf(path):
-    # HACK: work around a bug in odfpy: make sure the path string is unicode.
-    path = text_type(path)
-    doc = load(path)
-    return ODFDocument(doc=doc)
-
-
-def save_odf(path, contents):
-    contents.save(path)
+        return self._odf_doc
 
 
 ODF_FORMAT = dict(

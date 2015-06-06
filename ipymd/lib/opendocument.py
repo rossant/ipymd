@@ -17,13 +17,16 @@ try:
     import odf
 except ImportError:
     raise ImportError("The odfpy library is required.")
-from odf.opendocument import OpenDocumentText, load
-from odf.style import (Style, TextProperties, ListLevelProperties,
+from odf.opendocument import OpenDocument, OpenDocumentText, load
+from odf.style import (Style,
+                       TextProperties,
+                       ParagraphProperties,
+                       ListLevelProperties,
                        ListLevelLabelAlignment)
 from odf.text import (H, P, S, Span, LineBreak, List, ListItem,
                       ListStyle, ListLevelStyleNumber)
 
-from ..ext.six import string_types
+from ..ext.six import text_type, string_types
 from .base_lexer import BaseRenderer
 from .markdown import BaseRenderer, InlineLexer, MarkdownWriter, BlockLexer
 
@@ -32,8 +35,10 @@ from .markdown import BaseRenderer, InlineLexer, MarkdownWriter, BlockLexer
 # Utility functions
 # -----------------------------------------------------------------------------
 
-_STYLE_NAME = ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
-               'display-name')
+_STYLE_NAMES = (('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
+                'display-name'),
+                ('urn:oasis:names:tc:opendocument:xmlns:style:1.0',
+                'name'))
 
 
 def _show_attrs(el):
@@ -67,7 +72,8 @@ def _is_paragraph(el):
 
 
 def _is_normal_text(item):
-    return item['tag'] == 'span' and item.get('style', 'normal') == 'normal'
+    return (item['tag'] == 'span' and
+            item.get('style', 'normal-text') == 'normal-text')
 
 
 def _merge_text(*children):
@@ -93,6 +99,17 @@ def _is_empty(el):
     if _is_paragraph(el):
         return not(el.childNodes)
     return False
+
+
+def load_odf(path):
+    # HACK: work around a bug in odfpy: make sure the path string is unicode.
+    path = text_type(path)
+    doc = load(path)
+    return ODFDocument(doc=doc)
+
+
+def save_odf(path, contents):
+    contents.save(path)
 
 
 # -----------------------------------------------------------------------------
@@ -131,8 +148,18 @@ def _numbered_style():
 
 def _create_style(name, family=None, **kwargs):
     """Helper function for creating a new style."""
+    if family == 'paragraph' and 'marginbottom' not in kwargs:
+        kwargs['marginbottom'] = '.5cm'
     style = Style(name=name, family=family)
+    # Extract paragraph properties.
+    kwargs_par = {}
+    keys = sorted(kwargs.keys())
+    for k in keys:
+        if 'margin' in k:
+            kwargs_par[k] = kwargs.pop(k)
     style.addElement(TextProperties(**kwargs))
+    if kwargs_par:
+        style.addElement(ParagraphProperties(**kwargs_par))
     return style
 
 
@@ -145,38 +172,107 @@ def default_styles():
         styles[name] = _create_style(name, **kwargs)
 
     _add_style('heading-1',
-               family='paragraph', fontsize='24pt', fontweight='bold')
+               family='paragraph',
+               fontsize='24pt',
+               fontweight='bold',
+               )
     _add_style('heading-2',
-               family='paragraph', fontsize='22pt', fontweight='bold')
+               family='paragraph',
+               fontsize='22pt',
+               fontweight='bold',
+               )
     _add_style('heading-3',
-               family='paragraph', fontsize='20pt', fontweight='bold')
+               family='paragraph',
+               fontsize='20pt',
+               fontweight='bold',
+               )
     _add_style('heading-4',
-               family='paragraph', fontsize='18pt', fontweight='bold')
+               family='paragraph',
+               fontsize='18pt',
+               fontweight='bold',
+               )
     _add_style('heading-5',
-               family='paragraph', fontsize='16pt', fontweight='bold')
+               family='paragraph',
+               fontsize='16pt',
+               fontweight='bold',
+               )
     _add_style('heading-6',
-               family='paragraph', fontsize='14pt', fontweight='bold')
+               family='paragraph',
+               fontsize='14pt',
+               fontweight='bold',
+               )
+    _add_style('normal-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='0.25cm',
+               )
+    _add_style('code',
+               family='paragraph',
+               fontsize='10pt',
+               fontweight='bold',
+               fontfamily='Courier New',
+               color='#555555',
+               )
+    _add_style('quote',
+               family='paragraph',
+               fontsize='12pt',
+               fontstyle='italic',
+               )
+    _add_style('list-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='.1cm',
+               )
+    _add_style('sublist-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='.1cm',
+               )
+    _add_style('numbered-list-paragraph',
+               family='paragraph',
+               fontsize='12pt',
+               marginbottom='.1cm',
+               )
 
-    _add_style('code', family='paragraph', fontsize='10pt',
-               fontweight='bold', fontfamily='Courier New',
-               color='#555555')
-    _add_style('quote', family='paragraph', fontsize='12pt',
-               fontstyle='italic')
+    _add_style('normal-text',
+               family='text',
+               fontsize='12pt',
+               )
+    _add_style('italic',
+               family='text',
+               fontstyle='italic',
+               fontsize='12pt',
+               )
+    _add_style('bold',
+               family='text',
+               fontweight='bold',
+               fontsize='12pt',
+               )
+    _add_style('url',
+               family='text',
+               fontsize='12pt',
+               fontweight='bold',
+               fontfamily='Courier',
+               )
+    _add_style('inline-code',
+               family='text',
+               fontsize='10pt',
+               fontweight='bold',
+               fontfamily='Courier New',
+               color='#555555',
+               )
 
-    _add_style('normal', family='text', fontsize='12pt')
-    _add_style('italic', family='text', fontstyle='italic', fontsize='12pt')
-    _add_style('bold', family='text', fontweight='bold', fontsize='12pt')
-
-    _add_style('url', family='text', fontsize='12pt',
-               fontweight='bold', fontfamily='Courier')
-    _add_style('inline-code', family='text', fontsize='10pt',
-               fontweight='bold', fontfamily='Courier New', color='#555555')
+    styles['_numbered_list'] = _numbered_style()
 
     return styles
 
 
 def _style_name(el):
-    return el.attributes.get(_STYLE_NAME, '').strip()
+    for name in _STYLE_NAMES:
+        out = el.attributes.get(name, '').strip()
+        if out:
+            return out
+    return ''
 
 
 def load_styles(path_or_doc):
@@ -184,9 +280,44 @@ def load_styles(path_or_doc):
     if isinstance(path_or_doc, string_types):
         doc = load(path_or_doc)
     else:
-        doc = path_or_doc
+        # Recover the OpenDocumentText instance.
+        if isinstance(path_or_doc, ODFDocument):
+            doc = path_or_doc._doc
+        else:
+            doc = path_or_doc
+        assert isinstance(doc, OpenDocument), doc
     styles = {_style_name(style): style for style in doc.styles.childNodes}
     return styles
+
+
+class StyleManager(object):
+    def __init__(self, styles=None, mapping=None):
+        self._default = default_styles()
+        self._styles = styles or self._default
+
+        # Mapping and inverse mapping.
+        self._mapping = mapping
+        if mapping:
+            assert set(mapping.keys()) <= set(self._default.keys())
+            self._inverse_mapping = {v: k for (k, v) in mapping.items()}
+
+    @property
+    def styles(self):
+        return self._styles
+
+    def __getitem__(self, name):
+        if name is None:
+            return None
+        if not self._mapping:
+            return name
+        if name in self._default:
+            actual_name = self._mapping.get(name, name)
+            return actual_name
+        elif name in self._styles:
+            return name
+        else:
+            raise ValueError("The style '{0}' hasn't been ".format(name) +
+                             "defined.")
 
 
 # -----------------------------------------------------------------------------
@@ -194,29 +325,19 @@ def load_styles(path_or_doc):
 # -----------------------------------------------------------------------------
 
 class ODFDocument(object):
+    def __init__(self, styles=None, style_mapping=None, doc=None):
 
-    """Default stylename ==> actual stylename mapping."""
-    style_mapping = {}
+        # Create the document.
+        self._doc = doc or OpenDocumentText()
 
-    def __init__(self, styles=None, doc=None):
+        # Load styles.
+        if styles is None and doc is not None:
+            styles = load_styles(doc)
 
-        # Add default styles if necessary.
-        self._styles = {}  # Dictionary of current styles.
-        if styles is None:
-            if doc is None:
-                styles = default_styles()
-            else:
-                styles = load_styles(doc)
-        styles['_numbered_list'] = _numbered_style()
-
-        if doc is None:
-            self._doc = OpenDocumentText()
-            self.add_styles(**styles)
-        else:
-            self._doc = doc
-
-        self.inverse_style_mapping = {v: k
-                                      for (k, v) in self.style_mapping.items()}
+        # Create the style manager.
+        self._style_manager = StyleManager(styles=styles,
+                                           mapping=style_mapping)
+        self.add_styles(**self._style_manager.styles)
 
         self._containers = []  # Stack of currently-active containers.
         self._next_p_style = None  # Style of the next paragraph to be created.
@@ -236,24 +357,19 @@ class ODFDocument(object):
 
     def add_styles(self, **styles):
         """Add ODF styles to the current document."""
-        self._styles.update(styles)
         for stylename in sorted(styles):
             self._doc.styles.addElement(styles[stylename])
 
-    def _get_style(self, default_name):
-        """Return a style from its default name."""
-        actual_name = self.style_mapping.get(default_name, default_name)
-        if actual_name not in self._styles:
-            raise RuntimeError("The style {0} ".format(actual_name) +
-                               "doesn't exist.")
-        return self._styles.get(actual_name, None)
+    def _get_style_name(self, name):
+        """Return a style from its default or actual name."""
+        return self._style_manager[name]
 
     @property
     def styles(self):
-        return self._styles
+        return self._style_manager.styles
 
     def show_styles(self):
-        pprint(self._styles)
+        pprint(self.styles)
 
     def tree(self, el=None):
         item = {}
@@ -299,7 +415,7 @@ class ODFDocument(object):
     def _replace_stylename(self, kwargs):
         if 'stylename' in kwargs:
             if isinstance(kwargs['stylename'], string_types):
-                kwargs['stylename'] = self._get_style(kwargs['stylename'])
+                kwargs['stylename'] = self._get_style_name(kwargs['stylename'])
         return kwargs
 
     def _add_element(self, cls, **kwargs):
@@ -318,7 +434,7 @@ class ODFDocument(object):
         name = el.attributes.get(style_field, None)
         if not name:
             return None
-        return self.inverse_style_mapping.get(name, name)
+        return self._get_style_name(name)
 
     # Block methods
     # -------------------------------------------------------------------------
@@ -361,11 +477,8 @@ class ODFDocument(object):
     def start_paragraph(self, stylename=None):
         """Start a new paragraph."""
         # Use the next paragraph style if one was set.
-        if self._next_p_style is not None:
-            stylename = self._next_p_style
-            self._next_p_style = None
         if stylename is None:
-            stylename = 'normal'
+            stylename = self._next_p_style or 'normal-paragraph'
         self.start_container(P, stylename=stylename)
 
     def is_in_paragraph(self):
@@ -422,13 +535,22 @@ class ODFDocument(object):
                 self.linebreak()
             self._code_line(lines[-1])
 
+    def set_next_paragraph_style(self, style):
+        self._next_p_style = style
+
+    def next_paragraph_style(self):
+        return self._next_p_style
+
+    def clear_next_paragraph_style(self):
+        self._next_p_style = None
+
     def start_quote(self):
         """Start a block quote. Require a new paragraph afterwards."""
-        self._next_p_style = 'quote'
+        self.set_next_paragraph_style('quote')
 
     def end_quote(self):
         """End a block quote."""
-        self._next_p_style = None
+        self.clear_next_paragraph_style()
 
     # List methods
     # -------------------------------------------------------------------------
@@ -437,9 +559,13 @@ class ODFDocument(object):
         """Start a numbered list."""
         self._ordered = True
         self.start_container(List, stylename='_numbered_list')
+        self.set_next_paragraph_style('numbered-list-paragraph'
+                                      if self._item_level <= 0
+                                      else 'sublist-paragraph')
 
     def end_numbered_list(self):
         """End a numbered list."""
+        self.clear_next_paragraph_style()
         self.end_container()
         self._ordered = None
 
@@ -447,10 +573,14 @@ class ODFDocument(object):
         """Start a list."""
         self._ordered = False
         self.start_container(List)
+        self.set_next_paragraph_style('list-paragraph'
+                                      if self._item_level <= 0
+                                      else 'sublist-paragraph')
 
     def end_list(self):
         """End a list."""
         self.end_container()
+        self.clear_next_paragraph_style()
 
     @contextmanager
     def list(self):
@@ -489,7 +619,7 @@ class ODFDocument(object):
         assert self._containers
         container = self._containers[-1]
         if stylename is not None:
-            stylename = self._get_style(stylename)
+            stylename = self._get_style_name(stylename)
             container.addElement(Span(stylename=stylename, text=text))
         else:
             container.addElement(Span(text=text))
@@ -553,7 +683,6 @@ class ODFRenderer(BaseRenderer):
     def __init__(self, doc):
         super(ODFRenderer, self).__init__()
         self._doc = doc
-        self._level = 0
         self._paragraph_created_after_item_start = None
 
     def text(self, text):
@@ -609,16 +738,21 @@ class ODFRenderer(BaseRenderer):
 # -----------------------------------------------------------------------------
 
 def _item_type(item):
+    """Indicate to the ODF reader the type of the block or text."""
     tag = item['tag']
     style = item.get('style', None)
     if tag == 'p':
-        if style in (None, 'normal'):
+        if style is None or 'paragraph' in style:
             return 'paragraph'
+        else:
+            return style
     elif tag == 'span':
-        if style in (None, 'normal'):
+        if style in (None, 'normal-text'):
             return 'text'
         elif style == 'url':
             return 'link'
+        else:
+            return style
     elif tag == 'h':
         assert style is not None
         return style
@@ -629,9 +763,8 @@ def _item_type(item):
             return tag
     elif tag == 's':
         return 'spaces'
-    else:
-        raise Exception("This tag has not been implemented: " + tag)
-    return style
+    raise Exception("The tag '{0}' with style '{1}' hasn't "
+                    "been implemented.".format(tag, style))
 
 
 class BaseODFReader(BaseRenderer):

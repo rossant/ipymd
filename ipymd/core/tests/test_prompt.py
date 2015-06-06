@@ -84,7 +84,7 @@ def test_ipython_split():
 
 def test_ipython_prompt_manager():
     input, output = 'print("1")\nprint("2")', '1\n2'
-    text = 'In [1]: print("1")\n        print("2")\nOut [1]: 1\n         2'
+    text = 'In [1]: print("1")\n        print("2")\nOut[1]: 1\n        2'
 
     _test(IPythonPromptManager, (input, output), text)
 
