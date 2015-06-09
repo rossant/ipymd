@@ -127,7 +127,13 @@ All pros of IPython notebook and Markdown, no cons!
     pip install git+https://github.com/rossant/ipymd
     ```
 
-2. **Optional:**  
+2. **Optional:**
+    To interact with `.ipynb` files:
+
+    ```shell
+    pip install ipython[notebook]
+    ```
+
     To interact with `.odt` files:
 
     ```shell

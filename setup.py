@@ -50,5 +50,4 @@ setup(name='ipymd',
       classifiers=classifiers,
       packages=find_packages(),
       entry_points={'console_scripts': ['ipymd=ipymd.core.scripts:main']},
-      install_requires=['ipython[notebook] >= 3.0'],
       extras_require={'test': ['pytest', 'flake8', 'coverage', 'pytest-cov']})
