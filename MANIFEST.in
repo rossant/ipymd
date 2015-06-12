@@ -1,0 +1,9 @@
+include LICENSE.txt
+include Makefile
+include README.md
+
+graft examples
+graft ipymd
+
+global-exclude *.pyc
+global-exclude *.pyo
