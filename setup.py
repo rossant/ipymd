@@ -37,26 +37,33 @@ description = ('Use the IPython notebook as an interactive Markdown editor')
 with open('README.md') as f:
     long_description = f.read()
 
-setup(name='ipymd',
-      version=version,
-      license='BSD',
-      description=description,
-      long_description=long_description,
-      author='Cyrille Rossant',
-      author_email='cyrille.rossant at gmail.com',
-      maintainer='Cyrille Rossant',
-      maintainer_email='cyrille.rossant at gmail.com',
-      url='https://github.com/rossant/ipymd',
-      classifiers=classifiers,
-      packages=find_packages(),
-      entry_points={
-        'console_scripts': ['ipymd=ipymd.core.scripts:main'],
+setup(
+    name='ipymd',
+    version=version,
+    license='BSD',
+    description=description,
+    long_description=long_description,
+    author='Cyrille Rossant',
+    author_email='cyrille.rossant at gmail.com',
+    maintainer='Cyrille Rossant',
+    maintainer_email='cyrille.rossant at gmail.com',
+    url='https://github.com/rossant/ipymd',
+    classifiers=classifiers,
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'ipymd=ipymd.core.scripts:main',
+        ],
         'ipymd.format': [
-           'markdown=ipymd.formats.markdown:MARKDOWN_FORMAT',
-           'atlas=ipymd.formats.atlas:ATLAS_FORMAT',
-           'notebook=ipymd.formats.notebook:NOTEBOOK_FORMAT',
-           'opendocument=ipymd.formats.opendocument:ODF_FORMAT[odf]',
-           'python=ipymd.formats.python:PYTHON_FORMAT',
-       ]},
-      extras_require={'test': ['pytest', 'flake8', 'coverage', 'pytest-cov'],
-                      'odf': ['odfpy']})
+            'markdown=ipymd.formats.markdown:MARKDOWN_FORMAT',
+            'atlas=ipymd.formats.atlas:ATLAS_FORMAT',
+            'notebook=ipymd.formats.notebook:NOTEBOOK_FORMAT',
+            'opendocument=ipymd.formats.opendocument:ODF_FORMAT[odf]',
+            'python=ipymd.formats.python:PYTHON_FORMAT',
+        ]
+    },
+    extras_require={
+        'test': ['pytest', 'flake8', 'coverage', 'pytest-cov'],
+        'odf': ['odfpy'],
+    }
+)
