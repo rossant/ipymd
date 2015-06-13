@@ -49,5 +49,14 @@ setup(name='ipymd',
       url='https://github.com/rossant/ipymd',
       classifiers=classifiers,
       packages=find_packages(),
-      entry_points={'console_scripts': ['ipymd=ipymd.core.scripts:main']},
-      extras_require={'test': ['pytest', 'flake8', 'coverage', 'pytest-cov']})
+      entry_points={
+        'console_scripts': ['ipymd=ipymd.core.scripts:main'],
+        'ipymd.format': [
+           'markdown=ipymd.formats.markdown:MARKDOWN_FORMAT',
+           'atlas=ipymd.formats.atlas:ATLAS_FORMAT',
+           'notebook=ipymd.formats.notebook:NOTEBOOK_FORMAT',
+           'opendocument=ipymd.formats.opendocument:ODF_FORMAT[odf]',
+           'python=ipymd.formats.python:PYTHON_FORMAT',
+       ]},
+      extras_require={'test': ['pytest', 'flake8', 'coverage', 'pytest-cov'],
+                      'odf': ['odfpy']})

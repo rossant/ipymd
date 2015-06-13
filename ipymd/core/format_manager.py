@@ -13,9 +13,12 @@ import os.path as op
 import glob
 import json
 
+from pkg_resources import iter_entry_points, DistributionNotFound
+
+from IPython.config.configurable import LoggingConfigurable
+
 from ..ext.six import string_types
 from ..utils.utils import _read_text, _read_json, _write_text, _write_json
-from .. import formats
 
 
 #------------------------------------------------------------------------------
@@ -30,9 +33,46 @@ def _is_path(s):
         return False
 
 
-class FormatManager(object):
+class FormatManager(LoggingConfigurable):
+    # The name of the setup_tools entry point group to use in setup.py
+    entry_point_group = "ipymd.format"
+
+    # the singleton. there can be only one.
+    _instance = None
+
     def __init__(self):
+        if self._instance is not None:
+            raise ValueError("FormatManager is a singleton, access with"
+                             " FormatManager.format_manager")
+
         self._formats = {}
+
+    @classmethod
+    def format_manager(cls):
+        """Return the instance singleton, creating if necessary
+        """
+        if cls._instance is None:
+            # Discover the formats and register them with a new singleton.
+            cls._instance = cls().register_entrypoints()
+        return cls._instance
+
+    def register_entrypoints(self):
+        """Look through the `setup_tools` `entry_points` and load all of
+           the formats.
+        """
+        for spec in iter_entry_points(self.entry_point_group):
+            format_properties = {"name": spec.name}
+            try:
+                format_properties.update(spec.load())
+            except (DistributionNotFound, ImportError) as err:
+                self.log.info(
+                    "ipymd format {} could not be loaded: {}".format(
+                        spec.name, err))
+                continue
+
+            self.register(**format_properties)
+
+        return self
 
     def register(self, name=None, **kwargs):
         """Register a format.
@@ -211,22 +251,9 @@ class FormatManager(object):
             return cells
 
 
-_FORMAT_MANAGER = None
-
-
 def format_manager():
     """Return a FormatManager singleton instance."""
-    global _FORMAT_MANAGER
-    if _FORMAT_MANAGER is None:
-        # Discover the formats and register them.
-        _FORMAT_MANAGER = FormatManager()
-        # TODO: improve this. Currently, a module in ipymd/formats needs
-        # to have a SOMETHING_FORMAT global dictionary. It would be
-        # better to expose an on_load(format_manager) function.
-        for name in dir(formats):
-            if re.match(r'^[^\n]+\_FORMAT$', name):
-                _FORMAT_MANAGER.register(**getattr(formats, name))
-    return _FORMAT_MANAGER
+    return FormatManager.format_manager()
 
 
 def convert(*args, **kwargs):

@@ -188,7 +188,6 @@ class PythonWriter(object):
 
 
 PYTHON_FORMAT = dict(
-    name='python',
     reader=PythonReader,
     writer=PythonWriter,
     file_extension='.py',

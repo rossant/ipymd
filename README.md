@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/rossant/ipymd.svg?branch=travis)](https://travis-ci.org/rossant/ipymd)
 [![Coverage Status](https://coveralls.io/repos/rossant/ipymd/badge.svg)](https://coveralls.io/r/rossant/ipymd)
 
-# Replace .ipynb by .md in the IPython notebook
+# Replace .ipynb with .md in the IPython notebook
 
 The goal of ipymd is to replace `.ipynb` notebook files like:
 
@@ -28,11 +28,13 @@ The goal of ipymd is to replace `.ipynb` notebook files like:
    "source": [
     "print(\"Hello world!\")"
    ]
-  },
+  }
   ...
+  ]
+}
 ```
 
-by:
+with:
 
     Here is some Python code:
 
@@ -41,9 +43,9 @@ by:
     Hello world!
     ```
 
-The JSON `.ipymd` are removed out from the equation, and the conversion happens on-the-fly. The IPython notebook becomes an interactive Markdown text editor!
+The JSON `.ipynb` are removed from the equation, and the conversion happens on the fly. The IPython notebook becomes an interactive Markdown text editor!
 
-A drawback is that you loose metadata, prompt numbers, and images (for now).
+A drawback is that you lose metadata, prompt numbers, and images (for now).
 
 This is useful when you write technical documents, blog posts, books, etc.
 
@@ -51,7 +53,7 @@ This is useful when you write technical documents, blog posts, books, etc.
 
 ## Why?
 
-### IPython notebook
+### IPython Notebook
 
 Pros:
 
@@ -59,7 +61,7 @@ Pros:
 
 Cons:
 
-* .ipynb not git-friendly
+* `.ipynb` not git-friendly
 * Cannot easily edit in a text editor
 * Cannot easily edit on GitHub's web interface
 
@@ -68,7 +70,7 @@ Cons:
 
 Pros:
 
-* Simple ASCII format to write code and text
+* Simple ASCII/Unicode format to write code and text
 * Can easily edit in a text editor
 * Can easily edit on GitHub's web interface
 * Git-friendly
@@ -80,7 +82,7 @@ Cons:
 
 ### ipymd
 
-All pros of IPython notebook and Markdown, no cons!
+All pros of IPython Notebook and Markdown, no cons!
 
 
 ## How it works
@@ -97,7 +99,7 @@ All pros of IPython notebook and Markdown, no cons!
   Hello world
   ```
 
-* The back-and-forth conversion is not strictly the identity:
+* The back-and-forth conversion is not strictly the identity function:
     * Extra line breaks in Markdown are discarded
     * Text output and standard output are combined into a single text output (stdout lines first, output lines last)
 
@@ -151,7 +153,7 @@ All pros of IPython notebook and Markdown, no cons!
 
 ## Formats
 
-ipymd uses a modular architecture that lets you define new formats. The following formats are currently implemented:
+ipymd uses a modular architecture that lets you define new formats. The following formats are currently implemented, and can be selected by modifying `~/.ipython/profile_<whichever>/ipython_notebook_config.py`:
 
 * IPython notebook (`.ipynb`)
 * Markdown (`.md`)
@@ -187,34 +189,79 @@ You can also implement your own format by following these instructions:
 * Create a `MyFormatWriter` class that implements:
     * `self.write(cell)`: append an ipymd cell
     * `self.contents`: return the contents as a string
-* To activate this format, call this:
+* To activate this format, call this at notebook launch time (not in a kernel!), perhaps in your `ipython_notebook_config.py`:
 
   ```python
   from ipymd import format_manager
-  format_manager().register('my_format',
-                            reader=MyFormatReader,
-                            writer=MyFormatWriter,
-                            file_extension='.md',  # or anything else
-                            file_type='text',  # or JSON
-                            )
+  format_manager().register(
+      name='my_format',
+      reader=MyFormatReader,
+      writer=MyFormatWriter,
+      file_extension='.md',  # or anything else
+      file_type='text',  # or JSON
+  )
   ```
 
 * Now you can convert contents: `ipymd.convert(contents, from_='notebook', to='my_format')` or any other combination.
+
+### Contributing a new ipymd format
 * To further integrate your format in ipymd, create a `ipymd/formats/my_format.py` file.
-* Put your reader and writer class in there, as well as a global variable (needs to end with `FORMAT`):
+* Put your reader and writer class in there, as well as a top-level variable:
 
   ```python
-    MY_FORMAT = dict(
-      name='markdown',
+  MY_FORMAT = dict(
       reader=MyFormatReader,
       writer=MyFormatWriter,
       file_extension='.md',
       file_type='text',
   )
   ```
-* Import this file in `ipymd/formats/__init__.py`.
-* Add `c.IPymdContentsManager.format = 'my_format'` to your IPython notebook config file.
+
+* In `setup.py`, add this to `entry_points`:
+
+  ```python
+      ...
+      entry_points={
+          'ipymd.format': [
+              ...
+              'my_format=myformat:MY_FORMAT',
+              ...
+          ]
+      }
+  ```
+
+  > Note that the `entry_point` name will be used by default. you may override
+    it, if you like, but Don't Repeat Yourself.  
+
 * Add some unit tests in `ipymd/formats/tests`.
 * Propose a PR!
 
 Look at the existing format implementations for more details.
+
+
+### Packaging a format
+* If you want to be able to redistribute your format without adding it to ipymd proper (i.e. in-house or experimental), implement all your code in a real python module.
+* Someplace easy to import, e.g. `myformat.py` or `myformat/__init__.py`, add:
+
+  ```python
+  MY_FORMAT = dict(
+      reader=MyFormatReader,
+      writer=MyFormatWriter,
+      file_extension='.md',  # or anything else
+      file_type='text',  # or JSON
+  )
+  ```
+
+  and this to your `setup.py`:
+
+  ```python
+  ...
+      entry_points={
+          'ipymd.format': [
+              'my_format=myformat:MY_FORMAT',
+              ],
+          },
+  ...
+  ```
+  * Publish on pypi!
+  * Your users will now be able to `pip install myformat`, then configure their notebook to use your format with the name `my_format`.

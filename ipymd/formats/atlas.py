@@ -142,7 +142,6 @@ class AtlasWriter(BaseMarkdownWriter):
 
 
 ATLAS_FORMAT = dict(
-    name='atlas',
     reader=AtlasReader,
     writer=AtlasWriter,
     file_extension='.md',
