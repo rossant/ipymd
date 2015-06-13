@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/rossant/ipymd.svg?branch=travis)](https://travis-ci.org/rossant/ipymd)
 [![Coverage Status](https://coveralls.io/repos/rossant/ipymd/badge.svg)](https://coveralls.io/r/rossant/ipymd)
 
-# Replace .ipynb with .md in the IPython notebook
+# Replace .ipynb with .md in the IPython Notebook
 
 The goal of ipymd is to replace `.ipynb` notebook files like:
 
@@ -43,7 +43,7 @@ with:
     Hello world!
     ```
 
-The JSON `.ipynb` are removed from the equation, and the conversion happens on the fly. The IPython notebook becomes an interactive Markdown text editor!
+The JSON `.ipynb` are removed from the equation, and the conversion happens on the fly. The IPython Notebook becomes an interactive Markdown text editor!
 
 A drawback is that you lose metadata, prompt numbers, and images (for now).
 
@@ -89,7 +89,7 @@ All pros of IPython Notebook and Markdown, no cons!
 
 * Write in Markdown in `document.md`
     * Either in a text editor (convenient when working on text)
-    * Or in the notebook (convenient when writing code examples)
+    * Or in the Notebook (convenient when writing code examples)
 * Only the Markdown cells and code cells are saved in the file
 * Collaborators can work on the Markdown document using GitHub's web interface.
 * By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting**:
@@ -148,7 +148,7 @@ All pros of IPython Notebook and Markdown, no cons!
     c.NotebookApp.contents_manager_class = 'ipymd.IPymdContentsManager'
     ```
 
-4. Now, you can open `.md` files in the notebook.
+5. Now, you can open `.md` files in the Notebook.
 
 
 ## Formats
@@ -189,7 +189,7 @@ You can also implement your own format by following these instructions:
 * Create a `MyFormatWriter` class that implements:
     * `self.write(cell)`: append an ipymd cell
     * `self.contents`: return the contents as a string
-* To activate this format, call this at notebook launch time (not in a kernel!), perhaps in your `ipython_notebook_config.py`:
+* To activate this format, call this at Notebook launch time (not in a kernel!), perhaps in your `ipython_notebook_config.py`:
 
   ```python
   from ipymd import format_manager
@@ -264,4 +264,4 @@ Look at the existing format implementations for more details.
   ...
   ```
   * Publish on pypi!
-  * Your users will now be able to `pip install myformat`, then configure their notebook to use your format with the name `my_format`.
+  * Your users will now be able to `pip install myformat`, then configure their Notebook to use your format with the name `my_format`.
