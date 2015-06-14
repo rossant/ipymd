@@ -22,4 +22,4 @@ lint:
 	flake8 ipymd setup.py --exclude=ipymd/ext/six.py,ipymd/core/contents_manager.py --ignore=E226,E265,F401,F403,F811
 
 test: lint
-	py.test --cov-report term-missing --cov ipymd
+	python setup.py test

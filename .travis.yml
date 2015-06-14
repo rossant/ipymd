@@ -28,12 +28,7 @@ install:
   # TODO: IPython 2 env as well
   - conda install pip ipython-notebook
   # Require master version of odfpy
-  - pip install git+https://github.com/eea/odfpy
-  # Testing dependencies.
-  - conda install pytest flake8 coverage
-  - pip install coveralls
-  - pip install python-coveralls
-  - pip install pytest-cov
+  - pip install -r requirements-dev.txt
   # Install ipymd.
   - pip install -e .
 script:

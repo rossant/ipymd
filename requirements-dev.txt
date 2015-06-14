@@ -1,0 +1,6 @@
+coveralls
+flake8
+https://github.com/eea/odfpy/archive/master.zip
+pytest
+pytest-cov
+python-coveralls
