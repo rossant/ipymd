@@ -9,3 +9,6 @@ images
 .fuse*
 *.pyc
 *.egg-info
+build/
+dist/
+.eggs/

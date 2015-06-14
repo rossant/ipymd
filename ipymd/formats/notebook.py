@@ -125,7 +125,6 @@ class NotebookWriter(object):
 
 
 NOTEBOOK_FORMAT = dict(
-    name='notebook',
     reader=NotebookReader,
     writer=NotebookWriter,
     file_extension='.ipynb',

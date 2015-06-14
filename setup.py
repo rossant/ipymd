@@ -2,7 +2,29 @@
 
 import os.path
 import re
+import sys
+
 from setuptools import setup, find_packages
+from setuptools.command.test import test as TestCommand
+
+
+class PyTest(TestCommand):
+    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
+
+    def initialize_options(self):
+        TestCommand.initialize_options(self)
+        self.pytest_args = []
+
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.pytest_args)
+        sys.exit(errno)
 
 
 curdir = os.path.dirname(os.path.realpath(__file__))
@@ -37,17 +59,33 @@ description = ('Use the IPython notebook as an interactive Markdown editor')
 with open('README.md') as f:
     long_description = f.read()
 
-setup(name='ipymd',
-      version=version,
-      license='BSD',
-      description=description,
-      long_description=long_description,
-      author='Cyrille Rossant',
-      author_email='cyrille.rossant at gmail.com',
-      maintainer='Cyrille Rossant',
-      maintainer_email='cyrille.rossant at gmail.com',
-      url='https://github.com/rossant/ipymd',
-      classifiers=classifiers,
-      packages=find_packages(),
-      entry_points={'console_scripts': ['ipymd=ipymd.core.scripts:main']},
-      extras_require={'test': ['pytest', 'flake8', 'coverage', 'pytest-cov']})
+setup(
+    name='ipymd',
+    version=version,
+    license='BSD',
+    description=description,
+    long_description=long_description,
+    author='Cyrille Rossant',
+    author_email='cyrille.rossant at gmail.com',
+    maintainer='Cyrille Rossant',
+    maintainer_email='cyrille.rossant at gmail.com',
+    url='https://github.com/rossant/ipymd',
+    classifiers=classifiers,
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'ipymd=ipymd.core.scripts:main',
+        ],
+        'ipymd.format': [
+            'markdown=ipymd.formats.markdown:MARKDOWN_FORMAT',
+            'atlas=ipymd.formats.atlas:ATLAS_FORMAT',
+            'notebook=ipymd.formats.notebook:NOTEBOOK_FORMAT',
+            'opendocument=ipymd.formats.opendocument:ODF_FORMAT[odf]',
+            'python=ipymd.formats.python:PYTHON_FORMAT',
+        ]
+    },
+    extras_require={
+        'odf': ['odfpy'],
+    },
+    cmdclass={'test': PyTest},
+)

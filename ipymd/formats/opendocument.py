@@ -52,7 +52,6 @@ class ODFWriter(object):
 
 
 ODF_FORMAT = dict(
-    name='opendocument',
     reader=ODFReader,
     writer=ODFWriter,
     file_extension='.odt',

@@ -158,7 +158,6 @@ class MarkdownWriter(BaseMarkdownWriter):
 
 
 MARKDOWN_FORMAT = dict(
-    name='markdown',
     reader=MarkdownReader,
     writer=MarkdownWriter,
     file_extension='.md',
