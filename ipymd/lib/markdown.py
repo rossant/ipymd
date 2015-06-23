@@ -127,6 +127,14 @@ class BlockGrammar(object):
         r'^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*'
     )
     text = re.compile(r'^[^\n]+')
+    meta = re.compile(
+        r'''(^|\n\n)
+            (?P<sep_open>---)[ ]*  # open YAML stream
+            (?P<alias>.+)?  # cell split, or !tag
+            (\n
+            (?P<body>(.+\n)+)  # optional YAML
+            (?P<sep_cls>(\.{3}|-{3}))  # close YAML stream
+            )?(?:\n{2}|$)''', re.X)
 
 
 class BlockLexer(BaseLexer):
@@ -134,14 +142,14 @@ class BlockLexer(BaseLexer):
     grammar_class = BlockGrammar
 
     default_rules = [
-        'newline', 'hrule', 'block_code', 'fences', 'heading',
+        'newline', 'block_code', 'fences', 'meta', 'heading',
         'nptable', 'lheading', 'block_quote',
         'list_block', 'block_html', 'def_links',
-        'def_footnotes', 'table', 'paragraph', 'text'
+        'def_footnotes', 'table', 'paragraph', 'text',
     ]
 
     list_rules = (
-        'newline', 'block_code', 'fences', 'lheading', 'hrule',
+        'newline', 'block_code', 'fences', 'meta', 'lheading',
         'block_quote', 'list_block', 'block_html', 'text',
     )
 
@@ -329,6 +337,17 @@ class BlockLexer(BaseLexer):
         text = m.group(0)
         self.renderer.text(text)
 
+    def parse_meta(self, m):
+        # raise Exception(m.groupdict())
+        if not m.group("alias") and not m.group("body"):
+            self.renderer.text("META SPLIT")
+        elif m.group("alias") and not m.group("body"):
+            self.renderer.text("META SINGLE ALIAS")
+        elif m.group("body"):
+            self.renderer.text("META EXPLICIT")
+        else:
+            self.renderer.text("META")
+
 
 # -----------------------------------------------------------------------------
 # Inline lexer
@@ -373,7 +392,6 @@ class InlineGrammar(object):
     strikethrough = re.compile(r'^~~(?=\S)(.*?\S)~~')  # ~~word~~
     footnote = re.compile(r'^\[\^([^\]]+)\]')
     text = re.compile(r'^[\s\S]+?(?=[\\<!\[_*`~]|https?://| {2,}\n|$)')
-    # newline = re.compile(r'^\n+')
 
     def hard_wrap(self):
         """Grammar for hard wrap linebreak. You don't need to add two

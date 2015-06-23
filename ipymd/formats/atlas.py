@@ -125,7 +125,7 @@ class AtlasWriter(BaseMarkdownWriter):
 
     _math_regex = '''(?P<dollars>[\$]{1,2})([^\$]+)(?P=dollars)'''
 
-    def append_markdown(self, source):
+    def append_markdown(self, source, metadata=None):
         source = _ensure_string(source)
         # Wrap math equations.
         source = re.sub(self._math_regex,
@@ -134,7 +134,7 @@ class AtlasWriter(BaseMarkdownWriter):
         # Write the processed Markdown.
         self._output.write(source.rstrip())
 
-    def append_code(self, input, output=None):
+    def append_code(self, input, output=None, metadata=None):
         # Wrap code.
         wrapped = AtlasReader.code_wrap.format(lang='python', code=input)
         # Write the HTML code block.

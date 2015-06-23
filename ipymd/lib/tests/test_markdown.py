@@ -159,9 +159,128 @@ def test_block_lexer_list():
     assert renderer.output == expected
 
 
+def test_meta_split():
+    renderer = BlockRenderer()
+    text = "---"
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META SPLIT']
+    assert renderer.output == expected
+
+
+def test_meta_single_alias():
+    renderer = BlockRenderer()
+    text = "--- !FOO bar baz"
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META SINGLE ALIAS']
+    assert renderer.output == expected
+
+
+def test_meta_explicit():
+    renderer = BlockRenderer()
+    text = (
+        "---\n"
+        "foo: bar\n"
+        "baz: boo\n"
+        "..."
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META EXPLICIT']
+    assert renderer.output == expected
+
+
+def test_meta_stack():
+    renderer = BlockRenderer()
+    text = (
+        "---\n"
+        "- !FOO\n"
+        "- foo: bar\n"
+        "..."
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META EXPLICIT']
+    assert renderer.output == expected
+
+
+def test_meta_frontmatter():
+    renderer = BlockRenderer()
+    text = (
+        "---\n"
+        "- !FOO\n"
+        "- foo: bar\n"
+        "---"
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META EXPLICIT']
+    assert renderer.output == expected
+
+
+def test_meta_frontmatter_then_split():
+    renderer = BlockRenderer()
+    text = (
+        "---\n"
+        "- !FOO\n"
+        "- foo: bar\n"
+        "---\n\n"
+        "---"
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META EXPLICIT', 'META SPLIT']
+    assert renderer.output == expected
+
+
+def test_meta_frontmatter_then_alias():
+    renderer = BlockRenderer()
+    text = (
+        "--- !KERNEL python\n\n"
+        "--- !SLIDE"
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META SINGLE ALIAS', 'META SINGLE ALIAS']
+    assert renderer.output == expected
+
+
+def test_meta_exp_frontmatter_then_alias():
+    renderer = BlockRenderer()
+    text = (
+        "---\n"
+        "foo: bar\n"
+        "---\n\n"
+        "--- !SLIDE"
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META EXPLICIT', 'META SINGLE ALIAS']
+    assert renderer.output == expected
+
+
+def test_meta_split_md_split_not_meta():
+    renderer = BlockRenderer()
+    text = (
+        "---\n\n"
+        "* Just some markdown"
+        "\n\n---"
+    )
+    lexer = BlockLexer(renderer=renderer)
+    lexer.read(text)
+    expected = ['META SPLIT',
+                '<ul>', '<li>',
+                'Just some markdown',
+                '</li>', '</ul>',
+                'META SPLIT']
+    assert renderer.output == expected
+
+
 # -----------------------------------------------------------------------------
 # Tests Markdown inline lexer
 # -----------------------------------------------------------------------------
+
 
 def test_inline_lexer():
     renderer = InlineRenderer()

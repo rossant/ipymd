@@ -13,6 +13,8 @@ Much of the code comes from the mistune library.
 import re
 from collections import OrderedDict
 
+import yaml
+
 from ..ext.six import StringIO
 from ..utils.utils import _ensure_string, _preprocess
 from ..lib.markdown import (BlockGrammar, BlockLexer,
@@ -28,7 +30,8 @@ class BaseMarkdownReader(BlockLexer):
     def __init__(self):
         grammar = BlockGrammar()
         grammar.text = re.compile(r'^.+?\n\n|.+?$', re.DOTALL)
-        rules = ['block_code', 'fences', 'block_html', 'text', 'newline']
+        rules = ['block_code', 'fences', 'meta', 'block_html', 'text',
+                 'newline']
         super(BaseMarkdownReader, self).__init__(grammar=grammar,
                                                  rules=rules)
 
@@ -59,8 +62,22 @@ class BaseMarkdownReader(BlockLexer):
         return {'cell_type': 'markdown',
                 'source': source}
 
+    def _meta(self, source):
+        return {'is_meta': True,
+                'metadata': source}
+
     def _markdown_cell_from_regex(self, m):
         return self._markdown_cell(m.group(0).rstrip())
+
+    def _meta_from_regex(self, m):
+        body = m.group("body")
+        try:
+            if body:
+                return self._meta(yaml.safe_load(m.group("body")))
+            else:
+                return self._meta({})
+        except Exception as err:
+            raise Exception(body, err)
 
 
 class BaseMarkdownWriter(object):
@@ -72,18 +89,31 @@ class BaseMarkdownWriter(object):
     def _new_paragraph(self):
         self._output.write('\n\n')
 
-    def append_markdown(self, source):
-        source = _ensure_string(source)
-        self._output.write(source.rstrip())
+    def meta(self, source):
+        if source is None:
+            return ''
 
-    def append_code(self, input, output=None):
+        if not source:
+            return '---\n\n'
+
+        return '{}\n'.format(yaml.dump(source,
+                                       explicit_start=True,
+                                       explicit_end=True,
+                                       default_flow_style=False))
+
+    def append_markdown(self, source, metadata):
+        source = _ensure_string(source)
+        self._output.write(self.meta(metadata) + source.rstrip())
+
+    def append_code(self, input, output=None, metadata=None):
         raise NotImplementedError("This method must be overriden.")
 
     def write(self, cell):
+        metadata = cell.get('metadata', None)
         if cell['cell_type'] == 'markdown':
-            self.append_markdown(cell['source'])
+            self.append_markdown(cell['source'], metadata)
         elif cell['cell_type'] == 'code':
-            self.append_code(cell['input'], cell['output'])
+            self.append_code(cell['input'], cell['output'], metadata)
         self._new_paragraph()
 
     @property
@@ -107,6 +137,18 @@ class MarkdownReader(BaseMarkdownReader):
     def __init__(self, prompt=None):
         super(MarkdownReader, self).__init__()
         self._prompt = create_prompt(prompt)
+
+    def read(self, text, rules=None):
+        cells_and_meta = super(MarkdownReader, self).read(text, rules)
+        cells = []
+
+        for i, cell_or_meta in enumerate(cells_and_meta):
+            if cell_or_meta.get("is_meta", None):
+                cells_and_meta[i + 1]["metadata"] = cell_or_meta["metadata"]
+            else:
+                cells.append(cell_or_meta)
+
+        return cells
 
     # Helper functions to generate ipymd cells
     # -------------------------------------------------------------------------
@@ -143,6 +185,9 @@ class MarkdownReader(BaseMarkdownReader):
     def parse_text(self, m):
         return self._markdown_cell_from_regex(m)
 
+    def parse_meta(self, m):
+        return self._meta_from_regex(m)
+
 
 class MarkdownWriter(BaseMarkdownWriter):
     """Default Markdown writer."""
@@ -151,10 +196,10 @@ class MarkdownWriter(BaseMarkdownWriter):
         super(MarkdownWriter, self).__init__()
         self._prompt = create_prompt(prompt)
 
-    def append_code(self, input, output=None):
+    def append_code(self, input, output=None, metadata=None):
         code = self._prompt.from_cell(input, output)
         wrapped = '```python\n{code}\n```'.format(code=code.rstrip())
-        self._output.write(wrapped)
+        self._output.write(self.meta(metadata) + wrapped)
 
 
 MARKDOWN_FORMAT = dict(

@@ -42,16 +42,19 @@ def _test_markdown_markdown(basename):
 def test_markdown_reader():
     _test_markdown_reader('ex1')
     _test_markdown_reader('ex2')
+    _test_markdown_reader('ex3')
 
 
 def test_markdown_writer():
     _test_markdown_writer('ex1')
     _test_markdown_writer('ex2')
+    _test_markdown_writer('ex3')
 
 
 def test_markdown_markdown():
     _test_markdown_markdown('ex1')
     _test_markdown_markdown('ex2')
+    _test_markdown_markdown('ex3')
 
 
 def test_decorator():
