@@ -133,7 +133,7 @@ class BlockGrammar(object):
             (?P<alias>.+)?  # cell split, or !tag
             (\n
             (?P<body>(.+\n)+)  # optional YAML
-            (?P<sep_cls>(\.{3}|-{3}))  # close YAML stream
+            (?P<sep_close>(\.{3}|-{3}))  # close YAML stream
             )?(?:\n{2}|$)''', re.X)
 
 

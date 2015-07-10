@@ -242,8 +242,11 @@ class FormatManager(LoggingConfigurable):
 
         if writer is not None:
             # Convert from ipymd cells to the target format.
-            for cell in cells:
-                writer.write(cell)
+            for i, cell in enumerate(cells):
+                if cell.get("is_notebook", None):
+                    writer.write_notebook_meta(cell["metadata"])
+                else:
+                    writer.write(cell)
             return writer.contents
         else:
             # If no writer is specified, the output is supposed to be

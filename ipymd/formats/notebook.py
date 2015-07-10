@@ -68,6 +68,10 @@ class NotebookReader(object):
 
     def read(self, nb):
         assert nb['nbformat'] >= 4
+        yield {
+            "is_notebook": True,
+            "metadata": nb["metadata"]
+        }
         for cell in nb['cells']:
             ipymd_cell = {}
             metadata = self.clean_meta(cell)
@@ -127,6 +131,9 @@ class NotebookWriter(object):
             raise NotImplementedError("Output images not implemented yet.")
         self._nb['cells'].append(cell)
         self._count += 1
+
+    def write_notebook_meta(self, metadata):
+        self._nb.metadata.update(metadata)
 
     def write(self, cell):
         metadata = cell.get("metadata", {})

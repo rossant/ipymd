@@ -62,8 +62,9 @@ class BaseMarkdownReader(BlockLexer):
         return {'cell_type': 'markdown',
                 'source': source}
 
-    def _meta(self, source):
+    def _meta(self, source, is_notebook=False):
         return {'is_meta': True,
+                'is_notebook': is_notebook,
                 'metadata': source}
 
     def _markdown_cell_from_regex(self, m):
@@ -71,11 +72,14 @@ class BaseMarkdownReader(BlockLexer):
 
     def _meta_from_regex(self, m):
         body = m.group("body")
+        is_notebook = m.group("sep_close") == "---"
+        if is_notebook:
+            body = body.strip()[:-3] + "..."
         try:
             if body:
-                return self._meta(yaml.safe_load(m.group("body")))
+                return self._meta(yaml.safe_load(m.group("body")), is_notebook)
             else:
-                return self._meta({})
+                return self._meta({}, is_notebook)
         except Exception as err:
             raise Exception(body, err)
 
@@ -89,17 +93,22 @@ class BaseMarkdownWriter(object):
     def _new_paragraph(self):
         self._output.write('\n\n')
 
-    def meta(self, source):
+    def meta(self, source, is_notebook=False):
         if source is None:
             return ''
 
         if not source:
             return '---\n\n'
 
-        return '{}\n'.format(yaml.dump(source,
+        meta = '{}\n'.format(yaml.dump(source,
                                        explicit_start=True,
                                        explicit_end=True,
                                        default_flow_style=False))
+
+        if is_notebook:
+            meta = meta[:-5] + "---\n\n"
+
+        return meta
 
     def append_markdown(self, source, metadata):
         source = _ensure_string(source)
@@ -107,6 +116,9 @@ class BaseMarkdownWriter(object):
 
     def append_code(self, input, output=None, metadata=None):
         raise NotImplementedError("This method must be overriden.")
+
+    def write_notebook_meta(self, metadata):
+        self._output.write(self.meta(metadata, is_notebook=True))
 
     def write(self, cell):
         metadata = cell.get('metadata', None)
@@ -144,7 +156,13 @@ class MarkdownReader(BaseMarkdownReader):
 
         for i, cell_or_meta in enumerate(cells_and_meta):
             if cell_or_meta.get("is_meta", None):
-                cells_and_meta[i + 1]["metadata"] = cell_or_meta["metadata"]
+                if cell_or_meta.get("is_notebook", None):
+                    if cells:
+                        raise ValueError("Notebook metadata must appear first")
+                    cells.append(cell_or_meta)
+                else:
+                    cells_and_meta[i + 1].update(
+                        metadata=cell_or_meta["metadata"])
             else:
                 cells.append(cell_or_meta)
 
