@@ -64,7 +64,7 @@ class NotebookReader(object):
 
     nbformat v4 only."""
 
-    ignore_meta = ["collapsed"]
+    ignore_meta = ["collapsed", "trusted"]
 
     def read(self, nb):
         assert nb['nbformat'] >= 4

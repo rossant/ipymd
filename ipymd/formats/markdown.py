@@ -98,6 +98,8 @@ class BaseMarkdownWriter(object):
             return ''
 
         if not source:
+            if is_notebook:
+                return ''
             return '---\n\n'
 
         meta = '{}\n'.format(yaml.dump(source,

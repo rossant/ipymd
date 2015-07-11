@@ -16,6 +16,8 @@ import json
 from pkg_resources import iter_entry_points, DistributionNotFound
 
 from IPython.config.configurable import LoggingConfigurable
+from IPython.utils.traitlets import Unicode, Bool
+from IPython.kernel import KernelManager
 
 from ..ext.six import string_types
 from ..utils.utils import _read_text, _read_json, _write_text, _write_json
@@ -37,15 +39,27 @@ class FormatManager(LoggingConfigurable):
     # The name of the setup_tools entry point group to use in setup.py
     entry_point_group = "ipymd.format"
 
+    # The name of the default kernel: if left blank, assume native (pythonX)
+    # won't store kernelspec/language_info unless forced
+    # TODO: where does this get set but by the ContentsManager?
+    default_kernel_name = Unicode(config=True)
+
+    # don't strip any metadata
+    # TODO: where does this get set but by the ContentsManager?
+    verbose_metadata = Bool(False, config=True)
+
     # the singleton. there can be only one.
     _instance = None
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(FormatManager, self).__init__(*args, **kwargs)
+
         if self._instance is not None:
             raise ValueError("FormatManager is a singleton, access with"
                              " FormatManager.format_manager")
 
         self._formats = {}
+        self._km = KernelManager()
 
     @classmethod
     def format_manager(cls):
@@ -244,7 +258,8 @@ class FormatManager(LoggingConfigurable):
             # Convert from ipymd cells to the target format.
             for i, cell in enumerate(cells):
                 if cell.get("is_notebook", None):
-                    writer.write_notebook_meta(cell["metadata"])
+                    writer.write_notebook_meta(
+                        self.clean_meta(cell["metadata"]))
                 else:
                     writer.write(cell)
             return writer.contents
@@ -252,6 +267,25 @@ class FormatManager(LoggingConfigurable):
             # If no writer is specified, the output is supposed to be
             # a list of ipymd cells.
             return cells
+
+    def clean_meta(self, meta):
+        """Removes unwanted metadata
+
+        Parameters
+        ----------
+
+        meta : dict
+            Notebook metadata.
+        """
+        default_kernel_name = self.default_kernel_name or self._km.kernel_name
+        print("DEFAULT", default_kernel_name)
+
+        if not self.verbose_metadata:
+            if meta["kernelspec"]["name"] == default_kernel_name:
+                del meta["kernelspec"]
+                del meta["language_info"]
+
+        return meta
 
 
 def format_manager():
