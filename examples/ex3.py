@@ -11,7 +11,7 @@ output = [
 
     {'cell_type': 'markdown',
      'source': 'Python code:',
-     'metadata': {}},
+     'metadata': {'ipymd': {'empty_meta': True}}},
 
     {'cell_type': 'code',
      'input': 'print("Hello world!")',

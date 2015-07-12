@@ -79,7 +79,7 @@ class BaseMarkdownReader(BlockLexer):
             if body:
                 return self._meta(yaml.safe_load(m.group("body")), is_notebook)
             else:
-                return self._meta({}, is_notebook)
+                return self._meta({"ipymd": {"empty_meta": True}}, is_notebook)
         except Exception as err:
             raise Exception(body, err)
 
@@ -96,6 +96,9 @@ class BaseMarkdownWriter(object):
     def meta(self, source, is_notebook=False):
         if source is None:
             return ''
+
+        if source.get("ipymd", {}).get("empty_meta", None):
+            return '---\n\n'
 
         if not source:
             if is_notebook:
@@ -162,7 +165,7 @@ class MarkdownReader(BaseMarkdownReader):
                     if cells:
                         raise ValueError("Notebook metadata must appear first")
                     cells.append(cell_or_meta)
-                else:
+                elif cell_or_meta["metadata"]:
                     cells_and_meta[i + 1].update(
                         metadata=cell_or_meta["metadata"])
             else:

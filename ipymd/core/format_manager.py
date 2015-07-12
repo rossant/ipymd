@@ -278,10 +278,10 @@ class FormatManager(LoggingConfigurable):
             Notebook metadata.
         """
         default_kernel_name = self.default_kernel_name or self._km.kernel_name
-        print("DEFAULT", default_kernel_name)
 
         if not self.verbose_metadata:
-            if meta["kernelspec"]["name"] == default_kernel_name:
+            if (meta.get("kernelspec", {})
+                    .get("name", None) == default_kernel_name):
                 del meta["kernelspec"]
                 del meta["language_info"]
 
