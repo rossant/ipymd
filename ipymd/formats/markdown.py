@@ -22,6 +22,10 @@ from ..lib.markdown import (BlockGrammar, BlockLexer,
 from ..core.prompt import create_prompt
 
 
+CLOSE_NOTEBOOK_METADATA = "---"
+CLOSE_CELL_METADATA = "..."
+
+
 #------------------------------------------------------------------------------
 # Base Markdown
 #------------------------------------------------------------------------------
@@ -63,18 +67,41 @@ class BaseMarkdownReader(BlockLexer):
                 'source': source}
 
     def _meta(self, source, is_notebook=False):
+        """Turn a YAML string into ipynb cell/notebook metadata
+        """
+        if is_notebook:
+            return {'is_notebook': True,
+                    'metadata': source}
         return {'is_meta': True,
-                'is_notebook': is_notebook,
                 'metadata': source}
 
     def _markdown_cell_from_regex(self, m):
         return self._markdown_cell(m.group(0).rstrip())
 
     def _meta_from_regex(self, m):
+        """Extract and parse YAML metadata from a meta match
+
+        Notebook metadata must appear at the beginning of the file and follows
+        the Jekyll front-matter convention of dashed delimiters:
+
+            ---
+            some: yaml
+            ---
+
+        Cell metadata follows the YAML spec of dashes and periods
+
+            ---
+            some: yaml
+            ...
+
+        Both must be followed by at least one blank line (\n\n).
+        """
         body = m.group("body")
-        is_notebook = m.group("sep_close") == "---"
+        is_notebook = m.group("sep_close") == CLOSE_NOTEBOOK_METADATA
+
         if is_notebook:
-            body = body.strip()[:-3] + "..."
+            # make it into a valid YAML object
+            body = body.strip()[:-3] + CLOSE_CELL_METADATA
         try:
             if body:
                 return self._meta(yaml.safe_load(m.group("body")), is_notebook)
@@ -122,7 +149,7 @@ class BaseMarkdownWriter(object):
     def append_code(self, input, output=None, metadata=None):
         raise NotImplementedError("This method must be overriden.")
 
-    def write_notebook_meta(self, metadata):
+    def write_notebook_metadata(self, metadata):
         self._output.write(self.meta(metadata, is_notebook=True))
 
     def write(self, cell):
@@ -160,14 +187,13 @@ class MarkdownReader(BaseMarkdownReader):
         cells = []
 
         for i, cell_or_meta in enumerate(cells_and_meta):
-            if cell_or_meta.get("is_meta", None):
-                if cell_or_meta.get("is_notebook", None):
-                    if cells:
-                        raise ValueError("Notebook metadata must appear first")
-                    cells.append(cell_or_meta)
-                elif cell_or_meta["metadata"]:
-                    cells_and_meta[i + 1].update(
-                        metadata=cell_or_meta["metadata"])
+            if cell_or_meta.get("is_notebook", None):
+                if cells:
+                    raise ValueError("Notebook metadata must appear first")
+                cells.append(cell_or_meta)
+            elif cell_or_meta.get("is_meta", None) and cell_or_meta["metadata"]:
+                cells_and_meta[i + 1].update(
+                    metadata=cell_or_meta["metadata"])
             else:
                 cells.append(cell_or_meta)
 

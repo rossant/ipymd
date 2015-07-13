@@ -2,7 +2,6 @@
 output = [
 
     {'is_notebook': True,
-     'is_meta': True,
      'metadata': {'title': 'A Slideshow'}},
 
     {'cell_type': 'markdown',

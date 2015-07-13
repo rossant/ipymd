@@ -45,7 +45,7 @@ with:
 
 The JSON `.ipynb` are removed from the equation, and the conversion happens on the fly. The IPython Notebook becomes an interactive Markdown text editor!
 
-A drawback is that you lose metadata, prompt numbers, and images (for now).
+A drawback is that you prompt numbers and images (for now).
 
 This is useful when you write technical documents, blog posts, books, etc.
 
@@ -90,13 +90,58 @@ All pros of IPython Notebook and Markdown, no cons!
 * Write in Markdown in `document.md`
     * Either in a text editor (convenient when working on text)
     * Or in the Notebook (convenient when writing code examples)
-* Only the Markdown cells and code cells are saved in the file
+* Markdown cells, code cells and (optionally) notebook metadata are saved in
+  the file
 * Collaborators can work on the Markdown document using GitHub's web interface.
 * By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting**:
 
   ```
   >>> print("Hello world")
   Hello world
+  ```
+
+* **Notebook metadata** can be specified in [YAML](http://yaml.org/) inside
+  Jekyll-style [front-matter](http://jekyllrb.com/docs/frontmatter/) dashes
+  at the beginning of a document:
+
+  ```markdown
+  ---
+  kernelspec:
+    name: some-non-native-kernel
+  ---
+
+  First cell content
+  ```
+
+  Native kernel metadata will be elided by default: non-python kernels haven't
+  been tested yet, but support is planned.
+
+* **Cell metadata** is specified with YAML stream documents with dashes and
+  periods, such as to create slides:
+
+  ```markdown
+  # Previous slide
+
+  ---
+  slideshow:
+    slide_type: slide
+  ...
+
+  # Some Slide Content
+  ```
+
+  > NOTE: You probably shouldn't use `---` to mean an `<hr/>`: `***`
+  could be a suitable substitute.
+
+* Null metadata (i.e. splitting a markdown cell) can be created with just
+  three dashes. This is useful when adding slideshow notes or skipped cells.
+
+  ```markdown
+  A cell
+
+  ---
+
+  Another cell
   ```
 
 * The back-and-forth conversion is not strictly the identity function:
@@ -173,7 +218,9 @@ An **ipymd cell** is a Python dictionary with the following fields:
 * `input`: a string with the code input (code cell only)
 * `output`: a string with the text output and stdout (code cell only)
 * `source`: a string containing Markdown markup (markdown cell only)
-
+* `metadata`: a dictionary containing cell (or notebook) metadata
+* `is_notebook`: a boolean telling whether this cell's metadata is the notebook
+  metadata
 
 ### Customize the Markdown format
 
@@ -188,7 +235,10 @@ You can also implement your own format by following these instructions:
     * `self.read(contents)`: yields ipymd cells from a `contents` string
 * Create a `MyFormatWriter` class that implements:
     * `self.write(cell)`: append an ipymd cell
+      * (optional) `self.write_notebook_metadata(cell)`: write the notebook
+        metadata dictionary
     * `self.contents`: return the contents as a string
+
 * To activate this format, call this at Notebook launch time (not in a kernel!), perhaps in your `ipython_notebook_config.py`:
 
   ```python

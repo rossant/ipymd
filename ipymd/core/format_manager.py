@@ -256,9 +256,11 @@ class FormatManager(LoggingConfigurable):
 
         if writer is not None:
             # Convert from ipymd cells to the target format.
+            supports_nb_metadata = hasattr(writer, "write_notebook_metadata")
+
             for i, cell in enumerate(cells):
-                if cell.get("is_notebook", None):
-                    writer.write_notebook_meta(
+                if cell.get("is_notebook", None) and supports_nb_metadata:
+                    writer.write_notebook_metadata(
                         self.clean_meta(cell["metadata"]))
                 else:
                     writer.write(cell)

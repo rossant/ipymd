@@ -132,7 +132,7 @@ class NotebookWriter(object):
         self._nb['cells'].append(cell)
         self._count += 1
 
-    def write_notebook_meta(self, metadata):
+    def write_notebook_metadata(self, metadata):
         self._nb.metadata.update(metadata)
 
     def write(self, cell):
