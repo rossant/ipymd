@@ -16,9 +16,10 @@ from ._utils import (_test_reader, _test_writer,
 # Test Markdown parser
 #------------------------------------------------------------------------------
 
-def _test_markdown_reader(basename):
+def _test_markdown_reader(basename, ignore_notebook_meta=False):
     """Check that (test cells) and (test contents ==> cells) are the same."""
-    converted, expected = _test_reader(basename, 'markdown')
+    converted, expected = _test_reader(basename, 'markdown',
+                                       ignore_notebook_meta)
     assert converted == expected
 
 
@@ -43,18 +44,21 @@ def test_markdown_reader():
     _test_markdown_reader('ex1')
     _test_markdown_reader('ex2')
     _test_markdown_reader('ex3')
+    _test_markdown_reader('ex4', ignore_notebook_meta=False)
 
 
 def test_markdown_writer():
     _test_markdown_writer('ex1')
     _test_markdown_writer('ex2')
     _test_markdown_writer('ex3')
+    _test_markdown_writer('ex4')
 
 
 def test_markdown_markdown():
     _test_markdown_markdown('ex1')
     _test_markdown_markdown('ex2')
     _test_markdown_markdown('ex3')
+    _test_markdown_markdown('ex4')
 
 
 def test_decorator():

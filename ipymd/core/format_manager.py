@@ -277,9 +277,10 @@ class FormatManager(LoggingConfigurable):
         meta : dict
             Notebook metadata.
         """
-        default_kernel_name = self.default_kernel_name or self._km.kernel_name
-
         if not self.verbose_metadata:
+            default_kernel_name = (self.default_kernel_name or
+                                   self._km.kernel_name)
+
             if (meta.get("kernelspec", {})
                     .get("name", None) == default_kernel_name):
                 del meta["kernelspec"]
