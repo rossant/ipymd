@@ -191,7 +191,9 @@ class MarkdownReader(BaseMarkdownReader):
                 if cells:
                     raise ValueError("Notebook metadata must appear first")
                 cells.append(cell_or_meta)
-            elif cell_or_meta.get("is_meta", None) and cell_or_meta["metadata"]:
+            elif (
+                cell_or_meta.get("is_meta", None) and cell_or_meta["metadata"]
+            ):
                 cells_and_meta[i + 1].update(
                     metadata=cell_or_meta["metadata"])
             else:
