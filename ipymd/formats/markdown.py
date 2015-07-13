@@ -22,7 +22,6 @@ from ..lib.markdown import (BlockGrammar, BlockLexer,
 from ..core.prompt import create_prompt
 
 
-
 #------------------------------------------------------------------------------
 # Base Markdown
 #------------------------------------------------------------------------------
