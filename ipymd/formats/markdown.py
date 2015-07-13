@@ -22,9 +22,6 @@ from ..lib.markdown import (BlockGrammar, BlockLexer,
 from ..core.prompt import create_prompt
 
 
-CLOSE_NOTEBOOK_METADATA = "---"
-CLOSE_CELL_METADATA = "..."
-
 
 #------------------------------------------------------------------------------
 # Base Markdown
@@ -70,9 +67,9 @@ class BaseMarkdownReader(BlockLexer):
         """Turn a YAML string into ipynb cell/notebook metadata
         """
         if is_notebook:
-            return {'is_notebook': True,
+            return {'cell_type': 'notebook_metadata',
                     'metadata': source}
-        return {'is_meta': True,
+        return {'cell_type': 'cell_metadata',
                 'metadata': source}
 
     def _markdown_cell_from_regex(self, m):
@@ -96,17 +93,17 @@ class BaseMarkdownReader(BlockLexer):
 
         Both must be followed by at least one blank line (\n\n).
         """
-        body = m.group("body")
-        is_notebook = m.group("sep_close") == CLOSE_NOTEBOOK_METADATA
+        body = m.group('body')
+        is_notebook = m.group('sep_close') == '---'
 
         if is_notebook:
-            # make it into a valid YAML object
-            body = body.strip()[:-3] + CLOSE_CELL_METADATA
+            # make it into a valid YAML object by stripping ---
+            body = body.strip()[:-3] + '...'
         try:
             if body:
-                return self._meta(yaml.safe_load(m.group("body")), is_notebook)
+                return self._meta(yaml.safe_load(m.group('body')), is_notebook)
             else:
-                return self._meta({"ipymd": {"empty_meta": True}}, is_notebook)
+                return self._meta({'ipymd': {'empty_meta': True}}, is_notebook)
         except Exception as err:
             raise Exception(body, err)
 
@@ -124,7 +121,7 @@ class BaseMarkdownWriter(object):
         if source is None:
             return ''
 
-        if source.get("ipymd", {}).get("empty_meta", None):
+        if source.get('ipymd', {}).get('empty_meta', None):
             return '---\n\n'
 
         if not source:
@@ -138,7 +135,8 @@ class BaseMarkdownWriter(object):
                                        default_flow_style=False))
 
         if is_notebook:
-            meta = meta[:-5] + "---\n\n"
+            # Replace the trailing `...\n\n`
+            meta = meta[:-5] + '---\n\n'
 
         return meta
 
@@ -181,23 +179,20 @@ class MarkdownReader(BaseMarkdownReader):
     def __init__(self, prompt=None):
         super(MarkdownReader, self).__init__()
         self._prompt = create_prompt(prompt)
+        self._notebook_metadata = {}
 
     def read(self, text, rules=None):
-        cells_and_meta = super(MarkdownReader, self).read(text, rules)
+        raw_cells = super(MarkdownReader, self).read(text, rules)
         cells = []
 
-        for i, cell_or_meta in enumerate(cells_and_meta):
-            if cell_or_meta.get("is_notebook", None):
-                if cells:
-                    raise ValueError("Notebook metadata must appear first")
-                cells.append(cell_or_meta)
-            elif (
-                cell_or_meta.get("is_meta", None) and cell_or_meta["metadata"]
-            ):
-                cells_and_meta[i + 1].update(
-                    metadata=cell_or_meta["metadata"])
+        last_index = len(raw_cells) - 1
+
+        for i, cell in enumerate(raw_cells):
+            if cell['cell_type'] == 'cell_metadata':
+                if i + 1 <= last_index:
+                    raw_cells[i + 1].update(metadata=cell['metadata'])
             else:
-                cells.append(cell_or_meta)
+                cells.append(cell)
 
         return cells
 

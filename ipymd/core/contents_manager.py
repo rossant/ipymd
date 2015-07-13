@@ -32,13 +32,13 @@ def _file_extension(os_path):
 class IPymdContentsManager(FileContentsManager, Configurable):
     format = Unicode('markdown', config=True)
 
-    # The name of the default kernel: if left blank, assume native (pythonX)
-    # won't store kernelspec/language_info unless forced
-    # this will be passed to the FormatManager, overwriting any config there
+    # The name of the default kernel: if left blank, assume native (pythonX),
+    # won't store kernelspec/language_info unless forced with verbose_metadata.
+    # This will be passed to the FormatManager, overwriting any config there.
     default_kernel_name = Unicode(config=True)
 
-    # don't strip any metadata
-    # this will be passed to the FormatManager, overwriting any config there
+    # Don't strip any metadata.
+    # This will be passed to the FormatManager, overwriting any config there.
     verbose_metadata = Bool(False, config=True)
 
     def __init__(self, *args, **kwargs):

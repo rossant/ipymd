@@ -1,7 +1,7 @@
 # List of ipymd cells expected for this example.
 output = [
 
-    {'is_notebook': True,
+    {'cell_type': 'notebook_metadata',
      'metadata': {'title': 'A Slideshow'}},
 
     {'cell_type': 'markdown',

@@ -39,16 +39,16 @@ class FormatManager(LoggingConfigurable):
     # The name of the setup_tools entry point group to use in setup.py
     entry_point_group = "ipymd.format"
 
-    # The name of the default kernel: if left blank, assume native (pythonX)
+    # The name of the default kernel: if left blank, assume native (pythonX),
     # won't store kernelspec/language_info unless forced
     # TODO: where does this get set but by the ContentsManager?
     default_kernel_name = Unicode(config=True)
 
-    # don't strip any metadata
+    # Don't strip any metadata
     # TODO: where does this get set but by the ContentsManager?
     verbose_metadata = Bool(False, config=True)
 
-    # the singleton. there can be only one.
+    # The singleton. There can be only one.
     _instance = None
 
     def __init__(self, *args, **kwargs):
@@ -254,16 +254,24 @@ class FormatManager(LoggingConfigurable):
             # a list of ipymd cells.
             cells = contents
 
-        if writer is not None:
-            # Convert from ipymd cells to the target format.
-            supports_nb_metadata = hasattr(writer, "write_notebook_metadata")
+        notebook_metadata = [cell for cell in cells
+                             if cell["cell_type"] == "notebook_metadata"]
 
-            for i, cell in enumerate(cells):
-                if cell.get("is_notebook", None) and supports_nb_metadata:
-                    writer.write_notebook_metadata(
-                        self.clean_meta(cell["metadata"]))
+        if writer is not None:
+            if notebook_metadata:
+                notebook_metadata = notebook_metadata[0]["metadata"]
+                if hasattr(writer, "write_notebook_metadata"):
+                    writer.write_notebook_metadata(notebook_metadata)
                 else:
-                    writer.write(cell)
+                    print("{} does not support notebook metadata, "
+                          "dropping metadata: {}".format(
+                              writer,
+                              notebook_metadata))
+
+            # Convert from ipymd cells to the target format.
+            for cell in cells:
+                writer.write(cell)
+
             return writer.contents
         else:
             # If no writer is specified, the output is supposed to be

@@ -56,9 +56,6 @@ def _test_reader(basename, format, ignore_notebook_meta=True):
     """Return converted and expected ipymd cells of a given example."""
     contents = _read_test_file(basename, format)
     converted = convert(contents, from_=format)
-    if ignore_notebook_meta:
-        converted = [cell for cell in converted
-                     if not cell.get("is_notebook", None)]
     expected = _exec_test_file(basename)
     return converted, expected
 

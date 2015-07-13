@@ -66,12 +66,14 @@ class NotebookReader(object):
 
     ignore_meta = ["collapsed", "trusted"]
 
+    def __init__(self):
+        self._notebook_metadata = {}
+
     def read(self, nb):
         assert nb['nbformat'] >= 4
-        yield {
-            "is_notebook": True,
-            "metadata": nb["metadata"]
-        }
+
+        self._notebook_metadata = nb['metadata']
+
         for cell in nb['cells']:
             ipymd_cell = {}
             metadata = self.clean_meta(cell)
@@ -87,6 +89,9 @@ class NotebookReader(object):
             else:
                 continue
             yield ipymd_cell
+
+    def read_notebook_metadata(self):
+        return self._notebook_metadata
 
     def clean_meta(self, cell):
         metadata = cell.get('metadata', {})

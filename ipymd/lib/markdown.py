@@ -338,7 +338,6 @@ class BlockLexer(BaseLexer):
         self.renderer.text(text)
 
     def parse_meta(self, m):
-        # raise Exception(m.groupdict())
         if not m.group("alias") and not m.group("body"):
             self.renderer.text("META SPLIT")
         elif m.group("alias") and not m.group("body"):
