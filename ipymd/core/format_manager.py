@@ -259,7 +259,10 @@ class FormatManager(LoggingConfigurable):
 
         if writer is not None:
             if notebook_metadata:
-                notebook_metadata = notebook_metadata[0]["metadata"]
+                [cells.remove(cell) for cell in notebook_metadata]
+                notebook_metadata = self.clean_meta(
+                    notebook_metadata[0]["metadata"]
+                )
                 if hasattr(writer, "write_notebook_metadata"):
                     writer.write_notebook_metadata(notebook_metadata)
                 else:

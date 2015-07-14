@@ -64,7 +64,10 @@ class NotebookReader(object):
 
     nbformat v4 only."""
 
-    ignore_meta = ["collapsed", "trusted"]
+    # Metadata that is basically never important enough to appear in text
+    # formats.
+    # TODO: expose this as configurable?
+    ignore_meta = ["collapsed", "trusted", "celltoolbar"]
 
     def __init__(self):
         self._notebook_metadata = {}
@@ -72,7 +75,10 @@ class NotebookReader(object):
     def read(self, nb):
         assert nb['nbformat'] >= 4
 
-        self._notebook_metadata = nb['metadata']
+        yield {
+            'cell_type': 'notebook_metadata',
+            "metadata": nb['metadata']
+        }
 
         for cell in nb['cells']:
             ipymd_cell = {}
@@ -89,9 +95,6 @@ class NotebookReader(object):
             else:
                 continue
             yield ipymd_cell
-
-    def read_notebook_metadata(self):
-        return self._notebook_metadata
 
     def clean_meta(self, cell):
         metadata = cell.get('metadata', {})

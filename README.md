@@ -1,12 +1,3 @@
----
-celltoolbar: Slideshow
----
-
----
-slideshow:
-  slide_type: slide
-...
-
 [![Build Status](https://travis-ci.org/rossant/ipymd.svg?branch=travis)](https://travis-ci.org/rossant/ipymd)
 [![Coverage Status](https://coveralls.io/repos/rossant/ipymd/badge.svg)](https://coveralls.io/r/rossant/ipymd)
 
@@ -229,10 +220,22 @@ An **ipymd cell** is a Python dictionary with the following fields:
 * `source`: a string containing Markdown markup (markdown cell only)
 * `metadata`: a dictionary containing cell (or notebook) metadata
 
+### Kernel Metadata
+
+By default, notebook metadata for the native kernel (usually `python2` or
+`python3`) won't be written to markdown. Since ipymd doesn't yet support other
+kernels, this doesn't matter much, but if you would like to pick a non-native
+python kernel to be interpreted as the default for ipymd, and store
+`kernelspec` and `language_info` for the other, you can add this to your
+`ipython_notebook_config.py` file:
+  * `c.IPymdContentsManager.default_kernel_name = 'python2'`
+
+Or, to always remember all notebook-level metadata:
+  * `c.IPymdContentsManager.verbose_metadata = True`
+
 ### Customize the Markdown format
 
 You can customize the exact way the notebook is converted from/to Markdown by deriving from `BaseMarkdownReader` or `MarkdownReader` (idem with writers). Look at `ipymd/formats/markdown.py`.
-
 
 ### Implement your own format
 
@@ -249,7 +252,6 @@ You can also implement your own format by following these instructions:
 * To activate this format, call this at Notebook launch time (not in a kernel!), perhaps in your `ipython_notebook_config.py`:
 
 ```python
-
   from ipymd import format_manager
   format_manager().register(
       name='my_format',
@@ -267,7 +269,6 @@ You can also implement your own format by following these instructions:
 * Put your reader and writer class in there, as well as a top-level variable:
 
 ```python
-
   MY_FORMAT = dict(
       reader=MyFormatReader,
       writer=MyFormatWriter,
@@ -279,7 +280,6 @@ You can also implement your own format by following these instructions:
 * In `setup.py`, add this to `entry_points`:
 
 ```python
-
       ...
       entry_points={
           'ipymd.format': [
@@ -304,7 +304,6 @@ Look at the existing format implementations for more details.
 * Someplace easy to import, e.g. `myformat.py` or `myformat/__init__.py`, add:
 
 ```python
-
   MY_FORMAT = dict(
       reader=MyFormatReader,
       writer=MyFormatWriter,
@@ -316,7 +315,6 @@ Look at the existing format implementations for more details.
   and this to your `setup.py`:
 
 ```python
-
   ...
       entry_points={
           'ipymd.format': [
