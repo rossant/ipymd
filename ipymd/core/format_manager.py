@@ -16,6 +16,8 @@ import json
 from pkg_resources import iter_entry_points, DistributionNotFound
 
 from IPython.config.configurable import LoggingConfigurable
+from IPython.utils.traitlets import Unicode, Bool
+from IPython.kernel import KernelManager
 
 from ..ext.six import string_types
 from ..utils.utils import _read_text, _read_json, _write_text, _write_json
@@ -37,15 +39,27 @@ class FormatManager(LoggingConfigurable):
     # The name of the setup_tools entry point group to use in setup.py
     entry_point_group = "ipymd.format"
 
-    # the singleton. there can be only one.
+    # The name of the default kernel: if left blank, assume native (pythonX),
+    # won't store kernelspec/language_info unless forced
+    # TODO: where does this get set but by the ContentsManager?
+    default_kernel_name = Unicode(config=True)
+
+    # Don't strip any metadata
+    # TODO: where does this get set but by the ContentsManager?
+    verbose_metadata = Bool(False, config=True)
+
+    # The singleton. There can be only one.
     _instance = None
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(FormatManager, self).__init__(*args, **kwargs)
+
         if self._instance is not None:
             raise ValueError("FormatManager is a singleton, access with"
                              " FormatManager.format_manager")
 
         self._formats = {}
+        self._km = KernelManager()
 
     @classmethod
     def format_manager(cls):
@@ -240,15 +254,52 @@ class FormatManager(LoggingConfigurable):
             # a list of ipymd cells.
             cells = contents
 
+        notebook_metadata = [cell for cell in cells
+                             if cell["cell_type"] == "notebook_metadata"]
+
         if writer is not None:
+            if notebook_metadata:
+                [cells.remove(cell) for cell in notebook_metadata]
+                notebook_metadata = self.clean_meta(
+                    notebook_metadata[0]["metadata"]
+                )
+                if hasattr(writer, "write_notebook_metadata"):
+                    writer.write_notebook_metadata(notebook_metadata)
+                else:
+                    print("{} does not support notebook metadata, "
+                          "dropping metadata: {}".format(
+                              writer,
+                              notebook_metadata))
+
             # Convert from ipymd cells to the target format.
             for cell in cells:
                 writer.write(cell)
+
             return writer.contents
         else:
             # If no writer is specified, the output is supposed to be
             # a list of ipymd cells.
             return cells
+
+    def clean_meta(self, meta):
+        """Removes unwanted metadata
+
+        Parameters
+        ----------
+
+        meta : dict
+            Notebook metadata.
+        """
+        if not self.verbose_metadata:
+            default_kernel_name = (self.default_kernel_name or
+                                   self._km.kernel_name)
+
+            if (meta.get("kernelspec", {})
+                    .get("name", None) == default_kernel_name):
+                del meta["kernelspec"]
+                del meta["language_info"]
+
+        return meta
 
 
 def format_manager():

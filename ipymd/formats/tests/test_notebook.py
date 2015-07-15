@@ -43,13 +43,16 @@ def _test_notebook_notebook(basename):
 def test_notebook_reader():
     _test_notebook_reader('ex1')
     _test_notebook_reader('ex2')
+    _test_notebook_reader('ex3')
 
 
 def test_notebook_writer():
     _test_notebook_writer('ex1')
     _test_notebook_writer('ex2')
+    _test_notebook_writer('ex3')
 
 
 def test_notebook_notebook():
     _test_notebook_notebook('ex1')
     _test_notebook_notebook('ex2')
+    _test_notebook_notebook('ex3')

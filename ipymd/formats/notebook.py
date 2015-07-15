@@ -63,10 +63,28 @@ class NotebookReader(object):
     """Reader for notebook cells.
 
     nbformat v4 only."""
+
+    # Metadata that is basically never important enough to appear in text
+    # formats.
+    # TODO: expose this as configurable?
+    ignore_meta = ["collapsed", "trusted", "celltoolbar"]
+
+    def __init__(self):
+        self._notebook_metadata = {}
+
     def read(self, nb):
         assert nb['nbformat'] >= 4
+
+        yield {
+            'cell_type': 'notebook_metadata',
+            "metadata": nb['metadata']
+        }
+
         for cell in nb['cells']:
             ipymd_cell = {}
+            metadata = self.clean_meta(cell)
+            if metadata:
+                ipymd_cell['metadata'] = metadata
             ctype = cell['cell_type']
             ipymd_cell['cell_type'] = ctype
             if ctype == 'code':
@@ -77,6 +95,12 @@ class NotebookReader(object):
             else:
                 continue
             yield ipymd_cell
+
+    def clean_meta(self, cell):
+        metadata = cell.get('metadata', {})
+        for key in self.ignore_meta:
+            metadata.pop(key, None)
+        return metadata
 
 
 #------------------------------------------------------------------------------
@@ -90,16 +114,20 @@ class NotebookWriter(object):
         self._markdown_filter = MarkdownFilter(keep_markdown)
         self._code_filter = PythonFilter(ipymd_skip=ipymd_skip)
 
-    def append_markdown(self, source):
+    def append_markdown(self, source, metadata=None):
         # Filter Markdown contents.
         source = self._markdown_filter(source)
         if not source:
             return
-        self._nb['cells'].append(nbf.v4.new_markdown_cell(source))
+        self._nb['cells'].append(
+            nbf.v4.new_markdown_cell(source,
+                                     metadata=metadata))
 
-    def append_code(self, input, output=None, image=None):
+    def append_code(self, input, output=None, image=None, metadata=None):
         input = self._code_filter(input)
-        cell = nbf.v4.new_code_cell(input, execution_count=self._count)
+        cell = nbf.v4.new_code_cell(input,
+                                    execution_count=self._count,
+                                    metadata=metadata)
         if output:
             cell.outputs.append(nbf.v4.new_output('execute_result',
                                 {'text/plain': output},
@@ -112,11 +140,15 @@ class NotebookWriter(object):
         self._nb['cells'].append(cell)
         self._count += 1
 
+    def write_notebook_metadata(self, metadata):
+        self._nb.metadata.update(metadata)
+
     def write(self, cell):
+        metadata = cell.get("metadata", {})
         if cell['cell_type'] == 'markdown':
-            self.append_markdown(cell['source'])
+            self.append_markdown(cell['source'], metadata=metadata)
         elif cell['cell_type'] == 'code':
-            self.append_code(cell['input'], cell['output'])
+            self.append_code(cell['input'], cell['output'], metadata=metadata)
 
     @property
     def contents(self):

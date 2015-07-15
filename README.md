@@ -45,7 +45,7 @@ with:
 
 The JSON `.ipynb` are removed from the equation, and the conversion happens on the fly. The IPython Notebook becomes an interactive Markdown text editor!
 
-A drawback is that you lose metadata, prompt numbers, and images (for now).
+A drawback is that you lose prompt numbers and images (for now).
 
 This is useful when you write technical documents, blog posts, books, etc.
 
@@ -90,13 +90,58 @@ All pros of IPython Notebook and Markdown, no cons!
 * Write in Markdown in `document.md`
     * Either in a text editor (convenient when working on text)
     * Or in the Notebook (convenient when writing code examples)
-* Only the Markdown cells and code cells are saved in the file
+* Markdown cells, code cells and (optionally) notebook metadata are saved in
+  the file
 * Collaborators can work on the Markdown document using GitHub's web interface.
 * By convention, a **notebook code cell** is equivalent to a **Markdown code block with explicit `python` syntax highlighting**:
 
   ```
   >>> print("Hello world")
   Hello world
+  ```
+
+* **Notebook metadata** can be specified in [YAML](http://yaml.org/) inside
+  Jekyll-style [front-matter](http://jekyllrb.com/docs/frontmatter/) dashes
+  at the beginning of a document:
+
+  ```markdown
+  ---
+  kernelspec:
+    name: some-non-native-kernel
+  ---
+
+  First cell content
+  ```
+
+  Native kernel metadata will be elided by default: non-python kernels haven't
+  been tested yet, but support is planned.
+
+* **Cell metadata** is specified with YAML stream documents with dashes and
+  periods, such as to create slides:
+
+  ```markdown
+  # Previous slide
+
+  ---
+  slideshow:
+    slide_type: slide
+  ...
+
+  # Some Slide Content
+  ```
+
+  > NOTE: You probably shouldn't use `---` to mean an `<hr/>`: `***`
+  could be a suitable substitute.
+
+* Null metadata (i.e. splitting a markdown cell) can be created with just
+  three dashes. This is useful when adding slideshow notes or skipped cells.
+
+  ```markdown
+  A cell
+
+  ---
+
+  Another cell
   ```
 
 * The back-and-forth conversion is not strictly the identity function:
@@ -169,16 +214,28 @@ You can convert from any supported format to any supported format. This works by
 
 An **ipymd cell** is a Python dictionary with the following fields:
 
-* `cell_type`: `markdown` or `code`
+* `cell_type`: `markdown`, `code` or `notebok_metadata` (if implemented)
 * `input`: a string with the code input (code cell only)
 * `output`: a string with the text output and stdout (code cell only)
 * `source`: a string containing Markdown markup (markdown cell only)
+* `metadata`: a dictionary containing cell (or notebook) metadata
 
+### Kernel Metadata
+
+By default, notebook metadata for the native kernel (usually `python2` or
+`python3`) won't be written to markdown. Since ipymd doesn't yet support other
+kernels, this doesn't matter much, but if you would like to pick a non-native
+python kernel to be interpreted as the default for ipymd, and store
+`kernelspec` and `language_info` for the other, you can add this to your
+`ipython_notebook_config.py` file:
+  * `c.IPymdContentsManager.default_kernel_name = 'python2'`
+
+Or, to always remember all notebook-level metadata:
+  * `c.IPymdContentsManager.verbose_metadata = True`
 
 ### Customize the Markdown format
 
 You can customize the exact way the notebook is converted from/to Markdown by deriving from `BaseMarkdownReader` or `MarkdownReader` (idem with writers). Look at `ipymd/formats/markdown.py`.
-
 
 ### Implement your own format
 
@@ -188,10 +245,13 @@ You can also implement your own format by following these instructions:
     * `self.read(contents)`: yields ipymd cells from a `contents` string
 * Create a `MyFormatWriter` class that implements:
     * `self.write(cell)`: append an ipymd cell
+      * (optional) `self.write_notebook_metadata(cell)`: write the notebook
+        metadata dictionary
     * `self.contents`: return the contents as a string
+
 * To activate this format, call this at Notebook launch time (not in a kernel!), perhaps in your `ipython_notebook_config.py`:
 
-  ```python
+```python
   from ipymd import format_manager
   format_manager().register(
       name='my_format',
@@ -200,7 +260,7 @@ You can also implement your own format by following these instructions:
       file_extension='.md',  # or anything else
       file_type='text',  # or JSON
   )
-  ```
+```
 
 * Now you can convert contents: `ipymd.convert(contents, from_='notebook', to='my_format')` or any other combination.
 
@@ -208,18 +268,18 @@ You can also implement your own format by following these instructions:
 * To further integrate your format in ipymd, create a `ipymd/formats/my_format.py` file.
 * Put your reader and writer class in there, as well as a top-level variable:
 
-  ```python
+```python
   MY_FORMAT = dict(
       reader=MyFormatReader,
       writer=MyFormatWriter,
       file_extension='.md',
       file_type='text',
   )
-  ```
+```
 
 * In `setup.py`, add this to `entry_points`:
 
-  ```python
+```python
       ...
       entry_points={
           'ipymd.format': [
@@ -228,10 +288,10 @@ You can also implement your own format by following these instructions:
               ...
           ]
       }
-  ```
+```
 
   > Note that the `entry_point` name will be used by default. you may override
-    it, if you like, but Don't Repeat Yourself.  
+    it, if you like, but Don't Repeat Yourself.
 
 * Add some unit tests in `ipymd/formats/tests`.
 * Propose a PR!
@@ -243,18 +303,18 @@ Look at the existing format implementations for more details.
 * If you want to be able to redistribute your format without adding it to ipymd proper (i.e. in-house or experimental), implement all your code in a real python module.
 * Someplace easy to import, e.g. `myformat.py` or `myformat/__init__.py`, add:
 
-  ```python
+```python
   MY_FORMAT = dict(
       reader=MyFormatReader,
       writer=MyFormatWriter,
       file_extension='.md',  # or anything else
       file_type='text',  # or JSON
   )
-  ```
+```
 
   and this to your `setup.py`:
 
-  ```python
+```python
   ...
       entry_points={
           'ipymd.format': [
@@ -262,6 +322,7 @@ Look at the existing format implementations for more details.
               ],
           },
   ...
-  ```
+```
+
   * Publish on pypi!
   * Your users will now be able to `pip install myformat`, then configure their Notebook to use your format with the name `my_format`.
