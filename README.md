@@ -51,6 +51,43 @@ This is useful when you write technical documents, blog posts, books, etc.
 
 ![image](https://cloud.githubusercontent.com/assets/1942359/5570181/f656a484-8f7d-11e4-8ec2-558d022b13d3.png)
 
+## Installation
+
+1. Install ipymd:
+
+    To install the latest release version:
+
+    ```shell
+    pip install ipymd
+    ```
+
+    Alternatively, to install the development version:
+
+    ```shell
+    pip install git+https://github.com/rossant/ipymd
+    ```
+
+2. **Optional:**
+    To interact with `.ipynb` files:
+
+    ```shell
+    pip install ipython[notebook]
+    ```
+
+    To interact with `.odt` files:
+
+    ```shell
+    pip install git+https://github.com/eea/odfpy
+    ```
+
+3. Add this to your `ipython_notebook_config.py` file:
+
+    ```python
+    c.NotebookApp.contents_manager_class = 'ipymd.IPymdContentsManager'
+    ```
+
+4. Now, you can open `.md` files in the Notebook.
+
 ## Why?
 
 ### IPython Notebook
@@ -156,44 +193,6 @@ All pros of IPython Notebook and Markdown, no cons!
 * Renaming doesn't work yet (issue #4)
 * New notebook doesn't work yet (issue #5)
 * Only nbformat v4 is supported currently (IPython 3.0)
-
-
-## Installation
-
-1. Install ipymd:
-
-    To install the latest release version:
-
-    ```shell
-    pip install ipymd
-    ```
-
-    Alternatively, to install the development version:
-
-    ```shell
-    pip install git+https://github.com/rossant/ipymd
-    ```
-
-2. **Optional:**
-    To interact with `.ipynb` files:
-
-    ```shell
-    pip install ipython[notebook]
-    ```
-
-    To interact with `.odt` files:
-
-    ```shell
-    pip install git+https://github.com/eea/odfpy
-    ```
-
-3. Add this to your `ipython_notebook_config.py` file:
-
-    ```python
-    c.NotebookApp.contents_manager_class = 'ipymd.IPymdContentsManager'
-    ```
-
-5. Now, you can open `.md` files in the Notebook.
 
 
 ## Formats
