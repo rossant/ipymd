@@ -118,7 +118,7 @@ def _read_json(file):
 def _write_json(file, contents):
     """Write a dict to a JSON file."""
     with open(file, 'w') as f:
-        return json.dump(contents, f, indent=2)
+        return json.dump(contents, f, indent=2, sort_keys=True)
 
 
 def _read_text(file):
