@@ -8,8 +8,12 @@
 
 import json
 
-import IPython.nbformat as nbf
-from IPython.nbformat.v4.nbbase import validate
+try:
+    import nbformat as nbf
+    from nbformat.v4.nbbase import validate
+except ImportError:
+    import IPython.nbformat as nbf
+    from IPython.nbformat.v4.nbbase import validate
 
 from ..lib.markdown import MarkdownFilter
 from ..lib.python import PythonFilter

@@ -15,9 +15,17 @@ import json
 
 from pkg_resources import iter_entry_points, DistributionNotFound
 
-from IPython.config.configurable import LoggingConfigurable
-from IPython.utils.traitlets import Unicode, Bool
-from IPython.kernel import KernelManager
+try:
+    from traitlets import Unicode, Bool
+    from traitlets.config import LoggingConfigurable
+except ImportError:
+    from IPython.utils.traitlets import Unicode, Bool
+    from IPython.config.configurable import LoggingConfigurable
+
+try:
+    from jupyter_client import KernelManager
+except ImportError:
+    from IPython.kernel import KernelManager
 
 from ..ext.six import string_types
 from ..utils.utils import _read_text, _read_json, _write_text, _write_json

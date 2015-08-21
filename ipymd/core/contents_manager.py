@@ -12,10 +12,22 @@ import os.path as op
 
 from tornado import web
 
-from IPython import nbformat
-from IPython.config.configurable import Configurable
-from IPython.utils.traitlets import Unicode, Bool
-from IPython.html.services.contents.filemanager import FileContentsManager
+try:
+    import nbformat
+except ImportError:
+    from IPython import nbformat
+
+try:
+    from traitlets import Unicode, Bool
+    from traitlets.config import Configurable
+except ImportError:
+    from IPython.utils.traitlets import Unicode, Bool
+    from IPython.config.configurable import Configurable
+
+try:
+    from notebook.services.contents.filemanager import FileContentsManager
+except ImportError:
+    from IPython.html.services.contents.filemanager import FileContentsManager
 
 from .format_manager import convert, format_manager
 from ipymd.ext.six.moves.urllib.error import HTTPError
