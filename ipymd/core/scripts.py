@@ -120,6 +120,7 @@ def convert_files(files_or_dirs,
                   output_folder=None,
                   recursive=False,
                   simulate=False,
+                  extension=None,
                   ):
     # Find all files.
     files = _expand_dirs_to_files(files_or_dirs, recursive=recursive)
@@ -139,6 +140,8 @@ def convert_files(files_or_dirs,
         converted = convert(file, from_, to,
                             from_kwargs=from_kwargs, to_kwargs=to_kwargs)
         file_to = _converted_filename(file, from_, to)
+        if extension:
+            file_to = op.splitext(file_to)[0] + '.' + extension
         print("done.")
 
         # Compute the output path.
@@ -173,6 +176,9 @@ def main():
     parser.add_argument('--to', dest='to', required=True,
                         help='one of {0:s}'.format(formats))
 
+    parser.add_argument('--extension', dest='extension',
+                        help='output file extension')
+
     parser.add_argument('--overwrite', dest='overwrite', action='store_true',
                         help=('overwrite target file if it exists '
                               '(false by default)'))
@@ -183,6 +189,7 @@ def main():
                   overwrite=args.overwrite,
                   from_=args.from_,
                   to=args.to,
+                  extension=args.extension,
                   )
 
 
