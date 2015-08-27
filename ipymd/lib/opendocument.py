@@ -680,13 +680,15 @@ class ODFInlineRenderer(BaseRenderer):
 
 
 class ODFRenderer(BaseRenderer):
+    inline_class = ODFInlineRenderer
+
     def __init__(self, doc):
         super(ODFRenderer, self).__init__()
         self._doc = doc
         self._paragraph_created_after_item_start = None
 
     def text(self, text):
-        inline_renderer = ODFInlineRenderer(self._doc)
+        inline_renderer = self.inline_class(self._doc)
         inline_lexer = InlineLexer(renderer=inline_renderer)
         inline_lexer.read(text)
 
