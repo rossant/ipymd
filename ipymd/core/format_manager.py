@@ -38,7 +38,10 @@ from ..utils.utils import _read_text, _read_json, _write_text, _write_json
 def _is_path(s):
     """Return whether an object is a path."""
     if isinstance(s, string_types):
-        return op.exists(s)
+        try:
+            return op.exists(s)
+        except (OSError, ValueError):
+            return False
     else:
         return False
 
