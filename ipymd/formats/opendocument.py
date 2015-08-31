@@ -12,6 +12,7 @@ from ..lib.markdown import InlineLexer, BlockLexer, BaseRenderer
 from ..lib.opendocument import (ODFDocument, ODFRenderer,
                                 odf_to_markdown,
                                 load_odf, save_odf)
+from ..lib.python import PythonFilter
 from .markdown import MarkdownReader
 
 
@@ -28,13 +29,15 @@ class ODFReader(object):
 
 
 class ODFWriter(object):
-    def __init__(self, prompt=None, odf_doc=None, odf_renderer=None):
+    def __init__(self, prompt=None, odf_doc=None,
+                 odf_renderer=None, ipymd_skip=False):
         self._odf_doc = odf_doc or ODFDocument()
         if odf_renderer is None:
             odf_renderer = ODFRenderer
         self._prompt = create_prompt(prompt)
         renderer = odf_renderer(self._odf_doc)
         self._block_lexer = BlockLexer(renderer=renderer)
+        self._code_filter = PythonFilter(ipymd_skip=ipymd_skip)
 
     def write(self, cell):
         if cell['cell_type'] == 'markdown':
@@ -43,6 +46,7 @@ class ODFWriter(object):
             self._block_lexer.read(md)
         elif cell['cell_type'] == 'code':
             # Add the code cell to ODF.
+            cell['input'] = self._code_filter(cell['input'])
             source = self._prompt.from_cell(cell['input'], cell['output'])
             self._odf_doc.code(source)
 

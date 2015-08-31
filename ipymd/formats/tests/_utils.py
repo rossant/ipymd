@@ -58,8 +58,8 @@ def _test_reader(basename, format, ignore_notebook_meta=True):
     converted = convert(contents, from_=format)
     expected = _exec_test_file(basename)
     converted = [cell for cell in converted
-                 if (not ignore_notebook_meta)
-                 or cell["cell_type"] != "notebook_metadata"]
+                 if (not ignore_notebook_meta) or
+                 cell["cell_type"] != "notebook_metadata"]
 
     return converted, expected
 
