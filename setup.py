@@ -84,6 +84,7 @@ setup(
             'python=ipymd.formats.python:PYTHON_FORMAT',
         ]
     },
+    install_requires=['pyyaml'],
     extras_require={
         'odf': ['odfpy'],
     },
