@@ -132,7 +132,7 @@ def convert_files(files_or_dirs,
     # Get the common root of all files.
     if output_folder:
         output_folder = op.realpath(output_folder)
-        root = _common_root(files)
+        root = _common_root(files) if len(files) > 1 else op.dirname(files[0])
 
     # Convert all files.
     for file in files:
@@ -176,6 +176,9 @@ def main():
     parser.add_argument('--to', dest='to', required=True,
                         help='one of {0:s}'.format(formats))
 
+    parser.add_argument('--output', dest='output',
+                        help='output folder')
+
     parser.add_argument('--extension', dest='extension',
                         help='output file extension')
 
@@ -190,6 +193,7 @@ def main():
                   from_=args.from_,
                   to=args.to,
                   extension=args.extension,
+                  output_folder=args.output,
                   )
 
 
