@@ -71,7 +71,7 @@ This is useful when you write technical documents, blog posts, books, etc.
     To interact with `.ipynb` files:
 
     ```shell
-    pip install ipython[notebook]
+    pip install jupyter ipython
     ```
 
     To interact with `.odt` files:
@@ -80,13 +80,21 @@ This is useful when you write technical documents, blog posts, books, etc.
     pip install git+https://github.com/eea/odfpy
     ```
 
-3. Add this to your `ipython_notebook_config.py` file:
+3. Open your `jupyter_notebook_config.py`. Here's how to find it:
+
+
+    ```
+    jupyter notebook --generate-config  # generate a default config file
+    jupyter --config-dir  # find out the path to the config file
+    ```
+
+4. Add the following in `jupyter_notebook_config.py`:
 
     ```python
     c.NotebookApp.contents_manager_class = 'ipymd.IPymdContentsManager'
     ```
 
-4. Now, you can open `.md` files in the Notebook.
+5. Now, you can open `.md` files in the Notebook.
 
 ## Why?
 
