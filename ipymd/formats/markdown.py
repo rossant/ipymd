@@ -128,10 +128,10 @@ class BaseMarkdownWriter(object):
                 return ''
             return '---\n\n'
 
-        meta = '{}\n'.format(yaml.dump(source,
-                                       explicit_start=True,
-                                       explicit_end=True,
-                                       default_flow_style=False))
+        meta = '{}\n'.format(yaml.safe_dump(source,
+                                            explicit_start=True,
+                                            explicit_end=True,
+                                            default_flow_style=False))
 
         if is_notebook:
             # Replace the trailing `...\n\n`
