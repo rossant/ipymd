@@ -308,7 +308,7 @@ class FormatManager(LoggingConfigurable):
             if (meta.get("kernelspec", {})
                     .get("name", None) == default_kernel_name):
                 del meta["kernelspec"]
-                del meta["language_info"]
+                meta.pop("language_info", None)
 
         return meta
 
