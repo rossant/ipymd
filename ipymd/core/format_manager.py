@@ -287,7 +287,9 @@ class FormatManager(LoggingConfigurable):
 
             # Convert from ipymd cells to the target format.
             for cell in cells:
-                self.clean_cell_meta(cell.get("metadata", {}))
+                meta = self.clean_cell_meta(cell.get("metadata", {}))
+                if not meta:
+                    cell.pop("metadata", None)
                 writer.write(cell)
 
             return writer.contents
@@ -321,6 +323,7 @@ class FormatManager(LoggingConfigurable):
         for k, v in DEFAULT_CELL_METADATA.items():
             if meta.get(k, None) == v:
                 meta.pop(k, None)
+        return meta
 
 
 def format_manager():
