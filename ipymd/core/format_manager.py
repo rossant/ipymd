@@ -46,6 +46,9 @@ def _is_path(s):
         return False
 
 
+DEFAULT_CELL_METADATA = {"deletable": True, "editable": True}
+
+
 class FormatManager(LoggingConfigurable):
     # The name of the setup_tools entry point group to use in setup.py
     entry_point_group = "ipymd.format"
@@ -284,6 +287,7 @@ class FormatManager(LoggingConfigurable):
 
             # Convert from ipymd cells to the target format.
             for cell in cells:
+                self.clean_cell_meta(cell.get("metadata", {}))
                 writer.write(cell)
 
             return writer.contents
@@ -311,6 +315,12 @@ class FormatManager(LoggingConfigurable):
                 meta.pop("language_info", None)
 
         return meta
+
+    def clean_cell_meta(self, meta):
+        """Remove cell metadata that matches the default cell metadata."""
+        for k, v in DEFAULT_CELL_METADATA.items():
+            if meta.get(k, None) == v:
+                meta.pop(k, None)
 
 
 def format_manager():
