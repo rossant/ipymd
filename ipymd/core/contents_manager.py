@@ -25,6 +25,7 @@ except ImportError:
     from IPython.config.configurable import Configurable
 
 try:
+    from notebook import transutils
     from notebook.services.contents.filemanager import FileContentsManager
 except ImportError:
     from IPython.html.services.contents.filemanager import FileContentsManager
